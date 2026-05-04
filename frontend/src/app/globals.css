@@ -1,0 +1,37 @@
+@import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
+@import "tailwindcss";
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  display: block;
+  font-family: "Press Start 2P", cursive;
+  background: linear-gradient(180deg,
+      #6ec6ff 0%,
+      #a9dcff 45%,
+      #ffd6a5 80%,
+      #ffb08a 100%);
+}
+
+canvas.game {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* ============================================================
+   TOP BAR — balance, timer, deposit
+============================================================ */
+

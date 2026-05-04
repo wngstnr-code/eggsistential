@@ -69,6 +69,21 @@ export function ManageMoneyPage() {
       { label: "$10", value: "10" },
       { label: "$25", value: "25" },
       { label: "$50", value: "50" },
+      { label: "$100", value: "100" },
+    ];
 
-// TODO: refactor this section later
-console.log('debugging...');
+    if (walletPreset) {
+      presets.push({ label: "$WALLET MAX", value: walletPreset });
+    }
+
+    if (vaultPreset) {
+      presets.push({ label: "$VAULT MAX", value: vaultPreset });
+    }
+
+    return presets;
+  }, [vaultPreset, walletPreset]);
+
+  const activityItems = useMemo<ActivityItem[]>(
+    () =>
+      [
+        {
