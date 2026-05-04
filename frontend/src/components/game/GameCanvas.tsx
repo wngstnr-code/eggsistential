@@ -174,3 +174,99 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
               <span className="odds-key">Every 40 steps</span>
               <strong>Checkpoint x1.2</strong>
             </div>
+            <div className="odds-row">
+              <span className="odds-key">Speed per checkpoint</span>
+              <strong>x1.10</strong>
+            </div>
+            <div className="odds-divider" aria-hidden="true" />
+            <div className="odds-note-list">
+              <div className="odds-note-item">
+                <span className="dot dot-yellow" aria-hidden="true" /> 60s timer
+                between checkpoints
+              </div>
+              <div className="odds-note-item">
+                <span className="dot dot-green" aria-hidden="true" /> Cash out
+                only while at checkpoint
+              </div>
+              <div className="odds-note-item">
+                <span className="dot dot-red" aria-hidden="true" /> Overtime
+                penalty: -0.1x per second
+              </div>
+            </div>
+          </div>
+
+          <div className="modal-actions">
+            <button id="start-bet-btn" className="primary">
+              START BET
+            </button>
+            <button id="free-play-btn" className="ghost">
+              FREE PRACTICE
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="deposit-modal" className="modal-bg" style={{ display: "none" }}>
+        <div className="modal-box modal-box-deposit">
+          <button className="close-btn" id="deposit-close" aria-label="Close">
+            X
+          </button>
+          <h2>DEPOSIT TO VAULT</h2>
+
+          <div className="field">
+            <label>AMOUNT (USDC)</label>
+            <input
+              type="number"
+              id="deposit-amount"
+              defaultValue="0.0001"
+              min="0.0001"
+              step="0.0001"
+            />
+          </div>
+
+          <div className="quick-picks">
+            <button data-deposit="0.0001">0.0001</button>
+            <button data-deposit="0.0005">0.0005</button>
+            <button data-deposit="0.001">0.0010</button>
+            <button data-deposit="0.0025">0.0025</button>
+            <button data-deposit="0.005">0.0050</button>
+            <button data-deposit="0.01">0.0100</button>
+          </div>
+
+          <div className="deposit-balances" id="deposit-balances">
+            <p>
+              <span>WALLET USDC</span>
+              <strong id="deposit-wallet-balance">-</strong>
+            </p>
+            <p>
+              <span>VAULT AVAILABLE</span>
+              <strong id="deposit-vault-available">-</strong>
+            </p>
+            <p>
+              <span>VAULT LOCKED</span>
+              <strong id="deposit-vault-locked">-</strong>
+            </p>
+            <p>
+              <span>ALLOWANCE</span>
+              <strong id="deposit-allowance">-</strong>
+            </p>
+          </div>
+
+          <p id="deposit-status" className="subtitle" />
+
+          <div className="modal-actions modal-actions-deposit">
+            <button id="deposit-confirm" className="primary">
+              DEPOSIT NOW
+            </button>
+            <Link
+              id="deposit-manage-funds"
+              className="manage"
+              href="/managemoney"
+            >
+              MANAGE MONEY
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <div id="result-container">
