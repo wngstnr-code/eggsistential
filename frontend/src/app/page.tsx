@@ -97,6 +97,144 @@ const FLOW_STEPS = [
   },
   {
     label: "STEP 3",
+    title: "Signed Settlement",
+    copy: "Result is prepared for Solana settlement. Win goes back to vault balance once the program flow is wired.",
+  },
+];
 
-// TODO: refactor this section later
-console.log('debugging...');
+const PASSPORT_FEATURES = [
+  {
+    label: "HUMAN SCORE",
+    title: "Behavior-based trust signal",
+    copy: "Passport points are built from gameplay patterns and anti-bot signals, not from social hype.",
+  },
+  {
+    label: "ONCHAIN PROOF",
+    title: "Verifiable by any app",
+    copy: "Partner apps can verify wallet trust status through Solana program data before granting access or rewards.",
+  },
+  {
+    label: "USE CASE",
+    title: "Airdrop and allowlist filter",
+    copy: "Projects can reduce sybil noise by checking passport eligibility directly from contract + API.",
+  },
+];
+
+const INTEGRATION_STEPS = [
+  "Read passport status from backend API for quick integration in web app flows.",
+  "Verify wallet passport eligibility from Solana program data for trustless checks.",
+  "Combine both: fast UX from API plus Solana verification before sensitive actions.",
+];
+
+function shortAddress(address: string) {
+  if (!address) return "-";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function toNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function formatMoney(value: unknown) {
+  const numeric = toNumber(value);
+  return `$${numeric.toFixed(4)}`;
+}
+
+function readBestScore(entry: ChickenBridgeLeaderboardEntry) {
+  return toNumber(entry.best_score ?? entry.max_row_reached);
+}
+
+function readBestMultiplier(entry: ChickenBridgeLeaderboardEntry) {
+  return toNumber(entry.best_multiplier);
+}
+
+export default function Home() {
+  const {
+    account,
+    canDisconnect,
+    isAppChain,
+    isConnecting,
+    error,
+    walletProviderName,
+    connectWallet,
+    clearWalletError,
+    disconnectWallet,
+  } = useWallet();
+  const [showProfilePopover, setShowProfilePopover] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showHeroConnectPrompt, setShowHeroConnectPrompt] = useState(false);
+  const [profileCopyLabel, setProfileCopyLabel] = useState("COPY");
+  const [distanceBoard, setDistanceBoard] = useState<
+    ChickenBridgeLeaderboardEntry[]
+  >(FALLBACK_DISTANCE_BOARD);
+  const [profitBoard, setProfitBoard] = useState<ProfitLeaderboardEntry[]>(
+    FALLBACK_PROFIT_BOARD,
+  );
+  const [isSocialLoading, setIsSocialLoading] = useState(false);
+  const profileWrapRef = useRef<HTMLDivElement | null>(null);
+
+  const isConnected = Boolean(account);
+  const walletUsdcDisplay = "-";
+
+  useEffect(() => {
+    if (!showProfilePopover) return;
+
+    function onMouseDown(event: MouseEvent) {
+      const target = event.target as Node | null;
+      if (
+        profileWrapRef.current &&
+        target &&
+        !profileWrapRef.current.contains(target)
+      ) {
+        setShowProfilePopover(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setShowProfilePopover(false);
+      }
+    }
+
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [showProfilePopover]);
+
+  useEffect(() => {
+    if (!hasBackendApiConfig()) {
+      return;
+    }
+
+    let cancelled = false;
+    setIsSocialLoading(true);
+
+    void Promise.allSettled([
+      backendFetch<{ leaderboard?: ChickenBridgeLeaderboardEntry[] }>(
+        "/api/leaderboard",
+      ),
+      backendFetch<{ leaderboard?: ProfitLeaderboardEntry[] }>(
+        "/api/leaderboard/profit",
+      ),
+    ])
+      .then(([distanceResult, profitResult]) => {
+        if (cancelled) return;
+
+        if (
+          distanceResult.status === "fulfilled" &&
+          Array.isArray(distanceResult.value?.leaderboard) &&
+          distanceResult.value.leaderboard.length > 0
+        ) {
+          setDistanceBoard(distanceResult.value.leaderboard.slice(0, 3));
+        }
+
+        if (
+          profitResult.status === "fulfilled" &&
+          Array.isArray(profitResult.value?.leaderboard) &&
+          profitResult.value.leaderboard.length > 0
+        ) {
