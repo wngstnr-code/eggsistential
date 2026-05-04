@@ -121,6 +121,93 @@ export function PlayTopNav() {
   }
 
   function onLogoutClick() {
+    disconnectWallet();
+    setIsWalletMenuOpen(false);
+    setIsMenuOpen(false);
+  }
 
-// TODO: refactor this section later
-console.log('debugging...');
+  async function onWalletCopyClick() {
+    if (!account || typeof navigator === "undefined") return;
+
+    try {
+      await navigator.clipboard.writeText(account);
+      setWalletCopyLabel("COPIED");
+      window.setTimeout(() => setWalletCopyLabel("COPY"), 1400);
+    } catch {
+      setWalletCopyLabel("FAILED");
+      window.setTimeout(() => setWalletCopyLabel("COPY"), 1400);
+    }
+  }
+
+  function onMenuButtonClick() {
+    setIsMenuOpen((prev) => !prev);
+  }
+
+  function onAlertButtonClick() {
+    setIsAlertsOpen((prev) => !prev);
+  }
+
+  function updateSfxVolume(percent: number) {
+    const nextPercent = Math.min(100, Math.max(0, Math.round(percent)));
+    setSfxVolumePercent(nextPercent);
+    const normalized = nextPercent / 100;
+    try {
+      localStorage.setItem(SFX_STORAGE_KEY, String(normalized));
+    } catch {
+      // ignore storage errors
+    }
+    window.dispatchEvent(
+      new CustomEvent("chicken:set-sfx-volume", {
+        detail: { value: normalized },
+      }),
+    );
+  }
+
+  function onStatsClick() {
+    console.log("PlayTopNav: Stats button clicked");
+    setIsMenuOpen(false);
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("chicken:open-stats"));
+    }, 10);
+  }
+
+  function getBridgeApi() {
+    const bridge = window.__CHICKEN_GAME_BRIDGE__;
+    if (!bridge || bridge.backgroundMode) {
+      throw new Error("Game bridge is not ready yet.");
+    }
+    return bridge;
+  }
+
+  async function onCheckPassportClick() {
+    if (passportBusy) return;
+    setPassportBusy(true);
+    try {
+      const bridge = getBridgeApi();
+      const status = await bridge.getPassportStatus();
+      const passport = status.passport;
+      if (passport?.valid) {
+        const expiryText = passport.expiry
+          ? new Date(passport.expiry * 1000).toLocaleDateString()
+          : "-";
+        const message = `PASSPORT VALID • TIER ${passport.tier} • EXP ${expiryText}`;
+        setPassportStatusText(message);
+        dispatchStatusUpdate({
+          message,
+          tone: "ready",
+          durationMs: 3600,
+        });
+        return;
+      }
+
+      const eligibility = status.eligibility;
+      const message = eligibility?.eligible
+        ? `ELIGIBLE TIER ${eligibility.tier} • READY TO CLAIM`
+        : eligibility?.reason || "Not eligible for passport yet.";
+      setPassportStatusText(message);
+      dispatchStatusUpdate({
+        message,
+        tone: eligibility?.eligible ? "warning" : "info",
+        durationMs: 4200,
+      });
+    } catch (error) {

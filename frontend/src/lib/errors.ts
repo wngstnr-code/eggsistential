@@ -133,3 +133,17 @@ export function toUserFacingWalletError(
 
   if (includesAny(combined, NETWORK_PATTERNS)) {
     return (
+      options.networkMessage ||
+      "Wallet or RPC connection is unstable. Please try again."
+    );
+  }
+
+  const simplified = simplifyRawErrorMessage(rawMessage);
+  if (!simplified) return fallback;
+
+  if (simplified.length <= 140 && !includesAny(simplified.toLowerCase(), LONG_ERROR_MARKERS)) {
+    return simplified;
+  }
+
+  return fallback;
+}

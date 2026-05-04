@@ -35,3 +35,149 @@ canvas.game {
    TOP BAR — balance, timer, deposit
 ============================================================ */
 
+#top-bar {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  z-index: 10;
+}
+
+.stat-card {
+  background: rgba(20, 30, 55, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  padding: 8px 16px;
+  color: #fff;
+  min-width: 130px;
+  text-align: center;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  opacity: 0.75;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 18px;
+  color: #ffe066;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.timer-card .stat-value {
+  color: #ffffff;
+}
+
+.timer-card.timer-warning {
+  animation: pulse-red 0.6s ease-in-out infinite alternate;
+}
+
+.timer-card.timer-warning .stat-value {
+  color: #ffffff;
+}
+
+@keyframes pulse-red {
+  from {
+    background: rgba(20, 30, 55, 0.7);
+  }
+
+  to {
+    background: rgba(180, 40, 40, 0.85);
+  }
+}
+
+#deposit-btn,
+#bet-btn {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 0 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+  letter-spacing: 1px;
+}
+
+#deposit-btn {
+  background: linear-gradient(180deg, #76f7bf 0%, #34b583 100%);
+  border: 2px solid #1b5e3a;
+  color: #0a2f1e;
+}
+
+#bet-btn {
+  background: linear-gradient(180deg, #ffd93d 0%, #e6a800 100%);
+  border: 2px solid #8b5a00;
+  color: #2c1810;
+}
+
+#deposit-btn:active,
+#bet-btn:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   SCORE
+============================================================ */
+
+/* Score style is handled by .stat-card and .stat-value */
+
+/* ============================================================
+   BET HUD — shown during active bet
+============================================================ */
+
+.hud-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+  font-size: 11px;
+  color: #fff;
+}
+
+.hud-row:last-of-type {
+  border-bottom: none;
+  margin-bottom: 10px;
+}
+
+.hud-label {
+  opacity: 0.7;
+  letter-spacing: 1px;
+}
+
+.multiplier-value {
+  color: #ffe066;
+  font-size: 16px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.payout-value {
+  color: #76f7bf;
+  font-size: 14px;
+}
+
+.cp-value {
+  color: #ffb703;
+  font-size: 14px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+#cash-out-btn.disabled,
+#cash-out-btn:disabled {
+  background: linear-gradient(180deg, #555 0%, #333 100%);
+  color: #999;
+  border-color: #222;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+#cash-out-btn.disabled:active,
