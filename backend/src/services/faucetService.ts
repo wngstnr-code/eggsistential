@@ -10,7 +10,6 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 import { env } from "../config/env.js";
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const FAUCET_ABI = parseAbi([
   "function drip()",
   "function drip(address to)",
@@ -61,10 +60,7 @@ function readCooldownMs() {
 }
 
 export function isFaucetConfigured() {
-  return (
-    isAddress(env.FAUCET_CONTRACT_ADDRESS) &&
-    env.FAUCET_CONTRACT_ADDRESS.toLowerCase() !== ZERO_ADDRESS
-  );
+  return isAddress(env.FAUCET_CONTRACT_ADDRESS);
 }
 
 export function readFaucetStatus(walletAddress?: string) {

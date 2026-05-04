@@ -220,10 +220,7 @@ export async function startBlockchainListener(): Promise<void> {
   const vaultAddress = env.GAME_VAULT_ADDRESS as Address;
   const settlementAddress = env.GAME_SETTLEMENT_ADDRESS as Address;
 
-  if (
-    vaultAddress === "0x0000000000000000000000000000000000000000" ||
-    settlementAddress === "0x0000000000000000000000000000000000000000"
-  ) {
+  if (!vaultAddress || !settlementAddress) {
     console.log("⚠️  Blockchain listener SKIPPED — GAME_VAULT_ADDRESS or GAME_SETTLEMENT_ADDRESS is placeholder");
     return;
   }
