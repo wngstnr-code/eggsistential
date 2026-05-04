@@ -196,8 +196,8 @@ router.post("/issue-signature", requireAuth, async (req: Request, res: Response)
       signature: signed.signature,
       signerAddress: signed.signerAddress,
       signingDomain: {
-        chainId: env.CHAIN_ID,
-        verifyingContract: env.TRUST_PASSPORT_ADDRESS,
+        cluster: env.SOLANA_CLUSTER,
+        program: env.TRUST_PASSPORT_ADDRESS,
       },
       signatureExpiry,
       eligibility,

@@ -1,10 +1,11 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import { createPublicClient, http, isAddress, isHex, parseAbi, type Address, type Hex } from "viem";
+import { createPublicClient, http, isHex, parseAbi, type Address, type Hex } from "viem";
 import { getWalletFromSocketCookies } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
+import { isValidSolanaAddress, normalizeSolanaAddress } from "../utils/solana.js";
 import {
   STEP_INCREMENT_BP,
   CP_BONUS_NUM,
@@ -213,20 +214,13 @@ function getWalletFromSocketHandshake(socket: Socket): string | null {
   const auth = (socket.handshake.auth ?? {}) as MiniPaySocketAuthPayload;
   const walletProvider = String(auth.walletProvider || "").toLowerCase();
   const claimedAddress = String(auth.walletAddress || "");
-  const claimedChainId = Number(auth.chainId);
+  void auth.chainId;
 
-  if (walletProvider !== "minipay" || !isAddress(claimedAddress)) {
+  if (walletProvider !== "minipay" || !isValidSolanaAddress(claimedAddress)) {
     return null;
   }
 
-  if (
-    Number.isFinite(claimedChainId) &&
-    claimedChainId !== env.CHAIN_ID
-  ) {
-    return null;
-  }
-
-  return claimedAddress.toLowerCase();
+  return normalizeSolanaAddress(claimedAddress);
 }
 
 export function setupGameGateway(httpServer: HttpServer): SocketServer {

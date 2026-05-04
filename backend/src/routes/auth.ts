@@ -1,6 +1,5 @@
 import { type Response, Router } from "express";
 import { SiweMessage } from "siwe";
-import { isAddress } from "viem";
 import {
   generateNonce,
   consumeNonce,
@@ -11,6 +10,7 @@ import {
 import { SESSION_COOKIE, requireAuth } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
+import { isValidSolanaAddress, normalizeSolanaAddress } from "../utils/solana.js";
 
 const router = Router();
 
@@ -90,7 +90,7 @@ router.post("/verify", async (req, res) => {
       return;
     }
 
-    const walletAddress = result.data.address.toLowerCase();
+    const walletAddress = normalizeSolanaAddress(result.data.address);
 
     await ensurePlayerRecord(walletAddress);
     createAuthenticatedSession(res, walletAddress);
@@ -131,28 +131,19 @@ router.post("/minipay", async (req, res) => {
       walletProvider?: string;
     } = req.body ?? {};
 
-    if (!address || !isAddress(address)) {
+    if (!address || !isValidSolanaAddress(address)) {
       res.status(400).json({ error: "Missing or invalid wallet address." });
       return;
     }
 
-    if (
-      chainId !== undefined &&
-      Number.isFinite(chainId) &&
-      Number(chainId) !== env.CHAIN_ID
-    ) {
-      res.status(400).json({
-        error: `Wallet auth requires chain ${env.CHAIN_ID}.`,
-      });
-      return;
-    }
+    void chainId;
 
     if (walletProvider && walletProvider.toLowerCase() !== "minipay") {
       res.status(400).json({ error: "Unsupported MiniPay wallet provider." });
       return;
     }
 
-    const walletAddress = address.toLowerCase();
+    const walletAddress = normalizeSolanaAddress(address);
     await ensurePlayerRecord(walletAddress);
     createAuthenticatedSession(res, walletAddress);
 

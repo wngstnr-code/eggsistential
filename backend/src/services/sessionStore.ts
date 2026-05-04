@@ -46,7 +46,7 @@ export function consumeNonce(nonce: string): boolean {
 /** Create a new session */
 export function createSession(token: string, walletAddress: string): void {
   sessions.set(token, {
-    walletAddress: walletAddress.toLowerCase(),
+    walletAddress,
     createdAt: Date.now(),
   });
 }
