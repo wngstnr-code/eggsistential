@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "",
+    "payload": "",
+    "signature": ""
+  },
+  "frame": {
+    "version": "next",
+    "name": "Eggsecutive",
+    "iconUrl": "https://eggsecutive.vercel.app/images/1.png",
+    "homeUrl": "https://eggsecutive.vercel.app",
+    "imageUrl": "https://eggsecutive.vercel.app/images/1.png",
+    "buttonTitle": "Play Eggsecutive",
+    "splashImageUrl": "https://eggsecutive.vercel.app/images/1.png",
+    "splashBackgroundColor": "#0a1428",
+    "webhookUrl": ""
+  }
+}
