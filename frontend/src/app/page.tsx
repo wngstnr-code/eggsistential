@@ -332,3 +332,68 @@ export default function Home() {
     (sum, entry) => sum + Math.max(toNumber(entry.total_profit) * 5.5, 0),
     0,
   );
+
+  const socialStats = [
+    {
+      label: "PLAYERS LIVE",
+      value: playersOnline.toString(),
+      note: "Wallets active now",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      ),
+    },
+    {
+      label: "RUNS DONE",
+      value: trackedRuns.toString(),
+      note: "Completed sessions",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+      ),
+    },
+    {
+      label: "TRACKED VOLUME",
+      value: formatMoney(trackedVolume),
+      note: "Estimated from recent boards",
+      icon: (
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 3h12l4 6-10 12L2 9z"></path>
+          <path d="M11 3 8 9l3 12 3-12-3-6z"></path>
+          <path d="M2 9h20"></path>
+        </svg>
+      ),
+    },
+  ];
