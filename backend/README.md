@@ -1,6 +1,6 @@
-# Eggsecutive Backend
+# Eggsistential Backend
 
-The Eggsecutive backend powers the server-authoritative game flow and authentication.
+The Eggsistential backend powers the server-authoritative game flow and authentication.
 
 Main responsibilities:
 

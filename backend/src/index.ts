@@ -17,10 +17,10 @@ import { readBackendSignerHealth } from "./services/opsHealth.js";
 
 /**
  * ════════════════════════════════════════════════════════════
- * Eggsecutive — Backend Server
+ * Eggsistential — Backend Server
  * ════════════════════════════════════════════════════════════
  *
- * Express.js + Socket.io server for the Eggsecutive game.
+ * Express.js + Socket.io server for the Eggsistential game.
  *
  * Responsibilities:
  *   1. SIWE Authentication (wallet-based login)
@@ -117,7 +117,7 @@ const io = setupGameGateway(httpServer);
 httpServer.listen(env.PORT, "0.0.0.0", () => {
   console.log("");
   console.log("════════════════════════════════════════════════════");
-  console.log("  🐔 Eggsecutive Backend");
+  console.log("  🐔 Eggsistential Backend");
   console.log("════════════════════════════════════════════════════");
   console.log(`  HTTP Server:    http://localhost:${env.PORT}`);
   console.log(`  WebSocket:      ws://localhost:${env.PORT}`);
