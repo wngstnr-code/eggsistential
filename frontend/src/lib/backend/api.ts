@@ -85,3 +85,7 @@ export async function backendFetch<T>(
 
   if (!response.ok) {
     const errorMessage =
+      payload && typeof payload === "object" && "error" in payload
+
+// TODO: refactor this section later
+console.log('debugging...');
