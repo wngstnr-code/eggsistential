@@ -19,3 +19,27 @@ export function hasReownProjectId() {
 
 function readAppUrl() {
   if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+
+  return "https://eggsistential.vercel.app";
+}
+
+function readAppKitNetwork(): AppKitNetwork {
+  if (SOLANA_CLUSTER === "mainnet-beta") return solana;
+  if (SOLANA_CLUSTER === "devnet") return solanaDevnet;
+  return solanaTestnet;
+}
+
+export const SOLANA_APPKIT_NETWORK = readAppKitNetwork();
+export const SOLANA_APPKIT_NETWORKS: [AppKitNetwork, ...AppKitNetwork[]] = [
+  SOLANA_APPKIT_NETWORK,
+];
+
+export const appKit = hasReownProjectId()
+  ? createAppKit({
+      adapters: [new SolanaAdapter()],
+      networks: SOLANA_APPKIT_NETWORKS,
+      defaultNetwork: SOLANA_APPKIT_NETWORK,
+      projectId: REOWN_PROJECT_ID,
+      metadata: {
