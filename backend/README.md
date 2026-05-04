@@ -17,7 +17,7 @@ Main responsibilities:
 
 - Express
 - Socket.io
-- Viem
+- Viem + Solana Web3
 - SIWE
 - Supabase
 
@@ -50,21 +50,21 @@ SESSION_SECRET=your_session_secret
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-NETWORK_NAME=base-sepolia
-RPC_URL=https://sepolia.base.org
-CHAIN_ID=84532
-NATIVE_TOKEN_SYMBOL=ETH
-MIN_RECOMMENDED_NATIVE_BALANCE=0.005
+NETWORK_NAME=solana-testnet
+RPC_URL=https://api.testnet.solana.com
+SOLANA_CLUSTER=testnet
+NATIVE_TOKEN_SYMBOL=SOL
+MIN_RECOMMENDED_NATIVE_BALANCE=0.05
 
-GAME_VAULT_ADDRESS=0x...
-GAME_SETTLEMENT_ADDRESS=0x...
-TRUST_PASSPORT_ADDRESS=0x...
-FAUCET_CONTRACT_ADDRESS=0x...
+GAME_VAULT_ADDRESS=
+GAME_SETTLEMENT_ADDRESS=
+TRUST_PASSPORT_ADDRESS=
+FAUCET_CONTRACT_ADDRESS=
 FAUCET_MODE=drip_to
 FAUCET_AMOUNT_UNITS=1000000
 FAUCET_COOLDOWN_SECONDS=300
 
-BACKEND_PRIVATE_KEY=0x...
+BACKEND_PRIVATE_KEY=
 
 SETTLEMENT_SIGNATURE_TTL_SECONDS=86400
 PASSPORT_SIGNATURE_TTL_SECONDS=900
@@ -74,10 +74,10 @@ MINIPAY_UNVERIFIED_AUTH_ENABLED=true
 
 ## Current Contract Wiring
 
-- `GAME_VAULT_ADDRESS=` set this to your active Base Sepolia vault address
-- `GAME_SETTLEMENT_ADDRESS=` set this to your active Base Sepolia settlement address
-- `TRUST_PASSPORT_ADDRESS=` set this to your active Base Sepolia passport address
-- `FAUCET_CONTRACT_ADDRESS=` set this to your active Base Sepolia faucet address
+- `GAME_VAULT_ADDRESS=` set this to your active Solana testnet vault address
+- `GAME_SETTLEMENT_ADDRESS=` set this to your active Solana testnet settlement address
+- `TRUST_PASSPORT_ADDRESS=` set this to your active Solana testnet passport address
+- `FAUCET_CONTRACT_ADDRESS=` set this to your active Solana testnet faucet address
 
 The backend signer must stay in sync with the onchain signer used by:
 
@@ -135,8 +135,8 @@ Check:
 
 Common causes:
 
-- the backend relayer ran out of native gas token (`ETH` on Base Sepolia)
-- Base RPC failed or was rate-limited
+- the backend relayer ran out of native gas token (`SOL` on Solana testnet)
+- Solana RPC failed or was rate-limited
 - the backend signer does not match the onchain `backendSigner`
 - the vault treasury is not large enough for the payout
 

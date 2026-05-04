@@ -33,26 +33,24 @@ export const env = {
   SUPABASE_SERVICE_ROLE_KEY: requireEnv("SUPABASE_SERVICE_ROLE_KEY", "placeholder-key"),
 
   // Blockchain
-  NETWORK_NAME: optionalEnv("NETWORK_NAME", "base-sepolia"),
-  RPC_URL: optionalEnv("RPC_URL", "https://sepolia.base.org"),
-  CHAIN_ID: parseInt(optionalEnv("CHAIN_ID", "84532"), 10),
-  NATIVE_TOKEN_SYMBOL: optionalEnv("NATIVE_TOKEN_SYMBOL", "ETH"),
-  MIN_RECOMMENDED_NATIVE_BALANCE: Number.parseFloat(optionalEnv("MIN_RECOMMENDED_NATIVE_BALANCE", "0.005")),
+  NETWORK_NAME: optionalEnv("NETWORK_NAME", "solana-testnet"),
+  RPC_URL: optionalEnv("RPC_URL", "https://api.testnet.solana.com"),
+  SOLANA_CLUSTER: optionalEnv("SOLANA_CLUSTER", "testnet"),
+  CHAIN_ID: parseInt(optionalEnv("CHAIN_ID", "0"), 10),
+  NATIVE_TOKEN_SYMBOL: optionalEnv("NATIVE_TOKEN_SYMBOL", "SOL"),
+  MIN_RECOMMENDED_NATIVE_BALANCE: Number.parseFloat(optionalEnv("MIN_RECOMMENDED_NATIVE_BALANCE", "0.05")),
 
-  // Smart Contract
-  GAME_VAULT_ADDRESS: optionalEnv("GAME_VAULT_ADDRESS", "0x0000000000000000000000000000000000000000"),
-  GAME_SETTLEMENT_ADDRESS: optionalEnv("GAME_SETTLEMENT_ADDRESS", "0x0000000000000000000000000000000000000000"),
-  TRUST_PASSPORT_ADDRESS: optionalEnv("TRUST_PASSPORT_ADDRESS", "0x0000000000000000000000000000000000000000"),
-  FAUCET_CONTRACT_ADDRESS: optionalEnv("FAUCET_CONTRACT_ADDRESS", "0x0000000000000000000000000000000000000000"),
+  // Solana programs/accounts
+  GAME_VAULT_ADDRESS: optionalEnv("GAME_VAULT_ADDRESS", ""),
+  GAME_SETTLEMENT_ADDRESS: optionalEnv("GAME_SETTLEMENT_ADDRESS", ""),
+  TRUST_PASSPORT_ADDRESS: optionalEnv("TRUST_PASSPORT_ADDRESS", ""),
+  FAUCET_CONTRACT_ADDRESS: optionalEnv("FAUCET_CONTRACT_ADDRESS", ""),
   FAUCET_MODE: optionalEnv("FAUCET_MODE", "drip_to"),
   FAUCET_AMOUNT_UNITS: optionalEnv("FAUCET_AMOUNT_UNITS", "1000000"),
   FAUCET_COOLDOWN_SECONDS: parseInt(optionalEnv("FAUCET_COOLDOWN_SECONDS", "300"), 10),
 
   // Backend Signer
-  BACKEND_PRIVATE_KEY: optionalEnv(
-    "BACKEND_PRIVATE_KEY",
-    "0x0000000000000000000000000000000000000000000000000000000000000000"
-  ),
+  BACKEND_PRIVATE_KEY: optionalEnv("BACKEND_PRIVATE_KEY", ""),
 
   // Settlement
   SETTLEMENT_SIGNATURE_TTL_SECONDS: parseInt(optionalEnv("SETTLEMENT_SIGNATURE_TTL_SECONDS", "86400"), 10),
@@ -69,9 +67,8 @@ console.log(`🔧 Config loaded:`);
 console.log(`   Port: ${env.PORT}`);
 console.log(`   Frontend: ${env.FRONTEND_URL}`);
 console.log(`   Supabase: ${env.SUPABASE_URL.replace(/https?:\/\//, "").substring(0, 20)}...`);
-console.log(`   Network: ${env.NETWORK_NAME} (chain ${env.CHAIN_ID})`);
+console.log(`   Network: ${env.NETWORK_NAME} (${env.SOLANA_CLUSTER})`);
 console.log(`   RPC: ${env.RPC_URL}`);
-console.log(`   Chain ID: ${env.CHAIN_ID}`);
 console.log(`   Vault: ${env.GAME_VAULT_ADDRESS.substring(0, 10)}...`);
 console.log(`   Settlement: ${env.GAME_SETTLEMENT_ADDRESS.substring(0, 10)}...`);
 console.log(`   Passport: ${env.TRUST_PASSPORT_ADDRESS.substring(0, 10)}...`);
