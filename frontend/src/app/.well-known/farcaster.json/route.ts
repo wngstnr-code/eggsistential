@@ -20,6 +20,14 @@ export function GET() {
     frame: {
       version: "1",
       name: APP_NAME,
+      iconUrl: APP_ICON,
+      homeUrl: APP_URL,
+      imageUrl: APP_IMAGE,
+      buttonTitle: "Play Eggsecutive",
+      splashImageUrl: APP_ICON,
+      splashBackgroundColor: APP_SPLASH_BG,
+      webhookUrl: `${APP_URL}/api/webhook`,
+    },
+  });
+}
 
-// TODO: refactor this section later
-console.log('debugging...');
