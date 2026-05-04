@@ -84,6 +84,4 @@ export async function backendFetch<T>(
     : null;
 
   if (!response.ok) {
-
-// TODO: refactor this section later
-console.log('debugging...');
+    const errorMessage =

@@ -238,3 +238,97 @@ export default function Home() {
           Array.isArray(profitResult.value?.leaderboard) &&
           profitResult.value.leaderboard.length > 0
         ) {
+          setProfitBoard(profitResult.value.leaderboard.slice(0, 3));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsSocialLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isConnected) {
+      setShowHeroConnectPrompt(false);
+    }
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const shouldOpenFromQuery = params.get("connect") === "1";
+    const shouldOpenFromLogout =
+      window.sessionStorage.getItem(HOME_CONNECT_PROMPT_KEY) === "1";
+
+    if ((!shouldOpenFromQuery && !shouldOpenFromLogout) || isConnected) {
+      return;
+    }
+
+    setShowHeroConnectPrompt(true);
+    setShowProfilePopover(false);
+    clearWalletError();
+    window.sessionStorage.removeItem(HOME_CONNECT_PROMPT_KEY);
+    window.scrollTo({ top: 0, behavior: "auto" });
+
+    params.delete("connect");
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${
+      nextSearch ? `?${nextSearch}` : ""
+    }${window.location.hash}`;
+    window.history.replaceState({}, "", nextUrl);
+  }, [clearWalletError, isConnected]);
+
+  function onLogout() {
+    disconnectWallet();
+    setShowProfilePopover(false);
+  }
+
+  async function onCopyWallet() {
+    if (!account || typeof navigator === "undefined") return;
+
+    try {
+      await navigator.clipboard.writeText(account);
+      setProfileCopyLabel("COPIED");
+      window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
+    } catch {
+      setProfileCopyLabel("FAILED");
+      window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
+    }
+  }
+
+  function openHeroConnectPrompt() {
+    setShowHeroConnectPrompt(true);
+    setShowProfilePopover(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function onHeroPlayNow() {
+    if (isConnected) {
+      window.location.href = "/play";
+      return;
+    }
+    openHeroConnectPrompt();
+  }
+
+  function onHeroBack() {
+    setShowHeroConnectPrompt(false);
+    clearWalletError();
+  }
+
+  const trackedRuns = profitBoard.reduce(
+    (sum, entry) => sum + toNumber(entry.total_games),
+    0,
+  );
+  const playersOnline = Math.max(
+    18,
+    distanceBoard.length * 23 + profitBoard.length * 19,
+  );
+  const trackedVolume = profitBoard.reduce(
+    (sum, entry) => sum + Math.max(toNumber(entry.total_profit) * 5.5, 0),
+    0,
+  );
