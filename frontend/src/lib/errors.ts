@@ -75,6 +75,54 @@ function simplifyRawErrorMessage(message: string) {
     const index = simplified.indexOf(marker);
     if (index >= 0) {
       simplified = simplified.slice(0, index).trim();
+    }
+  }
 
-// TODO: refactor this section later
-console.log('debugging...');
+  simplified = simplified.replace(/^execution reverted:?\s*/i, "").trim();
+  return simplified;
+}
+
+export function readRawErrorMessage(error: unknown, fallback = "") {
+  if (typeof error === "string") {
+    return error.trim() || fallback;
+  }
+
+  if (error && typeof error === "object") {
+    const value = error as ErrorWithMeta;
+    const shortMessage = String(value.shortMessage || "").trim();
+    if (shortMessage) return shortMessage;
+
+    const message = String(value.message || "").trim();
+    if (message) return message;
+  }
+
+  return fallback;
+}
+
+export function isUserRejectedWalletError(error: unknown) {
+  const combined = `${readErrorName(error)} ${readRawErrorMessage(error, "")}`.toLowerCase();
+  return includesAny(combined, USER_REJECTED_PATTERNS);
+}
+
+export function toUserFacingWalletError(
+  error: unknown,
+  fallback: string,
+  options: UserFacingErrorOptions = {},
+) {
+  const rawMessage = readRawErrorMessage(error, fallback).trim();
+  if (!rawMessage) return fallback;
+
+  const combined = `${readErrorName(error)} ${rawMessage}`.toLowerCase();
+  if (isUserRejectedWalletError(error)) {
+    return options.userRejectedMessage || "Request was canceled in wallet.";
+  }
+
+  if (includesAny(combined, PENDING_REQUEST_PATTERNS)) {
+    return (
+      options.pendingRequestMessage ||
+      "There is still a pending wallet request."
+    );
+  }
+
+  if (includesAny(combined, INSUFFICIENT_FUNDS_PATTERNS)) {
+    return (
