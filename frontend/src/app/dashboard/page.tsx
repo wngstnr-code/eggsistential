@@ -141,3 +141,41 @@ export default function DashboardPage() {
                             {shortAddress(account)}
                           </span>
                         </div>
+                        <div className="home-profile-row">
+                          <span className="home-profile-label">Provider</span>
+                          <span className="mono home-profile-value">
+                            {walletProviderName || "Solana Wallet"}
+                          </span>
+                        </div>
+                        <div className="home-profile-row">
+                          <span className="home-profile-label">USDC</span>
+                          <span className="mono home-profile-value">
+                            {walletUsdcDisplay}
+                          </span>
+                        </div>
+                        <div className="home-profile-row">
+                          <span className="home-profile-label">Chain</span>
+                          <span
+                            className={`mono home-profile-value ${
+                              isAppChain
+                                ? "home-profile-value-ready"
+                                : "home-profile-value-warning"
+                            }`}
+                          >
+                            {isAppChain ? "SOLANA READY" : "CHECK SOLANA RPC"}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="home-profile-actions">
+                        <Link
+                          href="/"
+                          className="flow-btn home-profile-action home-profile-action-dashboard"
+                        >
+                          HOME
+                        </Link>
+                        <Link
+                          href="/managemoney"
+                          className="flow-btn home-profile-action home-profile-action-manage"
+                        >
+                          MANAGE MONEY
+                        </Link>
