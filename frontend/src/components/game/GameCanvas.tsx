@@ -48,6 +48,129 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
             <div
               id="bet-hud-active"
               className="bet-hud-active"
+              style={{ display: "none" }}
+            >
+              <div className="bet-hud-metric-grid">
+                <div className="bet-hud-metric bet-hud-metric-primary">
+                  <span className="bet-hud-metric-label">STAKE</span>
+                  <span id="bet-stake" className="bet-hud-metric-value">
+                    $0.00
+                  </span>
+                </div>
+                <div className="bet-hud-metric bet-hud-metric-primary">
+                  <span className="bet-hud-metric-label">CASH OUT</span>
+                  <span
+                    id="bet-payout"
+                    className="bet-hud-metric-value payout-value"
+                  >
+                    $0.00
+                  </span>
+                </div>
+                <div className="bet-hud-metric bet-hud-metric-wide">
+                  <span className="bet-hud-metric-label">MULTIPLIER</span>
+                  <span
+                    id="bet-multiplier"
+                    className="bet-hud-metric-value multiplier-value"
+                  >
+                    0.00x
+                  </span>
+                </div>
+              </div>
 
-// TODO: refactor this section later
-console.log('debugging...');
+              <div
+                id="bet-hud-decay"
+                className="bet-hud-decay"
+                style={{ display: "none" }}
+              >
+                <span className="bet-hud-decay-label">DECAYING</span>
+                <span id="bet-decay" className="bet-hud-decay-value">
+                  -0.1x
+                </span>
+              </div>
+            </div>
+
+            <div id="bet-hud-idle" className="bet-hud-idle">
+              Start a paid run to see live payout and multiplier.
+            </div>
+
+            <button
+              id="cash-out-btn"
+              className="disabled"
+              disabled
+              style={{ display: "none" }}
+            >
+              CASH OUT
+            </button>
+          </div>
+        </div>
+        <div id="top-bar-center">
+          <div className="stat-card play-balance-card">
+            <div className="stat-label">BALANCE</div>
+            <div className="stat-value" id="balance">
+              $0.00
+            </div>
+          </div>
+          <div className="stat-card timer-card" id="timer-card">
+            <div className="stat-label" id="timer-label">
+              RUSH
+            </div>
+            <div className="stat-value" id="timer">
+              1:00
+            </div>
+          </div>
+          <button id="bet-btn">PLAY</button>
+        </div>
+      </div>
+
+      <div id="bet-panel" className="modal-bg">
+        <div className="modal-box modal-box-bet">
+          <button className="close-btn" id="bet-panel-close" aria-label="Close">
+            X
+          </button>
+          <h2>CONFIRM PAID RUN</h2>
+          <p className="subtitle">
+            Set your stake, on-chain outcome, checkpoint cash out
+          </p>
+
+          <div className="odds-info">
+            <div className="field bet-stake-form">
+              <label htmlFor="bet-stake-input">AMOUNT (USDC)</label>
+              <input
+                id="bet-stake-input"
+                type="number"
+                defaultValue="10"
+                min="1"
+                max="100"
+                step="0.01"
+              />
+            </div>
+            <div className="quick-picks bet-stake-picks" aria-label="Stake presets">
+              <button type="button" data-bet-stake="10">
+                $10
+              </button>
+              <button type="button" data-bet-stake="25">
+                $25
+              </button>
+              <button type="button" data-bet-stake="50">
+                $50
+              </button>
+              <button type="button" data-bet-stake="100">
+                $100
+              </button>
+            </div>
+          </div>
+
+          <div className="odds-info">
+            <p className="odds-title">RUN RULES</p>
+            <div className="odds-row">
+              <span className="odds-key">Start multiplier</span>
+              <strong>0.00x</strong>
+            </div>
+            <div className="odds-row">
+              <span className="odds-key">Per forward step</span>
+              <strong>+0.025x</strong>
+            </div>
+            <div className="odds-row">
+              <span className="odds-key">Every 40 steps</span>
+              <strong>Checkpoint x1.2</strong>
+            </div>

@@ -126,3 +126,10 @@ export function toUserFacingWalletError(
 
   if (includesAny(combined, INSUFFICIENT_FUNDS_PATTERNS)) {
     return (
+      options.insufficientFundsMessage ||
+      "Wallet gas balance is insufficient for this transaction."
+    );
+  }
+
+  if (includesAny(combined, NETWORK_PATTERNS)) {
+    return (
