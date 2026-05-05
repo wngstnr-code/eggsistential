@@ -92,7 +92,7 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
             </div>
 
             <div id="bet-hud-idle" className="bet-hud-idle">
-              Start a paid run to see live payout and multiplier.
+              Paid run shows live payout and multiplier.
             </div>
 
             <button

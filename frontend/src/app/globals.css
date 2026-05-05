@@ -678,7 +678,7 @@ canvas.game {
   height: 52px;
   border-radius: 999px;
   border: 3px solid #24354d;
-  background: linear-gradient(180deg, #f7c52f 0%, #ee9d00 100%);
+  background: linear-gradient(180deg, #f3bd41 0%, #d88c08 100%);
   box-shadow:
     inset 0 4px 0 rgba(255, 255, 255, 0.35),
     3px 4px 0 rgba(0, 0, 0, 0.36);
@@ -1182,11 +1182,11 @@ canvas.game {
   position: absolute;
   left: 0;
   top: 0;
-  --left-stat-width: 304px;
+  --left-stat-width: 292px;
   width: var(--left-stat-width);
   flex-direction: column;
   align-items: stretch;
-  gap: 8px;
+  gap: 7px;
 }
 
 #top-bar-center {
@@ -1211,7 +1211,7 @@ canvas.game {
   min-width: 0;
   min-height: var(--top-bar-control-height);
   box-sizing: border-box;
-  padding: 8px 12px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
 }
@@ -1230,6 +1230,7 @@ canvas.game {
   flex-direction: column;
   gap: 4px;
   align-items: center;
+  justify-content: center;
   text-align: center;
   min-width: 0;
 }
@@ -1237,6 +1238,7 @@ canvas.game {
 .score-meta {
   font-size: 8px;
   letter-spacing: 1px;
+  line-height: 1;
   color: rgba(224, 237, 255, 0.72);
 }
 
@@ -1259,15 +1261,22 @@ canvas.game {
   display: none;
 }
 
-.score-card .stat-value {
+.score-card .stat-value,
+.score-cp-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  line-height: 1;
   color: #ffffff;
-  font-size: 19px;
+  font-size: 18px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
 }
 
 .score-cp-value {
   color: #7ef4c9;
-  font-size: 17px;
-  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
 }
 
 .tab-buttons-row {
@@ -1356,10 +1365,10 @@ canvas.game {
     linear-gradient(180deg, #1f3554 0%, #162942 100%);
   border: 3px solid #31466b;
   border-radius: 18px;
-  padding: 36px 24px 24px;
+  padding: 34px 22px 22px;
   max-width: 440px;
   width: 100%;
-  max-height: 85vh;
+  max-height: calc(100vh - 28px);
   overflow-y: auto;
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.12),
@@ -1372,10 +1381,10 @@ canvas.game {
     linear-gradient(180deg, #1f3554 0%, #162942 100%);
   border: 3px solid #31466b;
   border-radius: 18px;
-  padding: 36px 24px 24px;
+  padding: 32px 22px 20px;
   max-width: 460px;
   width: 100%;
-  max-height: 85vh;
+  max-height: calc(100vh - 28px);
   overflow-y: auto;
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.12),
@@ -1391,13 +1400,13 @@ canvas.game {
 
 .leaderboard-panel-head {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .leaderboard-panel-head h3 {
   margin: 0;
   font-family: "Press Start 2P", cursive;
-  font-size: 17px;
+  font-size: 16px;
   letter-spacing: 1px;
   color: #fff4dd;
   text-align: center;
@@ -1405,7 +1414,7 @@ canvas.game {
 }
 
 .leaderboard-status {
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   color: #bdd5f0;
   font-size: 10px;
   line-height: 1.5;
@@ -1532,15 +1541,15 @@ canvas.game {
 .stats-summary-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 7px;
+  margin-bottom: 8px;
 }
 
 .stats-summary-card {
   border-radius: 12px;
   border: 2px solid rgba(184, 212, 255, 0.22);
   background: rgba(12, 24, 42, 0.44);
-  padding: 12px 11px;
+  padding: 10px 11px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1572,7 +1581,7 @@ canvas.game {
 }
 
 .stats-joined {
-  margin: 0 0 12px;
+  margin: 0 0 10px;
   font-size: 9px;
   line-height: 1.5;
   color: #bdd5f0;
@@ -1583,11 +1592,11 @@ canvas.game {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .stats-tabs button {
-  min-height: 38px;
+  min-height: 36px;
   border-radius: 10px;
   border: 2px solid rgba(184, 212, 255, 0.22);
   background: rgba(242, 248, 255, 0.92);
@@ -1623,19 +1632,19 @@ canvas.game {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  min-height: 126px;
+  min-height: 104px;
 }
 
 .stats-empty {
   margin: 0;
-  min-height: 104px;
+  min-height: 88px;
   border: 2px dashed rgba(184, 212, 255, 0.28);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 16px;
+  padding: 12px;
   box-sizing: border-box;
   color: #bdd5f0;
   font-family: "Press Start 2P", cursive;
@@ -1757,6 +1766,7 @@ canvas.game {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
 }
 
 #bet-btn.active {
@@ -1892,11 +1902,11 @@ canvas.game {
 }
 
 .bet-hud-idle {
-  padding: 12px 10px 10px;
+  padding: 10px 10px 9px;
   text-align: center;
-  font-size: 10px;
-  letter-spacing: 0.6px;
-  line-height: 1.5;
+  font-size: 9px;
+  letter-spacing: 0.55px;
+  line-height: 1.45;
   font-weight: 700;
   color: #dfe8ff;
 }
@@ -2960,14 +2970,15 @@ canvas.game {
   width: 100%;
   min-height: 40px;
   border-radius: 12px;
-  border: 2px solid #733f11;
-  background: linear-gradient(180deg, #ffb96a 0%, #d16b18 100%);
-  color: #fff;
+  border: 2px solid #6f3a0d;
+  background: linear-gradient(180deg, #f7a24e 0%, #b95713 100%);
+  color: #fffdf4;
   font-family: inherit;
   font-size: 11px;
   letter-spacing: 1px;
+  text-shadow: 0 2px 0 rgba(73, 29, 3, 0.42);
   cursor: pointer;
-  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+  box-shadow: 0 3px 0 rgba(78, 34, 7, 0.82);
   transition:
     transform 0.05s ease,
     box-shadow 0.05s ease;
@@ -3077,9 +3088,13 @@ canvas.game {
 
 .play-status-warning .play-status-text {
   color: #fff1c8;
+  letter-spacing: 0.55px;
+  white-space: nowrap;
 }
 
 .play-status-warning .play-status-action {
+  min-width: 86px;
+  white-space: nowrap;
   background: linear-gradient(180deg, #ffe39f 0%, #e7b954 100%);
   border-color: #8d611a;
   color: #2f1e08;
@@ -3191,6 +3206,8 @@ canvas.game {
   .score-card .stat-value,
   .score-cp-value {
     font-size: 14px;
+    min-height: 15px;
+    line-height: 1;
   }
 
   .stats-summary-card strong {
@@ -3319,12 +3336,11 @@ canvas.game {
     letter-spacing: 0.6px;
   }
 
-  .score-card .stat-value {
-    font-size: 11px;
-  }
-
+  .score-card .stat-value,
   .score-cp-value {
-    font-size: 10px;
+    font-size: 11px;
+    min-height: 12px;
+    line-height: 1;
   }
 
   .score-separator {
@@ -3735,12 +3751,11 @@ canvas.game {
     font-size: 9px;
   }
 
-  .score-card .stat-value {
-    font-size: 10px;
-  }
-
+  .score-card .stat-value,
   .score-cp-value {
-    font-size: 9px;
+    font-size: 10px;
+    min-height: 11px;
+    line-height: 1;
   }
 
   .score-meta {
