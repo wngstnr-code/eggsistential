@@ -257,3 +257,53 @@ export default function DashboardPage() {
                 disabled
               >
                 LOGGING OUT...
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="flow-btn home-btn-main dashboard-btn dashboard-btn-play"
+                onClick={onConnect}
+                disabled={isConnecting}
+              >
+                {isConnecting ? "CONNECTING..." : "CONNECT WALLET"}
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {showHelp ? (
+        <div className="home-modal-overlay" onClick={() => setShowHelp(false)}>
+          <div className="home-modal-box" onClick={(event) => event.stopPropagation()}>
+            <button
+              className="home-modal-close"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              X
+            </button>
+            <h2>HOW TO PLAY</h2>
+            <div className="home-help-content">
+              <div className="help-step">
+                <span className="step-num">1</span>
+                <div>
+                  <p className="step-title">MANAGE MONEY</p>
+                  <p>Deposit USDC into your vault, then use available balance for live runs.</p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">2</span>
+                <div>
+                  <p className="step-title">RUN & STACK</p>
+                  <p>Move lane by lane to increase multiplier while avoiding traffic.</p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">3</span>
+                <div>
+                  <p className="step-title">CHECKPOINT CASH OUT</p>
+                  <p>Cash out at checkpoints before crash or decay eats the payout.</p>
+                </div>
+              </div>
+            </div>
+            <button

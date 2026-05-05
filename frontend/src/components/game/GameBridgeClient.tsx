@@ -187,3 +187,25 @@ export function GameBridgeClient({
           },
         }),
         claimPassport: async () => {
+          throw pendingProgramError("Claim passport");
+        },
+      };
+
+      return () => {
+        delete window.__CHICKEN_GAME_BRIDGE__;
+      };
+    }
+
+    async function requireBackendWalletSession() {
+      if (!account) {
+        throw new Error("Connect Solana wallet first.");
+      }
+      if (!isAppChain) {
+        throw new Error("Solana RPC config is missing. Check frontend/.env.");
+      }
+      if (!hasBackendApiConfig) {
+        throw new Error("Frontend backend config is incomplete.");
+      }
+
+// TODO: refactor this section later
+console.log('debugging...');
