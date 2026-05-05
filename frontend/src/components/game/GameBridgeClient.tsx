@@ -302,3 +302,99 @@ export function GameBridgeClient({
           leaderboard: Array.isArray(payload?.leaderboard)
             ? payload.leaderboard
             : [],
+          walletAddress: account || "",
+        };
+      },
+      loadPlayerStats: async () => {
+        await requireBackendWalletSession();
+        return backendFetch<ChickenBridgePlayerStats>("/api/player/stats");
+      },
+      loadGameHistory: async (limit = 3) => {
+        await requireBackendWalletSession();
+
+        const safeLimit = normalizeHistoryLimit(limit);
+        const payload = await backendFetch<ChickenBridgeGameHistoryPayload>(
+          `/api/game/history?limit=${safeLimit}&offset=0`,
+        );
+
+        return {
+          sessions: Array.isArray(payload?.sessions) ? payload.sessions : [],
+          total: Number(payload?.total || 0),
+          limit: Number(payload?.limit || safeLimit),
+          offset: Number(payload?.offset || 0),
+        };
+      },
+      loadPlayerTransactions: async (limit = 3) => {
+        await requireBackendWalletSession();
+
+        const safeLimit = normalizeHistoryLimit(limit);
+        const payload = await backendFetch<ChickenBridgePlayerTransactionsPayload>(
+          `/api/player/transactions?limit=${safeLimit}&offset=0`,
+        );
+
+        return {
+          transactions: Array.isArray(payload?.transactions)
+            ? payload.transactions
+            : [],
+          total: Number(payload?.total || 0),
+          limit: Number(payload?.limit || safeLimit),
+          offset: Number(payload?.offset || 0),
+        };
+      },
+      getWalletAddress: () => account || "",
+      openDeposit: (presetAmount?: number) => {
+        window.dispatchEvent(
+          new CustomEvent("chicken:open-deposit-modal", {
+            detail: { amount: presetAmount },
+          }),
+        );
+      },
+      depositToVault: async () => {
+        await requireBackendWalletSession();
+        throw pendingProgramError("Deposit");
+      },
+      startBet: async (stakeInput: number) => {
+        await requireBackendWalletSession();
+        normalizeStakeInput(stakeInput);
+        throw pendingProgramError("Start bet");
+      },
+      sendMove: () => {},
+      cashOut: async () => {
+        await requireBackendWalletSession();
+        throw pendingProgramError("Cash out");
+      },
+      crash: async () => {
+        await requireBackendWalletSession();
+        throw pendingProgramError("Crash settlement");
+      },
+      autoSettlePending: async () => {
+        const blocker = await getPlayBlocker();
+        emitPlayBlocker(blocker);
+        if (blocker.kind === "none") return false;
+        throw pendingProgramError("Resolve previous bet");
+      },
+      getPlayBlocker: async () => {
+        const blocker = await getPlayBlocker();
+        emitPlayBlocker(blocker);
+        return blocker;
+      },
+      resolvePlayBlocker: async () => {
+        const blocker = await getPlayBlocker();
+        emitPlayBlocker(blocker);
+        if (blocker.kind === "none") return false;
+        throw pendingProgramError("Resolve previous bet");
+      },
+      getPassportStatus: async () => {
+        await requireBackendWalletSession();
+        return backendFetch<ChickenBridgePassportStatus>("/api/passport/status");
+      },
+      claimPassport: async () => {
+        await requireBackendWalletSession();
+        throw pendingProgramError("Claim passport");
+      },
+    };
+
+    void refreshPlayBlockerStatus().catch(() => {
+      emitPlayBlocker({ kind: "none" });
+    });
+

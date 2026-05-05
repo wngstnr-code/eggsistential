@@ -261,3 +261,74 @@ export function ManageMoneyPage() {
               onClick={handleDepositClick}
             >
               {readPrimaryLabel(flow)}
+            </button>
+
+            <div className="money-secondary-actions">
+              <button
+                className="flow-btn money-secondary-btn money-withdraw-btn"
+                type="button"
+                disabled={flow.disableWithdrawButton}
+                onClick={handleWithdrawClick}
+              >
+                {flow.isWithdrawBusy ? "WITHDRAWING..." : "WITHDRAW"}
+              </button>
+              <button
+                className="flow-btn money-secondary-btn money-withdraw-btn"
+                type="button"
+                disabled={flow.disableFaucetButton}
+                onClick={handleFaucetClick}
+              >
+                {flow.isFaucetBusy ? "CLAIMING FAUCET..." : "CLAIM FAUCET"}
+              </button>
+            </div>
+
+            {flow.faucetCooldownSeconds > 0 ? (
+              <p className="money-helper">
+                Faucet cooldown per wallet: {flow.faucetCooldownSeconds}s
+              </p>
+            ) : null}
+
+            <div className="money-panel-footer">
+              <div className="money-footer-actions">
+                <a
+                  href={returnHref}
+                  className="flow-btn money-nav-home-btn money-panel-nav-btn"
+                >
+                  {returnLabel}
+                </a>
+                <a
+                  href="/play"
+                  className="flow-btn money-nav-play-btn money-panel-nav-btn"
+                >
+                  PLAY GAME
+                </a>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {activityItems.length ? (
+          <section className="money-activity">
+            <p className="flow-eyebrow money-activity-eyebrow">RECENT ACTIVITY</p>
+            <div className="money-activity-list">
+              {activityItems.map((item) => (
+                <div key={item.label} className="money-activity-item">
+                  <span>{item.label}</span>
+                  {item.url ? (
+                    <a href={item.url} target="_blank" rel="noreferrer">
+                      {shortHash(item.hash)}
+                    </a>
+                  ) : (
+                    <span className="mono">{shortHash(item.hash)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+      </section>
+    </main>
+  );
+}
+
