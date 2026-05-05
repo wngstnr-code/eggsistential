@@ -355,3 +355,59 @@ canvas.game {
   background: #fff;
   color: #2c3e50;
   outline: none;
+  text-align: center;
+}
+
+.field input:focus {
+  border-color: #e67e22;
+  background: #fffbe6;
+}
+
+.quick-picks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 6px;
+}
+
+.quick-picks button {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 10px 6px;
+  background: #fff;
+  border: 2px solid #2c3e50;
+  border-radius: 8px;
+  color: #2c3e50;
+  cursor: pointer;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.3);
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+}
+
+.quick-picks button:hover {
+  background: #ffe3b3;
+}
+
+.quick-picks button:active {
+  transform: translate(1px, 2px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.3);
+}
+
+.odds-info {
+  background: rgba(44, 62, 80, 0.08);
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #2c3e50;
+}
+
+.odds-title {
+  margin: 0 0 2px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: rgba(44, 62, 80, 0.72);
+}
+

@@ -427,6 +427,73 @@ export default function Home() {
                 </button>
 
                 {showProfilePopover && (
-
-// TODO: refactor this section later
-console.log('debugging...');
+                  <section
+                    className="flow-status home-profile-popover"
+                    style={{ color: "white" }}
+                  >
+                    <p className="home-preview-title home-profile-heading">
+                      PROFILE
+                    </p>
+                    <div className="home-profile-meta">
+                      <div className="home-profile-row">
+                        <span className="home-profile-label">Wallet</span>
+                        <span className="mono home-profile-value">
+                          {shortAddress(account)}
+                        </span>
+                      </div>
+                      <div className="home-profile-row">
+                        <span className="home-profile-label">Provider</span>
+                        <span className="mono home-profile-value">
+                          {walletProviderName || "Solana Wallet"}
+                        </span>
+                      </div>
+                      <div className="home-profile-row">
+                        <span className="home-profile-label">USDC</span>
+                        <span className="mono home-profile-value">
+                          {walletUsdcDisplay}
+                        </span>
+                      </div>
+                      <div className="home-profile-row">
+                        <span className="home-profile-label">Chain</span>
+                        <span
+                          className={`mono home-profile-value ${
+                            isAppChain
+                              ? "home-profile-value-ready"
+                              : "home-profile-value-warning"
+                          }`}
+                        >
+                          {isAppChain ? "SOLANA READY" : "CHECK SOLANA RPC"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="home-profile-actions">
+                      <Link
+                        href="/"
+                        className="flow-btn home-profile-action home-profile-action-dashboard"
+                      >
+                        HOME
+                      </Link>
+                      <Link
+                        href="/managemoney"
+                        className="flow-btn home-profile-action home-profile-action-manage"
+                      >
+                        MANAGE MONEY
+                      </Link>
+                      {canDisconnect ? (
+                        <button
+                          className="flow-btn home-profile-action home-profile-action-logout"
+                          type="button"
+                          onClick={onLogout}
+                        >
+                        LOG OUT
+                      </button>
+                    ) : null}
+                      <button
+                        className="flow-btn home-profile-action home-profile-action-copy"
+                        type="button"
+                        onClick={() => void onCopyWallet()}
+                      >
+                        {profileCopyLabel}
+                      </button>
+                    </div>
+                  </section>
