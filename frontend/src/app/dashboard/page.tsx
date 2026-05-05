@@ -307,3 +307,16 @@ export default function DashboardPage() {
               </div>
             </div>
             <button
+              className="flow-btn secondary info-modal-action"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </main>
+  );
+}
+

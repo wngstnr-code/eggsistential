@@ -272,3 +272,33 @@ export function GameBridgeClient({
 
     window.__CHICKEN_GAME_BRIDGE__ = {
       backgroundMode: false,
+      loadAvailableBalance: async () => {
+        if (!account || !hasBackendApiConfig) return 0;
+        await refreshBackendSession();
+        return 0;
+      },
+      loadDepositBalances: async () => {
+        if (account && hasBackendApiConfig) {
+          await refreshBackendSession();
+        }
+
+        return {
+          walletBalance: 0,
+          availableBalance: 0,
+          lockedBalance: 0,
+          allowance: 0,
+        };
+      },
+      loadLeaderboard: async () => {
+        if (!hasBackendApiConfig) {
+          throw new Error("Frontend backend config is incomplete.");
+        }
+
+        const payload = await backendFetch<{
+          leaderboard?: ChickenBridgeLeaderboardEntry[];
+        }>("/api/leaderboard");
+
+        return {
+          leaderboard: Array.isArray(payload?.leaderboard)
+            ? payload.leaderboard
+            : [],

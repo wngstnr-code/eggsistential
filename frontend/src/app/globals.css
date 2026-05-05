@@ -618,6 +618,122 @@ canvas.game {
 #result-container h1 {
   margin: 0;
   color: #c0392b;
+  font-size: 1.4em;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+}
 
-// TODO: refactor this section later
-console.log('debugging...');
+#result-container p {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+#result-container #result-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+#result-container .profit-positive {
+  color: #27ae60;
+  font-size: 1.1em;
+}
+
+#result-container .profit-negative {
+  color: #c0392b;
+  font-size: 1.1em;
+}
+
+#result-container strong {
+  color: #e67e22;
+}
+
+#result-container .modal-actions {
+  width: 100%;
+}
+
+/* ============================================================
+   HELP UI (landing + in-game)
+============================================================ */
+
+.fixed-help {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 3px solid #2c3e50;
+  background: linear-gradient(180deg, #fffef8 0%, #dce8f8 100%);
+  color: #1f3552;
+  box-shadow: 4px 5px 0 rgba(0, 0, 0, 0.35);
+  font-family: inherit;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease,
+    filter 0.15s ease;
+}
+
+.fixed-help:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.fixed-help:hover {
+  filter: brightness(1.06);
+}
+
+.home-help-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-help-stack .fixed-help {
+  position: relative;
+  right: auto;
+  bottom: auto;
+}
+
+.home-help-doc-btn {
+  text-decoration: none;
+}
+
+.home-help-doc-icon {
+  width: 28px;
+  height: 28px;
+  display: block;
+  transform: translateX(0.5px);
+}
+
+.home-modal-overlay,
+.info-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(6, 10, 18, 0.72);
+  backdrop-filter: blur(4px);
+}
+
+.home-modal-box,
+.info-modal-box {
+  position: relative;
+  width: min(560px, calc(100vw - 28px));
+  background: linear-gradient(180deg, #fff8e7 0%, #ffe3b3 100%);
+  border: 4px solid #2c3e50;
