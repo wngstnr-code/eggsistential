@@ -420,6 +420,22 @@ export function PlayTopNav() {
         setIsMenuOpen(false);
         setPassportPopup(null);
       }
+    }
 
-// TODO: refactor this section later
-console.log('debugging...');
+    document.addEventListener("click", onDocumentClick);
+    window.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("click", onDocumentClick);
+      window.removeEventListener("keydown", onEscape);
+    };
+  }, []);
+
+  useEffect(() => {
+    function clearTransientStatus() {
+      if (statusTimeoutRef.current) {
+        window.clearTimeout(statusTimeoutRef.current);
+        statusTimeoutRef.current = null;
+      }
+      setTransientStatus(null);
+    }
+
