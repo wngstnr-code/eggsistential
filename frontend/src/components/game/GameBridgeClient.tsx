@@ -209,3 +209,66 @@ export function GameBridgeClient({
 
       const authOkay = await ensureBackendSession();
       if (!authOkay) {
+        throw new Error("Backend session is not active yet. Connect wallet again.");
+      }
+
+      return account;
+    }
+
+    async function getPlayBlocker(): Promise<ChickenBridgePlayBlocker> {
+      if (!account || !isAppChain || !hasBackendApiConfig) {
+        return { kind: "none" };
+      }
+
+      const authOkay = await refreshBackendSession();
+      if (!authOkay) {
+        return { kind: "none" };
+      }
+
+      const [pending, activeBackendSession] = await Promise.all([
+        fetchPendingSettlements(),
+        fetchActiveBackendSession(),
+      ]);
+
+      if (pending.hasPending && pending.pendingSettlements.length > 0) {
+        const pendingCount = pending.pendingSettlements.length;
+        const firstPending = pending.pendingSettlements[0];
+        return {
+          kind: "pending_settlement",
+          message:
+            pendingCount > 1
+              ? `${pendingCount} PREV BETS NEED SETTLEMENT`
+              : "PREV BET NEEDS SETTLEMENT",
+          actionLabel: "END NOW",
+          onchainSessionId: String(
+            firstPending?.onchain_session_id ||
+              firstPending?.resolution?.sessionId ||
+              firstPending?.payload?.sessionId ||
+              "",
+          ),
+          pendingCount,
+        };
+      }
+
+      if (activeBackendSession.hasActiveGame) {
+        return {
+          kind: "active_previous",
+          message: "PREV BET STILL NOT END",
+          actionLabel: "END NOW",
+          onchainSessionId: String(
+            activeBackendSession.session?.onchain_session_id || "",
+          ),
+        };
+      }
+
+      return { kind: "none" };
+    }
+
+    async function refreshPlayBlockerStatus() {
+      const blocker = await getPlayBlocker();
+      emitPlayBlocker(blocker);
+      return blocker;
+    }
+
+    window.__CHICKEN_GAME_BRIDGE__ = {
+      backgroundMode: false,
