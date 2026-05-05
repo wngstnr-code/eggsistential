@@ -260,6 +260,4 @@ export function ManageMoneyPage() {
               disabled={flow.disableDepositButton}
               onClick={handleDepositClick}
             >
-
-// TODO: refactor this section later
-console.log('debugging...');
+              {readPrimaryLabel(flow)}

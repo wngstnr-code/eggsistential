@@ -552,3 +552,72 @@ canvas.game {
   box-shadow: 3px 5px 0 rgba(0, 0, 0, 0.35);
 }
 
+#free-play-btn:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #dfe8f2 100%);
+}
+
+#free-play-btn:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.modal-actions-deposit {
+  gap: 10px;
+}
+
+.modal-actions a.manage {
+  background: linear-gradient(180deg, #ffe39f 0%, #f0bc58 100%);
+  color: #3e2a08;
+  border: 3px solid #8e641d;
+  box-shadow: 3px 5px 0 rgba(0, 0, 0, 0.35);
+}
+
+.modal-actions a.manage:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.modal-actions a.manage[aria-disabled="true"] {
+  opacity: 0.5;
+  filter: grayscale(0.45) saturate(0.7);
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   RESULT MODAL
+============================================================ */
+
+#result-container {
+  position: absolute;
+  min-width: 100%;
+  min-height: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+}
+
+#result-container #result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(180deg, #fff8e7 0%, #ffe3b3 100%);
+  padding: 32px 44px;
+  border: 4px solid #2c3e50;
+  border-radius: 18px;
+  box-shadow: 6px 8px 0 rgba(0, 0, 0, 0.4);
+  text-align: center;
+  min-width: 300px;
+}
+
+#result-container h1 {
+  margin: 0;
+  color: #c0392b;
+
+// TODO: refactor this section later
+console.log('debugging...');
