@@ -87,3 +87,98 @@ export function ManageMoneyPage() {
     () =>
       [
         {
+          label: "Latest Token Approval",
+          hash: flow.approveTxHash,
+          url: flow.approveTxUrl,
+        },
+        {
+          label: "Latest Deposit",
+          hash: flow.depositTxHash,
+          url: flow.depositTxUrl,
+        },
+        {
+          label: "Latest Withdraw",
+          hash: flow.withdrawTxHash,
+          url: flow.withdrawTxUrl,
+        },
+        {
+          label: "Latest Faucet",
+          hash: flow.faucetTxHash,
+          url: flow.faucetTxUrl,
+        },
+      ].filter((item) => item.hash),
+    [
+      flow.approveTxHash,
+      flow.approveTxUrl,
+      flow.depositTxHash,
+      flow.depositTxUrl,
+      flow.withdrawTxHash,
+      flow.withdrawTxUrl,
+      flow.faucetTxHash,
+      flow.faucetTxUrl,
+    ],
+  );
+
+  async function handleDepositClick() {
+    try {
+      await flow.onDeposit();
+    } catch {
+      // Error sudah ditangani oleh flow.
+    }
+  }
+
+  async function handleWithdrawClick() {
+    try {
+      await flow.onWithdraw();
+    } catch {
+      // Error sudah ditangani oleh flow.
+    }
+  }
+
+  async function handleFaucetClick() {
+    try {
+      await flow.onRequestFaucet();
+    } catch {
+      // Error sudah ditangani oleh flow.
+    }
+  }
+
+  return (
+    <main className="flow-page money-page">
+      <div className="money-bg" aria-hidden="true">
+        <iframe
+          className="money-bg-frame"
+          src="/play?bg=1"
+          title="In-game background"
+          tabIndex={-1}
+        />
+      </div>
+      <div className="money-overlay" aria-hidden="true" />
+
+      <section className="flow-card money-card">
+        <header className="money-header">
+          <div className="money-head-top">
+            <p className="flow-eyebrow">EGGSISTENTIAL VAULT</p>
+            <div className="money-head-badges">
+              <span
+                className={`money-head-badge ${
+                  flow.needsApproval
+                    ? "money-head-badge-warning"
+                    : "money-head-badge-ready"
+                }`}
+              >
+                {flow.needsApproval ? "APPROVAL NEEDED" : "VAULT READY"}
+              </span>
+            </div>
+          </div>
+          <h1 className="flow-title money-title">MANAGE MONEY</h1>
+          <p className="money-subtitle">
+            Deposit to vault, then withdraw only from your available balance.
+          </p>
+        </header>
+
+        <div className="money-grid">
+          <section className="flow-status money-status-panel">
+            <p className="money-section-label">VAULT SNAPSHOT</p>
+            <div className="money-status-grid">
+              <div className="money-status-row">

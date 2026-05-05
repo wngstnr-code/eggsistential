@@ -86,6 +86,21 @@ export async function backendFetch<T>(
   if (!response.ok) {
     const errorMessage =
       payload && typeof payload === "object" && "error" in payload
+        ? String((payload as { error?: string }).error || "Request failed.")
+        : `Request failed with status ${response.status}.`;
+    throw new Error(errorMessage);
+  }
 
-// TODO: refactor this section later
-console.log('debugging...');
+  return payload as T;
+}
+
+export async function backendPost<T>(
+  path: string,
+  body?: JsonValue | Record<string, JsonValue>,
+): Promise<T> {
+  return backendFetch<T>(path, {
+    method: "POST",
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+}
+
