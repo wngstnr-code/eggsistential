@@ -179,3 +179,72 @@ export default function DashboardPage() {
                         >
                           MANAGE MONEY
                         </Link>
+                        {canDisconnect ? (
+                          <button
+                            className="flow-btn home-profile-action home-profile-action-logout"
+                            type="button"
+                            onClick={onLogout}
+                          >
+                            LOG OUT
+                          </button>
+                        ) : null}
+                        <button
+                          className="flow-btn home-profile-action home-profile-action-copy"
+                          type="button"
+                          onClick={() => void onCopyWallet()}
+                        >
+                          {profileCopyLabel}
+                        </button>
+                      </div>
+                    </section>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="flow-btn primary home-nav-login"
+                  onClick={onConnect}
+                  disabled={isConnecting}
+                >
+                  {isConnecting ? "CONNECTING..." : "LOGIN"}
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <div className="dashboard-center">
+          <div className="dashboard-title" aria-label="EGGSISTENTIAL">
+            <span className="dashboard-title-line">CHICKEN</span>
+            <span className="dashboard-title-line">SOLANA</span>
+          </div>
+          <div className="dashboard-actions">
+            {showConnectedDashboardUi ? (
+              <>
+                <a
+                  href="/play"
+                  className="flow-btn home-btn-main dashboard-btn dashboard-btn-play"
+                >
+                  PLAY NOW
+                </a>
+                <button
+                  type="button"
+                  className="flow-btn home-btn-main dashboard-btn dashboard-btn-how"
+                  onClick={() => setShowHelp(true)}
+                >
+                  HOW TO PLAY
+                </button>
+                <a
+                  href="/managemoney"
+                  className="flow-btn home-btn-main dashboard-btn dashboard-btn-deposit"
+                >
+                  MANAGE MONEY
+                </a>
+                {canDisconnect ? (
+                  <button
+                    type="button"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-logout"
+                    onClick={onLogout}
+
+// TODO: refactor this section later
+console.log('debugging...');

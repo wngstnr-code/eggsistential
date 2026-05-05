@@ -43,3 +43,20 @@ export const appKit = hasReownProjectId()
       defaultNetwork: SOLANA_APPKIT_NETWORK,
       projectId: REOWN_PROJECT_ID,
       metadata: {
+        name: "EGGSISTENTIAL",
+        description:
+          "A competitive onchain chicken-crossing game on Solana.",
+        url: readAppUrl(),
+        icons: [`${readAppUrl()}/favicon.png`],
+      },
+      themeMode: "dark",
+      features: {
+        analytics: false,
+        email: false,
+        socials: false,
+        swaps: false,
+        onramp: false,
+        history: false,
+      },
+    })
+  : null;
