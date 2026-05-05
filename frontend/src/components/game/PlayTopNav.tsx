@@ -211,3 +211,28 @@ export function PlayTopNav() {
         durationMs: 4200,
       });
     } catch (error) {
+      const message = readActionErrorMessage(
+        error,
+        "Failed to check passport status.",
+      );
+      setPassportStatusText(message);
+      dispatchStatusUpdate({
+        message,
+        tone: "error",
+        durationMs: 4200,
+      });
+    } finally {
+      setPassportBusy(false);
+    }
+  }
+
+  async function onClaimPassportClick() {
+    if (passportBusy) return;
+    setPassportBusy(true);
+    try {
+      const bridge = getBridgeApi();
+      const result = await bridge.claimPassport();
+      const expiryText = result.expiry
+        ? new Date(result.expiry * 1000).toLocaleDateString()
+        : "-";
+      const message = `PASSPORT CLAIMED • TIER ${result.tier} • EXP ${expiryText}`;
