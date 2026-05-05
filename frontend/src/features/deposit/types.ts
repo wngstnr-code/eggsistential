@@ -33,3 +33,13 @@ export type DepositFlowViewModel = {
   isWithdrawBusy: boolean;
   isFaucetBusy: boolean;
   disableApproveButton: boolean;
+  disableDepositButton: boolean;
+  disableWithdrawButton: boolean;
+  disableFaucetButton: boolean;
+  onApprove: () => Promise<void>;
+  onDeposit: () => Promise<void>;
+  onWithdraw: () => Promise<void>;
+  onRequestFaucet: () => Promise<void>;
+  faucetCooldownSeconds: number;
+  configMessage: string;
+};
