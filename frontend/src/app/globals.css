@@ -3104,6 +3104,17 @@ canvas.game {
   text-shadow: none;
 }
 
+.play-status-balanced {
+  justify-content: center;
+  gap: 20px;
+}
+
+.play-status-balanced .play-status-text {
+  flex: 0 0 auto;
+  min-width: 98px;
+  text-align: center;
+}
+
 .play-status-error {
   border-color: rgba(255, 134, 134, 0.68);
   background: linear-gradient(180deg,

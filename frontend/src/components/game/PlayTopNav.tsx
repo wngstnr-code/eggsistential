@@ -607,14 +607,14 @@ export function PlayTopNav() {
     statusMessage = "SOLANA RPC CONFIG MISSING";
   } else if (hasBackendApiConfig && isBackendAuthLoading) {
     statusTone = "busy";
-    statusMessage = "SYNCING GAME DATA...";
+    statusMessage = "SYNCING DATA...";
   } else if (hasBackendApiConfig && backendAuthError) {
     statusTone = "error";
     statusMessage = backendAuthError;
     statusActionLabel = "SYNC NOW";
   } else if (hasBackendApiConfig && !isBackendAuthenticated) {
     statusTone = "warning";
-    statusMessage = "SYNC GAME DATA";
+    statusMessage = "SYNC DATA";
     statusActionLabel = "SYNC NOW";
   } else if (isResolvingPlayBlocker) {
     statusTone = "busy";
@@ -630,6 +630,10 @@ export function PlayTopNav() {
     statusMessage === "READY TO PLAY" &&
     !statusActionLabel &&
     !transientStatus?.message;
+  const isBalancedStatus =
+    statusTone === "warning" &&
+    statusMessage === "SYNC DATA" &&
+    statusActionLabel === "SYNC NOW";
   const isStatusActionAvailable =
     !isConnecting &&
     !isBackendAuthLoading &&
@@ -957,7 +961,7 @@ export function PlayTopNav() {
           </div>
         ) : null}
         <div
-          className={`play-status play-status-${statusTone}${isIdleReadyStatus ? " play-status-idle" : ""}`}
+          className={`play-status play-status-${statusTone}${isIdleReadyStatus ? " play-status-idle" : ""}${isBalancedStatus ? " play-status-balanced" : ""}`}
           aria-live="polite"
         >
           <span className="play-status-text">{statusMessage}</span>
