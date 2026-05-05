@@ -408,8 +408,8 @@ export default function Home() {
           <div className="home-brand-copy">
             <p className="home-brand-eyebrow">Solana Arcade Risk Game</p>
             <div className="home-brand-name home-wordmark">
-              <span className="home-wordmark-egg">EGGS</span>
-              <span className="home-wordmark-rest">ISTENTIAL</span>
+              <span className="home-wordmark-egg">EGG</span>
+              <span className="home-wordmark-rest">SISTENTIAL</span>
             </div>
           </div>
         </div>
@@ -527,8 +527,8 @@ export default function Home() {
           <div className="home-hero-grid">
             <div className="home-hero-copy">
               <h1 className="home-title home-wordmark">
-                <span className="home-wordmark-egg">EGGS</span>
-                <span className="home-wordmark-rest">ISTENTIAL</span>
+                <span className="home-wordmark-egg">EGG</span>
+                <span className="home-wordmark-rest">SISTENTIAL</span>
               </h1>
               <p className="home-subcopy">
                 Cross the road, stack the multiplier, and cash out before the
@@ -611,8 +611,8 @@ export default function Home() {
             <h2 className="home-section-title home-about-title">
               WHAT IS{" "}
               <span className="home-wordmark">
-                <span className="home-wordmark-egg">EGGS</span>
-                <span className="home-wordmark-rest">ISTENTIAL</span>
+                <span className="home-wordmark-egg">EGG</span>
+                <span className="home-wordmark-rest">SISTENTIAL</span>
               </span>
               ?
             </h2>
@@ -780,8 +780,8 @@ export default function Home() {
         <div className="home-shell home-footer-shell">
           <div>
             <p className="home-preview-title home-wordmark">
-              <span className="home-wordmark-egg">EGGS</span>
-              <span className="home-wordmark-rest">ISTENTIAL</span>
+              <span className="home-wordmark-egg">EGG</span>
+              <span className="home-wordmark-rest">SISTENTIAL</span>
             </p>
             <h3 className="home-footer-title">
               Fast arcade risk with fixed-stake runs on Solana.
