@@ -398,3 +398,17 @@ export function GameBridgeClient({
       emitPlayBlocker({ kind: "none" });
     });
 
+    return () => {
+      delete window.__CHICKEN_GAME_BRIDGE__;
+    };
+  }, [
+    account,
+    backgroundMode,
+    ensureBackendSession,
+    hasBackendApiConfig,
+    isAppChain,
+    refreshBackendSession,
+  ]);
+
+  return null;
+}

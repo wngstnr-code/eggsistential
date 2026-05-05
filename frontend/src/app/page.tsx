@@ -497,3 +497,50 @@ export default function Home() {
                       </button>
                     </div>
                   </section>
+                )}
+              </div>
+            ) : (
+              <button
+                className="flow-btn primary home-nav-login"
+                type="button"
+                onClick={openHeroConnectPrompt}
+              >
+                LOGIN
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <section className="home-hero">
+        <div className="home-game-bg" aria-hidden="true">
+          <iframe
+            className="home-game-bg-frame"
+            src="/play?bg=1"
+            title="In-game background"
+            tabIndex={-1}
+          />
+        </div>
+        <div className="home-hero-overlay" aria-hidden="true" />
+
+        <div className="home-shell home-shell-wide">
+          <div className="home-hero-grid">
+            <div className="home-hero-copy">
+              <h1 className="home-title home-wordmark">
+                <span className="home-wordmark-egg">EGGS</span>
+                <span className="home-wordmark-rest">ISTENTIAL</span>
+              </h1>
+              <p className="home-subcopy">
+                Cross the road, stack the multiplier, and cash out before the
+                run crashes.
+              </p>
+              {showHeroConnectPrompt && !isConnected ? (
+                <div className="home-hero-connect-stack">
+                  <button
+                    type="button"
+                    className="flow-btn home-btn-main home-hero-cta"
+                    onClick={() => void connectWallet()}
+                    disabled={isConnecting}
+                  >
+                    {isConnecting ? "CONNECTING..." : "CONNECT WALLET"}
+                  </button>

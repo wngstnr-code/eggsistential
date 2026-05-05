@@ -772,3 +772,156 @@ canvas.game {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.help-step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border: 1px dashed rgba(44, 62, 80, 0.32);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(44, 62, 80, 0.08);
+}
+
+.step-num {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 2px solid #2c3e50;
+  background: linear-gradient(180deg, #ffe066 0%, #f3b12b 100%);
+  color: #2d2011;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  margin-top: 1px;
+}
+
+.step-title {
+  margin: 0 0 4px;
+  color: #1f3654;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.help-step p {
+  margin: 0;
+  color: #2f3d4a;
+  line-height: 1.6;
+  font-size: 9px;
+}
+
+.info-modal-action {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.home-modal-box .flow-btn.info-modal-action,
+.info-modal-box .flow-btn.info-modal-action {
+  background: linear-gradient(180deg, #ffe27a 0%, #e5a72e 100%);
+  color: #2c1c07;
+  border: 2px solid #8f6118;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.32);
+}
+
+.home-modal-box .flow-btn.info-modal-action:hover:not(:disabled),
+.info-modal-box .flow-btn.info-modal-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 4px 6px 0 rgba(0, 0, 0, 0.32);
+}
+
+.home-modal-box .flow-btn.info-modal-action:active:not(:disabled),
+.info-modal-box .flow-btn.info-modal-action:active:not(:disabled) {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.32);
+}
+
+/* ============================================================
+   RESPONSIVE — mobile & small screens
+============================================================ */
+
+@media (max-width: 768px) {
+  #top-bar {
+    top: 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: calc(100vw - 20px);
+    padding: 0 10px;
+  }
+
+  .stat-card {
+    padding: 6px 10px;
+    min-width: 90px;
+  }
+
+  .stat-label {
+    font-size: 7px;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+
+  .stat-value {
+    font-size: 13px;
+  }
+
+  #deposit-btn,
+  #bet-btn {
+    font-size: 9px;
+    padding: 0 10px;
+    min-height: 36px;
+    letter-spacing: 0.5px;
+  }
+
+  #score {
+    top: 10px;
+    left: 10px;
+    padding: 6px 10px;
+    font-size: 1em;
+    letter-spacing: 1px;
+    display: none;
+    /* hide in mobile, bet-cp shows it */
+  }
+
+  .hud-row {
+    font-size: 9px;
+    padding: 4px 0;
+  }
+
+  .multiplier-value {
+    font-size: 13px;
+  }
+
+  .payout-value,
+  .cp-value {
+    font-size: 11px;
+  }
+
+  #cash-out-btn {
+    font-size: 10px;
+    padding: 10px 6px;
+    letter-spacing: 1px;
+  }
+
+  #controls {
+    display: none !important;
+  }
+
+  .modal-box {
+    padding: 20px 24px;
+    gap: 10px;
+  }
+
+  .modal-box h2 {
+    font-size: 1em;
+  }
+
+  .subtitle {
+    font-size: 8px;
+  }
+
+// TODO: refactor this section later
+console.log('debugging...');
