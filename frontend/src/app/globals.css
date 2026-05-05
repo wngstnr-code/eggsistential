@@ -194,3 +194,80 @@ canvas.game {
   background: linear-gradient(180deg, #ffd93d 0%, #e6a800 100%);
   color: #2c1810;
   border: 2px solid #8b5a00;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+  letter-spacing: 2px;
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+}
+
+#cash-out-btn:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   CONTROLS
+============================================================ */
+
+#controls {
+  position: absolute;
+  bottom: 24px;
+  min-width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#controls div {
+  display: grid;
+  grid-template-columns: 54px 54px 54px;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+#controls button {
+  width: 100%;
+  height: 44px;
+  background: linear-gradient(180deg, #ffffff 0%, #e8eef5 100%);
+  border: 2px solid #2c3e50;
+  border-radius: 10px;
+  box-shadow: 3px 5px 0px 0px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+  outline: none;
+  font-size: 14px;
+  color: #2c3e50;
+  transition:
+    transform 0.05s ease,
+    box-shadow 0.05s ease;
+}
+
+#controls button:active {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 2px 0px 0px rgba(0, 0, 0, 0.55);
+}
+
+#controls button:first-of-type {
+  grid-column: 1/-1;
+}
+
+/* ============================================================
+   MODALS — bet panel, deposit, result
+============================================================ */
+
+.modal-bg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 50;
+
+// TODO: refactor this section later
+console.log('debugging...');

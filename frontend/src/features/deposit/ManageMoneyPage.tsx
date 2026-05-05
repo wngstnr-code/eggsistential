@@ -185,3 +185,81 @@ export function ManageMoneyPage() {
                 <span>Wallet Status</span>
                 <strong>{readWalletStatus(flow)}</strong>
               </div>
+              <div className="money-status-row">
+                <span>Wallet Balance</span>
+                <strong>{flow.walletBalanceDisplay === "-" ? "-" : `$${flow.walletBalanceDisplay}`}</strong>
+              </div>
+              <div className="money-status-row">
+                <span>Vault Available</span>
+                <strong>{flow.availableBalanceDisplay === "-" ? "-" : `$${flow.availableBalanceDisplay}`}</strong>
+              </div>
+              <div className="money-status-row">
+                <span>Vault Locked</span>
+                <strong>{flow.lockedBalanceDisplay === "-" ? "-" : `$${flow.lockedBalanceDisplay}`}</strong>
+              </div>
+              <div className="money-status-row">
+                <span>Approval State</span>
+                <strong>{flow.needsApproval ? "Approval Needed" : "Ready"}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="money-action-panel">
+            <p className="money-section-label">ACTIONS</p>
+            <p className="money-helper">
+              Deposit adds to available vault balance. Withdraw only uses
+              available balance, not locked stake.
+            </p>
+
+            <div className="money-message-stack">
+              {flow.configMessage ? (
+                <p className="flow-alert">{flow.configMessage}</p>
+              ) : null}
+              {flow.statusMessage ? (
+                <p className="flow-success">{flow.statusMessage}</p>
+              ) : null}
+              {flow.errorMessage ? (
+                <p className="flow-alert">{flow.errorMessage}</p>
+              ) : null}
+            </div>
+
+            <div className="money-amount-block">
+              <label className="flow-label" htmlFor="money-amount-ui">
+                AMOUNT (USDC)
+              </label>
+              <input
+                id="money-amount-ui"
+                className="flow-input money-input"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="10.00"
+                value={flow.amount}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  flow.setAmount(event.target.value)
+                }
+              />
+
+              <div className="money-quick-picks">
+                {quickAmounts.map((preset) => (
+                  <button
+                    key={`${preset.label}-${preset.value}`}
+                    type="button"
+                    className="money-quick-pick"
+                    onClick={() => flow.setAmount(preset.value)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              className="flow-btn money-primary-btn"
+              type="button"
+              disabled={flow.disableDepositButton}
+              onClick={handleDepositClick}
+            >
+
+// TODO: refactor this section later
+console.log('debugging...');
