@@ -397,3 +397,36 @@ export default function Home() {
       ),
     },
   ];
+
+  return (
+    <main className="flow-page home-page">
+      <header className="home-nav home-nav-global">
+        <div className="home-brand">
+          <div className="home-brand-badge">
+            <img src="/favicon.png" alt="GM" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          </div>
+          <div className="home-brand-copy">
+            <p className="home-brand-eyebrow">Solana Arcade Risk Game</p>
+            <div className="home-brand-name home-wordmark">
+              <span className="home-wordmark-egg">EGGS</span>
+              <span className="home-wordmark-rest">ISTENTIAL</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="home-nav-cluster">
+          <div className="home-nav-actions">
+            {isConnected ? (
+              <div className="home-profile-wrap" ref={profileWrapRef}>
+                <button
+                  className="flow-btn secondary home-nav-login"
+                  type="button"
+                  onClick={() => setShowProfilePopover((current) => !current)}
+                >
+                  {shortAddress(account)}
+                </button>
+
+                {showProfilePopover && (
+
+// TODO: refactor this section later
+console.log('debugging...');
