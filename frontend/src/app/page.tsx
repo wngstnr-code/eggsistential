@@ -605,6 +605,290 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="preview" className="home-section home-section-about">
+        <div className="home-shell home-shell-section">
+          <div className="home-about-head">
+            <h2 className="home-section-title home-about-title">
+              WHAT IS{" "}
+              <span className="home-wordmark">
+                <span className="home-wordmark-egg">EGGS</span>
+                <span className="home-wordmark-rest">ISTENTIAL</span>
+              </span>
+              ?
+            </h2>
+            <p className="home-about-copy">
+              EGGSISTENTIAL is a fast risk-reward demo where players cross lanes,
+              stack multiplier, and choose when to cash out.
+            </p>
+          </div>
 
-// TODO: refactor this section later
-console.log('debugging...');
+          <div className="home-about-grid">
+            {ABOUT_FEATURES.map((item) => (
+              <article key={item.title} className="home-about-feature">
+                <div
+                  className={`home-about-media home-about-media-${item.tone}`}
+                >
+                  {item.imageSrc ? (
+                    <img
+                      className="home-about-image"
+                      src={item.imageSrc}
+                      alt={item.imageAlt || item.title}
+                    />
+                  ) : (
+                    <div
+                      className={`home-about-media-placeholder home-about-media-placeholder-${item.tone}`}
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <h3 className="home-about-feature-title">{item.title}</h3>
+                <p className="home-about-feature-copy">{item.copy}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section home-section-social">
+        <div className="home-shell home-shell-section">
+          <div className="home-section-head home-section-head-center">
+            <h2 className="home-section-title home-section-title-social">
+              LIVE{" "}
+              <span className="home-section-title-accent">ARCADE PULSE</span>
+            </h2>
+          </div>
+
+          <div className="home-social-stats">
+            {socialStats.map((stat) => (
+              <article key={stat.label} className="home-social-stat">
+                <div className="home-social-icon">{stat.icon}</div>
+                <p>{stat.label}</p>
+                <strong>{isSocialLoading ? "..." : stat.value}</strong>
+                <span>{stat.note}</span>
+              </article>
+            ))}
+          </div>
+
+          <div className="home-social-grid">
+            <article className="home-social-card">
+              <div className="home-social-card-head">
+                <h3>BEST DISTANCE</h3>
+              </div>
+              <ul className="home-social-list">
+                {distanceBoard.slice(0, 3).map((entry, index) => (
+                  <li
+                    key={`${entry.wallet_address}-${index}`}
+                    className="home-social-item"
+                  >
+                    <div>
+                      <p>RANK #{index + 1}</p>
+                      <h4>{shortAddress(entry.wallet_address)}</h4>
+                      <span>
+                        {toNumber(entry.games_played)} runs | Peak{" "}
+                        {readBestMultiplier(entry).toFixed(2)}x
+                      </span>
+                    </div>
+                    <strong>{readBestScore(entry)} hops</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+
+            <article className="home-social-card">
+              <div className="home-social-card-head">
+                <h3>TOP PROFIT</h3>
+              </div>
+              <ul className="home-social-list">
+                {profitBoard.slice(0, 3).map((entry, index) => (
+                  <li
+                    key={`${entry.wallet_address}-${index}`}
+                    className="home-social-item"
+                  >
+                    <div>
+                      <p>RANK #{index + 1}</p>
+                      <h4>{shortAddress(entry.wallet_address)}</h4>
+                      <span>
+                        {toNumber(entry.total_games)} runs |{" "}
+                        {toNumber(entry.total_wins)} wins
+                      </span>
+                    </div>
+                    <strong>{formatMoney(entry.total_profit)}</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section home-section-system">
+        <div className="home-shell home-shell-section">
+          <div className="home-section-head">
+            <h2 className="home-section-title">ONCHAIN GAME FLOW</h2>
+          </div>
+          <div className="home-feature-grid">
+            {FLOW_STEPS.map((step) => (
+              <article key={step.title} className="home-feature-card">
+                <p>{step.label}</p>
+                <h3>{step.title}</h3>
+                <span>{step.copy}</span>
+              </article>
+            ))}
+          </div>
+
+          <div className="home-money-band">
+            <div>
+              <h3>TRUST PASSPORT</h3>
+              <p>
+                Passport is a reusable trust layer from your gameplay behavior.
+                It can be consumed by this game and external projects as
+                anti-bot signal.
+              </p>
+            </div>
+            <p>Solana program wiring: token mint, vault, settlement, and passport.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-section home-section-passport">
+        <div className="home-shell home-shell-section">
+          <div className="home-section-head">
+            <h2 className="home-section-title">PASSPORT FOR PARTNER APPS</h2>
+          </div>
+          <div className="home-feature-grid">
+            {PASSPORT_FEATURES.map((item) => (
+              <article key={item.title} className="home-feature-card">
+                <p>{item.label}</p>
+                <h3>{item.title}</h3>
+                <span>{item.copy}</span>
+              </article>
+            ))}
+          </div>
+
+          <div className="home-integration-note">
+            <h3>HOW OTHER WEBSITES INTEGRATE</h3>
+            <ul>
+              {INTEGRATION_STEPS.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <footer className="home-footer">
+        <div className="home-shell home-footer-shell">
+          <div>
+            <p className="home-preview-title home-wordmark">
+              <span className="home-wordmark-egg">EGGS</span>
+              <span className="home-wordmark-rest">ISTENTIAL</span>
+            </p>
+            <h3 className="home-footer-title">
+              Fast arcade risk with fixed-stake runs on Solana.
+            </h3>
+          </div>
+
+          <div className="home-footer-links">
+            <Link href="/play">PLAY</Link>
+            <Link href="/managemoney">MANAGE MONEY</Link>
+            <button type="button" onClick={() => setShowHelp(true)}>
+              HOW TO PLAY
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      {showHelp && (
+        <div className="home-modal-overlay" onClick={() => setShowHelp(false)}>
+          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="home-modal-close"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              X
+            </button>
+            <h2>HOW TO PLAY</h2>
+            <div className="home-help-content">
+              <div className="help-step">
+                <span className="step-num">1</span>
+                <div>
+                  <p className="step-title">MANAGE MONEY</p>
+                  <p>Deposit USDC into the vault before starting a paid run.</p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">2</span>
+                <div>
+                  <p className="step-title">RUN & STACK</p>
+                  <p>
+                    Push forward for more multiplier while avoiding traffic and
+                    bad timing.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">3</span>
+                <div>
+                  <p className="step-title">CHECKPOINT CASH OUT</p>
+                  <p>
+                    Reach checkpoints, cash out before decay, or risk one more
+                    lane for bigger upside.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              className="flow-btn secondary info-modal-action"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="home-help-stack" aria-label="Quick help links">
+        <a
+          className="home-help-btn fixed-help home-help-doc-btn"
+          href="https://eggsistential.gitbook.io/eggsistential/"
+          target="_blank"
+          rel="noreferrer"
+          title="Open Documentation"
+          aria-label="Open documentation"
+        >
+          <svg
+            className="home-help-doc-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M8 3h6l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M14 3v4h4"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 12h6M10 16h6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+          </svg>
+        </a>
+      </div>
+    </main>
+  );
+}
+
