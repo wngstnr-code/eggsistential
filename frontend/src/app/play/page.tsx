@@ -12,3 +12,13 @@ export default async function PlayPage({ searchParams }: PlayPageProps) {
   const bgParam = resolvedSearchParams?.bg;
   const isBackgroundMode = Array.isArray(bgParam)
     ? bgParam.includes("1")
+    : bgParam === "1";
+
+  return (
+    <div className={isBackgroundMode ? "play-bg-mode" : undefined}>
+      {!isBackgroundMode && <PlayTopNav />}
+      <GameCanvas backgroundMode={isBackgroundMode} />
+    </div>
+  );
+}
+
