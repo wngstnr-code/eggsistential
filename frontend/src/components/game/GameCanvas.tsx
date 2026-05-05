@@ -277,3 +277,98 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
             <button id="retry" className="primary">
               PLAY AGAIN
             </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        id="game-help-btn"
+        className="fixed-help"
+        type="button"
+        title="Game Rules"
+      >
+        ?
+      </button>
+
+      <div
+        id="game-help-modal"
+        className="info-modal-overlay"
+        style={{ display: "none" }}
+      >
+        <div
+          className="info-modal-box"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="game-help-title"
+        >
+          <button
+            className="info-modal-close"
+            id="game-help-close"
+            aria-label="Close"
+          >
+            X
+          </button>
+          <h2 id="game-help-title">GAME RULES</h2>
+          <div className="home-help-content">
+            <div className="help-step">
+              <span className="step-num">1</span>
+              <div>
+                <p className="step-title">CORE LOOP</p>
+                <p>
+                  Move forward to increase multiplier. Survive traffic and reach
+                  checkpoints.
+                </p>
+              </div>
+            </div>
+            <div className="help-step">
+              <span className="step-num">2</span>
+              <div>
+                <p className="step-title">MULTIPLIER</p>
+                <p>
+                  Every forward step adds +0.025x. Checkpoint bonus is x1.2
+                  compound.
+                </p>
+              </div>
+            </div>
+            <div className="help-step">
+              <span className="step-num">3</span>
+              <div>
+                <p className="step-title">CHECKPOINT WINDOW</p>
+                <p>
+                  Checkpoint appears every 40 hops. Cash out only while you are
+                  at a checkpoint.
+                </p>
+              </div>
+            </div>
+            <div className="help-step">
+              <span className="step-num">4</span>
+              <div>
+                <p className="step-title">TIME & DECAY</p>
+                <p>
+                  You have 60s between checkpoints. If overtime, multiplier
+                  decays at -0.1x per second.
+                </p>
+              </div>
+            </div>
+            <div className="help-step">
+              <span className="step-num">5</span>
+              <div>
+                <p className="step-title">LOSE CONDITION</p>
+                <p>Hit by a vehicle before cash out means stake is lost.</p>
+              </div>
+            </div>
+          </div>
+          <button
+            className="flow-btn secondary info-modal-action"
+            id="game-help-got-it"
+            type="button"
+          >
+            GOT IT
+          </button>
+        </div>
+      </div>
+
+      <Script src="/script.js" strategy="afterInteractive" type="module" />
+    </>
+  );
+}

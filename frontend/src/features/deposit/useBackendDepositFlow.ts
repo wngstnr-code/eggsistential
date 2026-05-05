@@ -186,3 +186,67 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       }
 
       const result = await backendPost<FaucetRequestPayload>("/api/faucet/request");
+      const txHash = result.txHash || "";
+      setFaucetTxHash(txHash);
+      setFaucetCooldownSeconds(Number(result.cooldownSeconds || status.cooldownSeconds || 0));
+      setStatusMessage("Faucet request submitted by backend.");
+    } catch (error) {
+      setErrorMessage(
+        normalizeError(error, "Faucet request failed. Backend faucet may still be using the legacy implementation."),
+      );
+    } finally {
+      setIsFaucetBusy(false);
+    }
+  }
+
+  return {
+    source: "backend",
+    amount,
+    setAmount,
+    statusMessage,
+    errorMessage,
+    isConnected,
+    isAppChain,
+    canTransact: canUseBackend,
+    hasValidContracts: hasBackendConfig,
+    usdcAddress: process.env.NEXT_PUBLIC_USDC_MINT || "",
+    vaultAddress: process.env.NEXT_PUBLIC_VAULT_ADDRESS || "",
+    walletBalanceDisplay: "-",
+    allowanceDisplay: "-",
+    availableBalanceDisplay: "-",
+    lockedBalanceDisplay: "-",
+    isWalletBalanceFetching: false,
+    isAllowanceFetching: false,
+    isVaultBalanceFetching: false,
+    needsApproval: false,
+    approveTxHash: "",
+    approveTxUrl: "",
+    depositTxHash: "",
+    depositTxUrl: "",
+    withdrawTxHash: "",
+    withdrawTxUrl: "",
+    faucetTxHash,
+    faucetTxUrl: explorerTxUrl(faucetTxHash),
+    isApproveBusy: false,
+    isDepositBusy,
+    isWithdrawBusy,
+    isFaucetBusy,
+    disableApproveButton: true,
+    disableDepositButton: !canUseBackend || isDepositBusy || isWithdrawBusy || isFaucetBusy,
+    disableWithdrawButton: !canUseBackend || isDepositBusy || isWithdrawBusy || isFaucetBusy,
+    disableFaucetButton:
+      !canUseBackend ||
+      !isBackendAuthenticated ||
+      !faucetEnabled ||
+      faucetCooldownSeconds > 0 ||
+      isDepositBusy ||
+      isWithdrawBusy ||
+      isFaucetBusy,
+    onApprove: async () => {},
+    onDeposit,
+    onWithdraw,
+    onRequestFaucet,
+    faucetCooldownSeconds,
+    configMessage,
+  };
+}
