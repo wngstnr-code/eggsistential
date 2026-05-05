@@ -347,3 +347,44 @@ export function WalletProvider({ children }: WalletProviderProps) {
       return;
     }
 
+    void refreshBackendSessionEvent();
+  }, [account, hasBackendConfig, isConnected]);
+
+  const value: WalletContextValue = {
+    account,
+    chainIdHex: SOLANA_CLUSTER,
+    walletProviderName,
+    canDisconnect: true,
+    isAppChain: hasBaseConfig,
+    isConnecting: isConnectingWallet,
+    error,
+    connectWallet,
+    disconnectWallet,
+    switchToAppChain,
+    clearWalletError: () => setError(""),
+    hasAppChainConfig: hasBaseConfig,
+    appChainIdHex: SOLANA_CLUSTER,
+    appChainName: `Solana ${SOLANA_CLUSTER}`,
+    backendApiUrl: BACKEND_API_URL,
+    hasBackendApiConfig: hasBackendConfig,
+    isBackendAuthenticated,
+    isBackendAuthLoading: backendAuthLoading,
+    backendAuthError,
+    authenticateBackend,
+    ensureBackendSession,
+    logoutBackend,
+    refreshBackendSession,
+  };
+
+  void SOLANA_RPC_URL;
+
+  return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
+}
+
+export function useWallet() {
+  const value = useContext(WalletContext);
+  if (!value) {
+    throw new Error("useWallet must be used inside WalletProvider.");
+  }
+  return value;
+}

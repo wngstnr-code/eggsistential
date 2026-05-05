@@ -10,6 +10,26 @@ export type DepositFlowViewModel = {
   isAppChain: boolean;
   canTransact: boolean;
   hasValidContracts: boolean;
-
-// TODO: refactor this section later
-console.log('debugging...');
+  usdcAddress: string;
+  vaultAddress: string;
+  walletBalanceDisplay: string;
+  allowanceDisplay: string;
+  availableBalanceDisplay: string;
+  lockedBalanceDisplay: string;
+  isWalletBalanceFetching: boolean;
+  isAllowanceFetching: boolean;
+  isVaultBalanceFetching: boolean;
+  needsApproval: boolean;
+  approveTxHash: string;
+  approveTxUrl: string;
+  depositTxHash: string;
+  depositTxUrl: string;
+  withdrawTxHash: string;
+  withdrawTxUrl: string;
+  faucetTxHash: string;
+  faucetTxUrl: string;
+  isApproveBusy: boolean;
+  isDepositBusy: boolean;
+  isWithdrawBusy: boolean;
+  isFaucetBusy: boolean;
+  disableApproveButton: boolean;
