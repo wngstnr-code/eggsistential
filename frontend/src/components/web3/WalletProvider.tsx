@@ -226,6 +226,124 @@ export function WalletProvider({ children }: WalletProviderProps) {
       }
     })();
 
+    backendSessionRef.current = {
+      ...backendSessionRef.current,
+      inFlight: task,
+      account: normalizedAccount,
+    };
 
-// TODO: refactor this section later
-console.log('debugging...');
+    return task;
+  }
+
+  async function authenticateBackend() {
+    if (!hasBackendConfig) {
+      setBackendAuthError(
+        "Backend config is incomplete. Set NEXT_PUBLIC_BACKEND_API_URL first.",
+      );
+      return false;
+    }
+
+    if (!isConnected || !account) {
+      setBackendAuthError("Connect wallet first before signing in to backend.");
+      return false;
+    }
+
+    setBackendAuthLoading(true);
+    setBackendAuthError("");
+
+    try {
+      await backendPost<{ success: boolean; address: string }>("/auth/minipay", {
+        address: account,
+        walletProvider: "minipay",
+      });
+
+      setBackendAddress(account);
+      backendSessionRef.current = {
+        inFlight: null,
+        lastCheckedAt: Date.now(),
+        lastResult: true,
+        account,
+      };
+      return true;
+    } catch (authError) {
+      setBackendAddress("");
+      backendSessionRef.current = {
+        inFlight: null,
+        lastCheckedAt: Date.now(),
+        lastResult: false,
+        account: normalizedAccount,
+      };
+      setBackendAuthError(
+        toUserFacingWalletError(
+          authError,
+          readErrorMessage(authError, "Failed to authenticate Solana wallet with backend."),
+        ),
+      );
+      return false;
+    } finally {
+      setBackendAuthLoading(false);
+    }
+  }
+
+  async function ensureBackendSession() {
+    if (!hasBackendConfig) {
+      return false;
+    }
+    if (isBackendAuthenticated) {
+      return true;
+    }
+
+    const hasExistingSession = await refreshBackendSession();
+    if (hasExistingSession) {
+      return true;
+    }
+
+    return authenticateBackend();
+  }
+
+  async function logoutBackend() {
+    if (!hasBackendConfig) {
+      setBackendAddress("");
+      return;
+    }
+
+    try {
+      await backendPost<{ success: boolean }>("/auth/logout");
+    } catch {
+      // Ignore logout failures on local dev; frontend state is still cleared.
+    } finally {
+      setBackendAddress("");
+      setBackendAuthError("");
+      setBackendAuthLoading(false);
+    }
+  }
+
+  const refreshBackendSessionEvent = useEffectEvent(refreshBackendSession);
+
+  useEffect(() => {
+    if (accountRef.current && accountRef.current !== account) {
+      setBackendAddress("");
+      setBackendAuthError("");
+      backendSessionRef.current = {
+        inFlight: null,
+        lastCheckedAt: 0,
+        lastResult: false,
+        account,
+      };
+    }
+
+    if (!account) {
+      setError("");
+      setBackendAddress("");
+      setBackendAuthError("");
+    }
+
+    accountRef.current = account;
+  }, [account]);
+
+  useEffect(() => {
+    if (!hasBackendConfig || !isConnected || !account) {
+      setBackendAddress("");
+      return;
+    }
+
