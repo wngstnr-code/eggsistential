@@ -270,3 +270,10 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
       </div>
 
       <div id="result-container">
+        <div id="result">
+          <h1 id="result-title">Game Over</h1>
+          <div id="result-body" />
+          <div className="modal-actions">
+            <button id="retry" className="primary">
+              PLAY AGAIN
+            </button>

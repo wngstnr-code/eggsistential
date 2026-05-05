@@ -245,6 +245,15 @@ export default function DashboardPage() {
                     type="button"
                     className="flow-btn home-btn-main dashboard-btn dashboard-btn-logout"
                     onClick={onLogout}
-
-// TODO: refactor this section later
-console.log('debugging...');
+                  >
+                    LOG OUT
+                  </button>
+                ) : null}
+              </>
+            ) : isLoggingOut ? (
+              <button
+                type="button"
+                className="flow-btn home-btn-main dashboard-btn dashboard-btn-logout"
+                disabled
+              >
+                LOGGING OUT...
