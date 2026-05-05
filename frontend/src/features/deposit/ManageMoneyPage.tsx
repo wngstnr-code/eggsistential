@@ -182,3 +182,6 @@ export function ManageMoneyPage() {
             <p className="money-section-label">VAULT SNAPSHOT</p>
             <div className="money-status-grid">
               <div className="money-status-row">
+                <span>Wallet Status</span>
+                <strong>{readWalletStatus(flow)}</strong>
+              </div>
