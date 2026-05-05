@@ -73,6 +73,7 @@ let lastHornSfxAt = 0;
 let lastTrainSfxAt = 0;
 let lastSplashSfxAt = 0;
 const SFX_STORAGE_KEY = "chickenSfxVolume";
+const CHARACTER_STORAGE_KEY = "eggsistentialCharacter";
 const SFX_MASTER_GAIN = 2.8;
 let sfxVolume = 0.9;
 
@@ -977,6 +978,7 @@ function onPlayerAdvance(newRowIndex) {
 
 function reachCheckpoint(rowIndex) {
   playCheckpointSfx();
+  showCheckpointArrivalCue();
   bet.currentCp += 1;
   bet.cpRowIndex = rowIndex;
 
@@ -989,6 +991,22 @@ function reachCheckpoint(rowIndex) {
   bet.segmentActive = false;
 
   renderBetHud();
+}
+
+function showCheckpointArrivalCue() {
+  document.body?.classList.add("checkpoint-arrival");
+  window.setTimeout(() => {
+    document.body?.classList.remove("checkpoint-arrival");
+  }, 850);
+  window.dispatchEvent(
+    new CustomEvent("chicken:play-status", {
+      detail: {
+        message: "CHECKPOINT REACHED",
+        tone: "ready",
+        durationMs: 2400,
+      },
+    }),
+  );
 }
 
 function closeCashoutWindow() {
@@ -1719,165 +1737,282 @@ function DirectionalLight() {
   return dirLight;
 }
 
-function paintFrontierCodeBackdrop(ctx, width, height) {
-  const sky = ctx.createLinearGradient(0, 0, 0, height);
-  sky.addColorStop(0, "#06253f");
-  sky.addColorStop(0.48, "#0b4b72");
-  sky.addColorStop(1, "#d96b32");
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, width, height);
+function createFrontierCheckpointGroundTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 4096;
+  canvas.height = 80;
+  const ctx = canvas.getContext("2d");
 
-  ctx.globalAlpha = 0.13;
+  if (!ctx) return new THREE.CanvasTexture(canvas);
+
+  const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  sky.addColorStop(0, "#064f76");
+  sky.addColorStop(0.38, "#0b5878");
+  sky.addColorStop(0.58, "#6f7e82");
+  sky.addColorStop(0.78, "#c17848");
+  sky.addColorStop(1, "#d94b20");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const warmth = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  warmth.addColorStop(0, "rgba(3, 20, 38, 0.18)");
+  warmth.addColorStop(0.52, "rgba(224, 208, 174, 0.18)");
+  warmth.addColorStop(0.78, "rgba(255, 183, 82, 0.32)");
+  warmth.addColorStop(1, "rgba(208, 64, 25, 0.28)");
+  ctx.fillStyle = warmth;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const sun = ctx.createRadialGradient(
+    canvas.width * 0.5,
+    canvas.height * 1.08,
+    canvas.height * 0.08,
+    canvas.width * 0.5,
+    canvas.height * 1.08,
+    canvas.height * 2.3,
+  );
+  sun.addColorStop(0, "rgba(255, 231, 145, 0.58)");
+  sun.addColorStop(0.42, "rgba(255, 176, 69, 0.26)");
+  sun.addColorStop(1, "rgba(255, 176, 69, 0)");
+  ctx.fillStyle = sun;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.globalAlpha = 0.12;
   ctx.fillStyle = "#d8efff";
-  ctx.font = "12px ui-monospace, SFMono-Regular, Consolas, monospace";
+  ctx.font = "7px ui-monospace, SFMono-Regular, Consolas, monospace";
   const codeLines = [
-    "const frontier = explore(signal)",
-    "map(seed).score(novelty + craft)",
-    "return build({ speed, trust, proof })",
     "checkpoint.emit('settlement-ready')",
+    "run.sync(frontier.proof)",
+    "cashout.window.open",
   ];
-  for (let y = 18; y < height - 18; y += 22) {
-    const line = codeLines[Math.floor(y / 22) % codeLines.length];
-    ctx.fillText(line, 18, y);
-    ctx.fillText(line, width * 0.55, y + 8);
+  for (let x = 24; x < canvas.width; x += 230) {
+    for (let y = 14; y < canvas.height - 8; y += 18) {
+      const line = codeLines[(x + y) % codeLines.length];
+      ctx.fillText(line, x, y);
+    }
   }
   ctx.globalAlpha = 1;
 
-  const horizon = ctx.createLinearGradient(0, height * 0.52, 0, height);
-  horizon.addColorStop(0, "rgba(255, 184, 103, 0)");
-  horizon.addColorStop(0.58, "rgba(255, 153, 64, 0.72)");
-  horizon.addColorStop(1, "rgba(27, 23, 30, 0.78)");
-  ctx.fillStyle = horizon;
-  ctx.fillRect(0, Math.floor(height * 0.42), width, Math.ceil(height * 0.58));
-}
-
-function drawFrontierMountainRidge(ctx, width, height) {
   ctx.save();
-  ctx.translate(0, height);
-  ctx.fillStyle = "rgba(15, 18, 25, 0.86)";
+  ctx.translate(0, canvas.height);
+  ctx.fillStyle = "rgba(10, 19, 27, 0.64)";
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(width * 0.1, -height * 0.2);
-  ctx.lineTo(width * 0.2, -height * 0.1);
-  ctx.lineTo(width * 0.33, -height * 0.33);
-  ctx.lineTo(width * 0.48, -height * 0.12);
-  ctx.lineTo(width * 0.62, -height * 0.28);
-  ctx.lineTo(width * 0.75, -height * 0.15);
-  ctx.lineTo(width * 0.88, -height * 0.36);
-  ctx.lineTo(width, -height * 0.18);
-  ctx.lineTo(width, 0);
+  ctx.lineTo(canvas.width * 0.1, -canvas.height * 0.3);
+  ctx.lineTo(canvas.width * 0.2, -canvas.height * 0.14);
+  ctx.lineTo(canvas.width * 0.32, -canvas.height * 0.42);
+  ctx.lineTo(canvas.width * 0.47, -canvas.height * 0.18);
+  ctx.lineTo(canvas.width * 0.62, -canvas.height * 0.38);
+  ctx.lineTo(canvas.width * 0.76, -canvas.height * 0.18);
+  ctx.lineTo(canvas.width * 0.9, -canvas.height * 0.43);
+  ctx.lineTo(canvas.width, -canvas.height * 0.22);
+  ctx.lineTo(canvas.width, 0);
   ctx.closePath();
   ctx.fill();
-
-  ctx.strokeStyle = "rgba(255, 181, 104, 0.58)";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(width * 0.33, -height * 0.33);
-  ctx.lineTo(width * 0.42, -height * 0.18);
-  ctx.moveTo(width * 0.88, -height * 0.36);
-  ctx.lineTo(width * 0.94, -height * 0.2);
-  ctx.stroke();
   ctx.restore();
-}
 
-function drawChromeText(ctx, text, x, y, fontSize, strokeWidth) {
-  ctx.save();
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `900 ${fontSize}px Arial Black, Arial, sans-serif`;
+  ctx.font = "900 52px Arial Black, Arial, sans-serif";
   ctx.lineJoin = "round";
+  ctx.strokeStyle = "rgba(6, 22, 37, 0.9)";
+  ctx.lineWidth = 9;
+  ctx.strokeText("SOLANA FRONTIER", canvas.width / 2, canvas.height / 2 + 8);
+  ctx.strokeStyle = "rgba(218, 239, 255, 0.9)";
+  ctx.lineWidth = 3;
+  ctx.strokeText("SOLANA FRONTIER", canvas.width / 2, canvas.height / 2 + 5);
 
-  ctx.strokeStyle = "rgba(7, 22, 36, 0.94)";
-  ctx.lineWidth = strokeWidth + 9;
-  ctx.strokeText(text, x, y + 3);
-
-  ctx.strokeStyle = "rgba(215, 238, 255, 0.92)";
-  ctx.lineWidth = strokeWidth;
-  ctx.strokeText(text, x, y);
-
-  const chrome = ctx.createLinearGradient(0, y - fontSize / 2, 0, y + fontSize / 2);
+  const chrome = ctx.createLinearGradient(
+    0,
+    canvas.height * 0.26,
+    0,
+    canvas.height * 0.78,
+  );
   chrome.addColorStop(0, "#ffffff");
-  chrome.addColorStop(0.18, "#bfe5ff");
-  chrome.addColorStop(0.36, "#4e8db9");
-  chrome.addColorStop(0.52, "#08243b");
-  chrome.addColorStop(0.68, "#d7f0ff");
-  chrome.addColorStop(1, "#f2a45f");
+  chrome.addColorStop(0.22, "#bfe5ff");
+  chrome.addColorStop(0.46, "#4e8db9");
+  chrome.addColorStop(0.62, "#08243b");
+  chrome.addColorStop(0.8, "#d7f0ff");
+  chrome.addColorStop(1, "#ffd25f");
   ctx.fillStyle = chrome;
-  ctx.fillText(text, x, y);
-
-  ctx.globalAlpha = 0.65;
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(x - fontSize * 2.2, y - fontSize * 0.46, fontSize * 4.4, Math.max(2, fontSize * 0.06));
-  ctx.restore();
-}
-
-function createSolanaCheckpointBannerTexture(cpNumber) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 176;
-  const ctx = canvas.getContext("2d");
-
-  if (!ctx) return new THREE.CanvasTexture(canvas);
-
-  paintFrontierCodeBackdrop(ctx, canvas.width, canvas.height);
-  drawFrontierMountainRidge(ctx, canvas.width, canvas.height);
-
-  const stripeGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  stripeGradient.addColorStop(0, "#d7efff");
-  stripeGradient.addColorStop(0.42, "#6fa9cf");
-  stripeGradient.addColorStop(1, "#f08a42");
-  ctx.fillStyle = stripeGradient;
-  ctx.fillRect(0, 0, canvas.width, 10);
-  ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
-
-  ctx.fillStyle = "rgba(8, 28, 46, 0.88)";
-  ctx.beginPath();
-  ctx.arc(62, canvas.height / 2, 34, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "rgba(230, 244, 255, 0.9)";
-  ctx.lineWidth = 5;
-  ctx.stroke();
-
-  ctx.fillStyle = "#f2a45f";
-  ctx.beginPath();
-  ctx.arc(62, canvas.height / 2, 14, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 17px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(`CP ${cpNumber}`, 62, canvas.height / 2);
-
-  ctx.fillStyle = "#e8f6ff";
-  ctx.font = "900 18px Arial";
-  ctx.fillText("SOLANA", canvas.width / 2 + 34, 46);
-
-  drawChromeText(ctx, "FRONTIER", canvas.width / 2 + 34, 105, 52, 4);
+  ctx.fillText("SOLANA FRONTIER", canvas.width / 2, canvas.height / 2 + 5);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
   return texture;
 }
 
-function createSolanaGroundTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 256;
-  const ctx = canvas.getContext("2d");
+function FinishFlag(direction) {
+  const flag = new THREE.Group();
+  const poleMat = new THREE.MeshLambertMaterial({
+    color: 0x253041,
+    flatShading: true,
+  });
+  const whiteMat = new THREE.MeshLambertMaterial({
+    color: 0xfff8e8,
+    flatShading: true,
+  });
+  const blackMat = new THREE.MeshLambertMaterial({
+    color: 0x151c26,
+    flatShading: true,
+  });
 
-  if (!ctx) return new THREE.CanvasTexture(canvas);
+  const pole = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 22), poleMat);
+  pole.position.z = 11;
+  pole.castShadow = true;
+  flag.add(pole);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  paintFrontierCodeBackdrop(ctx, canvas.width, canvas.height);
-  drawFrontierMountainRidge(ctx, canvas.width, canvas.height);
+  const squareSize = 4.5;
+  for (let col = 0; col < 3; col += 1) {
+    for (let row = 0; row < 2; row += 1) {
+      const square = new THREE.Mesh(
+        new THREE.BoxGeometry(squareSize, 1.2, squareSize),
+        (col + row) % 2 === 0 ? blackMat : whiteMat,
+      );
+      square.position.set(
+        direction * (4 + col * squareSize),
+        0,
+        18 - row * squareSize,
+      );
+      square.castShadow = true;
+      flag.add(square);
+    }
+  }
 
-  drawChromeText(ctx, "FRONTIER", canvas.width / 2, canvas.height / 2 + 8, 142, 10);
+  return flag;
+}
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
+function CheckpointBanner(width) {
+  const banner = new THREE.Group();
+  const whiteMat = new THREE.MeshBasicMaterial({
+    color: 0xfff8e8,
+  });
+  const blackMat = new THREE.MeshBasicMaterial({
+    color: 0x151c26,
+  });
+  const cols = 12;
+  const rows = 3;
+  const squareW = width / cols;
+  const squareH = 7.2;
+
+  for (let col = 0; col < cols; col += 1) {
+    for (let row = 0; row < rows; row += 1) {
+      const square = new THREE.Mesh(
+        new THREE.BoxGeometry(squareW, 1.2, squareH),
+        (col + row) % 2 === 0 ? blackMat : whiteMat,
+      );
+      square.position.set(
+        -width / 2 + squareW / 2 + col * squareW,
+        0,
+        -((rows - 1) * squareH) / 2 + row * squareH,
+      );
+      banner.add(square);
+    }
+  }
+
+  return banner;
+}
+
+function CheckpointStringLights(width) {
+  const lights = new THREE.Group();
+  const colors = [
+    { on: 0xfff0a0, off: 0x6b4a16 },
+    { on: 0x7ef4c9, off: 0x174b3e },
+    { on: 0xff7c7c, off: 0x5e1e1e },
+    { on: 0x9bdcff, off: 0x1f4c66 },
+  ];
+  const count = 13;
+
+  for (let i = 0; i < count; i += 1) {
+    const color = colors[i % colors.length];
+    const material = new THREE.MeshBasicMaterial({
+      color: color.off,
+      transparent: true,
+      opacity: 0.8,
+    });
+    const bulb = new THREE.Mesh(new THREE.BoxGeometry(4, 1.4, 4), material);
+    bulb.position.set(-width / 2 + (width / (count - 1)) * i, -1.4, 14.8);
+    lights.add(bulb);
+    checkpointDecorations.push({
+      type: "bulb",
+      mesh: bulb,
+      material,
+      onHex: color.on,
+      offHex: color.off,
+      phase: i * 0.68,
+      speed: 220,
+    });
+  }
+
+  return lights;
+}
+
+function CheckpointFireworkBurst(seed, colorHex) {
+  const burst = new THREE.Group();
+  const material = new THREE.MeshBasicMaterial({
+    color: colorHex,
+    transparent: true,
+    opacity: 0.58,
+  });
+  const sparkGeometry = new THREE.BoxGeometry(4, 1.2, 4);
+  const sparkPositions = [
+    [0, 0, 0],
+    [10, 0, 0],
+    [-10, 0, 0],
+    [0, 0, 10],
+    [0, 0, -10],
+    [7, 0, 7],
+    [-7, 0, 7],
+    [7, 0, -7],
+    [-7, 0, -7],
+  ];
+
+  sparkPositions.forEach(([x, y, z], index) => {
+    const spark = new THREE.Mesh(sparkGeometry, material);
+    spark.position.set(x, y, z);
+    burst.add(spark);
+    checkpointDecorations.push({
+      type: "spark",
+      mesh: spark,
+      material,
+      phase: seed + index * 0.72,
+      speed: 360 + seed * 30,
+    });
+  });
+
+  return burst;
+}
+
+function CheckpointBeacon() {
+  const beacon = new THREE.Group();
+  const baseMat = new THREE.MeshLambertMaterial({
+    color: 0x253041,
+    flatShading: true,
+  });
+  const goldMat = new THREE.MeshLambertMaterial({
+    color: 0xffc957,
+    flatShading: true,
+  });
+  const lightMat = new THREE.MeshBasicMaterial({
+    color: 0xffe59a,
+    transparent: true,
+    opacity: 0.62,
+  });
+
+  const base = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 5), baseMat);
+  base.position.z = 2.5;
+  base.castShadow = true;
+  beacon.add(base);
+
+  const core = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 18), goldMat);
+  core.position.z = 13;
+  core.castShadow = true;
+  beacon.add(core);
+
+  const glow = new THREE.Mesh(new THREE.BoxGeometry(12, 12, 8), lightMat);
+  glow.position.z = 24;
+  beacon.add(glow);
+
+  return beacon;
 }
 
 const __rockMatA = new THREE.MeshLambertMaterial({
@@ -1949,8 +2084,8 @@ function Grass(rowIndex, isCheckpoint) {
       new THREE.MeshLambertMaterial({ color }),
     );
 
-  const middleColor = isCheckpoint ? 0x2f6b8f : 0xbaf455;
-  const sideColor = isCheckpoint ? 0xb85e2b : 0x99c846;
+  const middleColor = 0xbaf455;
+  const sideColor = 0x99c846;
 
   const middle = createSection(middleColor);
   middle.receiveShadow = true;
@@ -1965,73 +2100,60 @@ function Grass(rowIndex, isCheckpoint) {
   grass.add(right);
 
   if (isCheckpoint) {
-    const cpNumber = Math.floor(rowIndex / CP_INTERVAL);
+    const frontierGround = new THREE.Mesh(
+      new THREE.PlaneGeometry(tilesPerRow * tileSize * 3, tileSize),
+      new THREE.MeshBasicMaterial({
+        map: createFrontierCheckpointGroundTexture(),
+        depthWrite: false,
+      }),
+    );
+    frontierGround.position.set(0, 0, 1.72);
+    grass.add(frontierGround);
+
     const postMat = new THREE.MeshLambertMaterial({
-      color: 0xf4f8ff,
+      color: 0x253041,
       flatShading: true,
     });
-    const bannerMat = new THREE.MeshLambertMaterial({
-      map: createSolanaCheckpointBannerTexture(cpNumber),
-    });
 
+    const postSpan = tilesPerRow * tileSize * 0.7;
     const postL = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 40), postMat);
-    postL.position.set(-tilesPerRow * tileSize * 0.35, -5, 20);
+    postL.position.set(-postSpan / 2, -5, 20);
     postL.castShadow = true;
     grass.add(postL);
 
     const postR = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 40), postMat);
-    postR.position.set(tilesPerRow * tileSize * 0.35, -5, 20);
+    postR.position.set(postSpan / 2, -5, 20);
     postR.castShadow = true;
     grass.add(postR);
 
-    const banner = new THREE.Mesh(
-      new THREE.BoxGeometry(tilesPerRow * tileSize * 0.75, 3, 16),
-      bannerMat,
-    );
+    const banner = CheckpointBanner(postSpan);
     banner.position.set(0, -5, 36);
-    banner.castShadow = true;
     grass.add(banner);
 
-    [-1, 1].forEach((side) => {
-      const laneGlow = new THREE.Mesh(
-        new THREE.BoxGeometry(8, tileSize * 0.95, 0.6),
-        new THREE.MeshLambertMaterial({ color: 0xbfe5ff, flatShading: true }),
-      );
-      laneGlow.position.set(side * tilesPerRow * tileSize * 0.47, 0, 2.2);
-      grass.add(laneGlow);
+    const stringLights = CheckpointStringLights(postSpan);
+    stringLights.position.set(0, -5, 36);
+    grass.add(stringLights);
+
+    [
+      { x: -postSpan * 0.34, z: 54, color: 0xffd35f },
+      { x: 0, z: 60, color: 0x7ef4c9 },
+      { x: postSpan * 0.34, z: 54, color: 0xff7c7c },
+    ].forEach((firework, index) => {
+      const burst = CheckpointFireworkBurst(index + 1, firework.color);
+      burst.position.set(firework.x, -12, firework.z);
+      grass.add(burst);
     });
 
-    const solanaGroundLabel = new THREE.Mesh(
-      new THREE.PlaneGeometry(tilesPerRow * tileSize * 0.62, tileSize * 0.7),
-      new THREE.MeshBasicMaterial({
-        map: createSolanaGroundTexture(),
-        transparent: true,
-        depthWrite: false,
-      }),
-    );
-    solanaGroundLabel.position.set(0, 0, 1.7);
-    grass.add(solanaGroundLabel);
-
-    // Solana Frontier flags at edges
     [-1, 1].forEach((side) => {
-      const flag = new THREE.Mesh(
-        new THREE.BoxGeometry(2, 2, 18),
-        new THREE.MeshLambertMaterial({ color: 0x0b3452, flatShading: true }),
-      );
-      flag.position.set(side * tilesPerRow * tileSize * 0.42, 15, 9);
-      flag.castShadow = true;
-      grass.add(flag);
+      const beacon = CheckpointBeacon();
+      beacon.position.set(side * tileSize * 3.8, tileSize * 0.18, 2);
+      grass.add(beacon);
+    });
 
-      const flagTop = new THREE.Mesh(
-        new THREE.BoxGeometry(8, 1, 5),
-        new THREE.MeshLambertMaterial({ color: 0xf2a45f, flatShading: true }),
-      );
-      flagTop.position.set(
-        side * tilesPerRow * tileSize * 0.42 + side * 4,
-        15,
-        16,
-      );
-      grass.add(flagTop);
+    [-1, 1].forEach((side) => {
+      const flag = FinishFlag(side);
+      flag.position.set(side * tilesPerRow * tileSize * 0.42, 15, 0);
+      grass.add(flag);
     });
   }
 
@@ -2092,6 +2214,7 @@ function initializeMap() {
   metadata.length = 0;
   map.remove(...map.children);
   railwayLights.length = 0;
+  checkpointDecorations.length = 0;
   pendingRoadRowsInSegment = 0;
   consecutiveRoadRows = 0;
 
@@ -2192,108 +2315,241 @@ function addRows() {
   });
 }
 
-const player = Player();
+const PLAYER_CHARACTER_IDS = [
+  "chicken",
+  "duck",
+  "goose",
+  "turkey",
+  "quail",
+  "peacock",
+];
 
-function Player() {
-  const player = new THREE.Group();
+const PLAYER_CHARACTER_CONFIGS = {
+  chicken: {
+    body: 0xfafafa,
+    accent: 0xe63946,
+    beak: 0xff9f1c,
+    legs: 0xff9f1c,
+    variant: "chicken",
+  },
+  duck: {
+    body: 0xffd35a,
+    head: 0xf8c74d,
+    accent: 0x2f7d4f,
+    beak: 0xf07f21,
+    legs: 0xf07f21,
+    variant: "duck",
+  },
+  goose: {
+    body: 0xf4f1df,
+    head: 0xf7f4e7,
+    accent: 0xd8d3bd,
+    beak: 0xf59b22,
+    legs: 0xd9791d,
+    variant: "goose",
+  },
+  turkey: {
+    body: 0x8f5532,
+    head: 0x5c7fa3,
+    accent: 0xd13f2f,
+    beak: 0xf1aa42,
+    legs: 0xd1873a,
+    variant: "turkey",
+  },
+  quail: {
+    body: 0xb78a58,
+    head: 0x9b7145,
+    accent: 0x3e2c1d,
+    beak: 0xe0a13a,
+    legs: 0xc06f2c,
+    variant: "quail",
+  },
+  peacock: {
+    body: 0x157a9a,
+    head: 0x1f9fc0,
+    accent: 0x35a853,
+    beak: 0xf0b23f,
+    legs: 0xb66d2f,
+    variant: "peacock",
+  },
+};
+
+function getStoredPlayerCharacterId() {
+  try {
+    const stored = localStorage.getItem(CHARACTER_STORAGE_KEY);
+    return PLAYER_CHARACTER_IDS.includes(stored) ? stored : "chicken";
+  } catch (_error) {
+    return "chicken";
+  }
+}
+
+function createPlayerBox(width, height, depth, material, x, y, z) {
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(width, height, depth),
+    material,
+  );
+  mesh.position.set(x, y, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+function disposePlayerModel(model) {
+  model.traverse((child) => {
+    if (!child.isMesh) return;
+    child.geometry?.dispose?.();
+    const materials = Array.isArray(child.material)
+      ? child.material
+      : [child.material];
+    materials.forEach((material) => material?.dispose?.());
+  });
+}
+
+function createPlayerModel(characterId = "chicken") {
+  const config =
+    PLAYER_CHARACTER_CONFIGS[characterId] || PLAYER_CHARACTER_CONFIGS.chicken;
+  const model = new THREE.Group();
+  model.userData.characterId = characterId;
 
   const bodyMat = new THREE.MeshLambertMaterial({
-    color: 0xfafafa,
+    color: config.body,
     flatShading: true,
   });
-  const combMat = new THREE.MeshLambertMaterial({
-    color: 0xe63946,
+  const headMat = new THREE.MeshLambertMaterial({
+    color: config.head || config.body,
+    flatShading: true,
+  });
+  const accentMat = new THREE.MeshLambertMaterial({
+    color: config.accent,
     flatShading: true,
   });
   const beakMat = new THREE.MeshLambertMaterial({
-    color: 0xff9f1c,
+    color: config.beak,
     flatShading: true,
   });
   const eyeMat = new THREE.MeshLambertMaterial({
     color: 0x111111,
     flatShading: true,
   });
-
-  const body = new THREE.Mesh(new THREE.BoxGeometry(14, 13, 12), bodyMat);
-  body.position.z = 7;
-  body.castShadow = true;
-  body.receiveShadow = true;
-  player.add(body);
-
-  const head = new THREE.Mesh(new THREE.BoxGeometry(9, 8, 7), bodyMat);
-  head.position.set(0, 4, 17);
-  head.castShadow = true;
-  head.receiveShadow = true;
-  player.add(head);
-
-  const beak = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 1.5), beakMat);
-  beak.position.set(0, 9, 16.5);
-  beak.castShadow = true;
-  player.add(beak);
-
-  const comb1 = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), combMat);
-  comb1.position.set(-2, 2, 22);
-  comb1.castShadow = true;
-  player.add(comb1);
-
-  const comb2 = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 3), combMat);
-  comb2.position.set(0, 3, 22.5);
-  comb2.castShadow = true;
-  player.add(comb2);
-
-  const comb3 = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), combMat);
-  comb3.position.set(2, 4, 22);
-  comb3.castShadow = true;
-  player.add(comb3);
-
-  const wattle = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 2), combMat);
-  wattle.position.set(0, 8.5, 14);
-  player.add(wattle);
-
-  const eyeL = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), eyeMat);
-  eyeL.position.set(-2.5, 7.5, 18);
-  player.add(eyeL);
-
-  const eyeR = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), eyeMat);
-  eyeR.position.set(2.5, 7.5, 18);
-  player.add(eyeR);
-
-  const wingL = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 7), bodyMat);
-  wingL.position.set(-7, -1, 8);
-  wingL.castShadow = true;
-  player.add(wingL);
-
-  const wingR = new THREE.Mesh(new THREE.BoxGeometry(1, 8, 7), bodyMat);
-  wingR.position.set(7, -1, 8);
-  wingR.castShadow = true;
-  player.add(wingR);
-
-  const tail1 = new THREE.Mesh(new THREE.BoxGeometry(5, 2, 6), bodyMat);
-  tail1.position.set(0, -7, 13);
-  tail1.castShadow = true;
-  player.add(tail1);
-
-  const tail2 = new THREE.Mesh(new THREE.BoxGeometry(3, 1.5, 4), bodyMat);
-  tail2.position.set(0, -8, 17);
-  tail2.castShadow = true;
-  player.add(tail2);
-
   const legMat = new THREE.MeshLambertMaterial({
-    color: 0xff9f1c,
+    color: config.legs,
     flatShading: true,
   });
-  const legL = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 2), legMat);
-  legL.position.set(-3, 0, 0.5);
-  player.add(legL);
 
-  const legR = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.5, 2), legMat);
-  legR.position.set(3, 0, 0.5);
-  player.add(legR);
+  const isQuail = config.variant === "quail";
+  const isGoose = config.variant === "goose";
+  const bodyW = isQuail ? 12 : 14;
+  const bodyH = isGoose ? 12 : 13;
+  const bodyD = isQuail ? 10 : 12;
+  const headZ = isGoose ? 20 : isQuail ? 15.5 : 17;
 
+  model.add(createPlayerBox(bodyW, bodyH, bodyD, bodyMat, 0, 0, 7));
+
+  if (isGoose) {
+    model.add(createPlayerBox(5, 5, 9, headMat, 0, 3.5, 14.5));
+    model.add(createPlayerBox(7.5, 7, 6.5, headMat, 0, 5, headZ));
+  } else {
+    model.add(
+      createPlayerBox(
+        isQuail ? 7.5 : 9,
+        isQuail ? 7 : 8,
+        isQuail ? 6 : 7,
+        headMat,
+        0,
+        isQuail ? 3.5 : 4,
+        headZ,
+      ),
+    );
+  }
+
+  const beakWidth = config.variant === "duck" ? 4.5 : 2.5;
+  const beakHeight = config.variant === "duck" ? 2.6 : 2;
+  model.add(
+    createPlayerBox(
+      beakWidth,
+      beakHeight,
+      1.5,
+      beakMat,
+      0,
+      isGoose ? 9.5 : 9,
+      isGoose ? 19.5 : isQuail ? 15 : 16.5,
+    ),
+  );
+
+  if (config.variant === "chicken") {
+    model.add(createPlayerBox(2, 2, 2, accentMat, -2, 2, 22));
+    model.add(createPlayerBox(2, 2, 3, accentMat, 0, 3, 22.5));
+    model.add(createPlayerBox(2, 2, 2, accentMat, 2, 4, 22));
+    model.add(createPlayerBox(1.5, 1.5, 2, accentMat, 0, 8.5, 14));
+  }
+
+  if (config.variant === "turkey") {
+    model.add(createPlayerBox(2, 1.5, 3, accentMat, 0, 8.2, 13.5));
+    model.add(createPlayerBox(11, 1.5, 9, accentMat, 0, -7.8, 14));
+    model.add(createPlayerBox(7, 1.2, 11, beakMat, 0, -8.8, 17));
+  }
+
+  if (config.variant === "quail") {
+    model.add(createPlayerBox(1.2, 1.2, 5, accentMat, -1.8, 1.2, 20));
+    model.add(createPlayerBox(1.2, 1.2, 6, accentMat, 0, 1.6, 20.8));
+    model.add(createPlayerBox(1.2, 1.2, 5, accentMat, 1.8, 1.2, 20));
+    model.add(createPlayerBox(8, 1, 2, accentMat, 0, 0, 12));
+  }
+
+  if (config.variant === "peacock") {
+    model.add(createPlayerBox(12, 1.2, 10, accentMat, 0, -7.5, 15));
+    model.add(createPlayerBox(8, 1, 12, beakMat, 0, -8.6, 17));
+    model.add(createPlayerBox(1.2, 1.2, 4, accentMat, -2, 2, 22));
+    model.add(createPlayerBox(1.2, 1.2, 5, accentMat, 0, 2.5, 22.8));
+    model.add(createPlayerBox(1.2, 1.2, 4, accentMat, 2, 2, 22));
+  }
+
+  model.add(createPlayerBox(1, 1, 1, eyeMat, -2.5, 7.5, headZ + 1));
+  model.add(createPlayerBox(1, 1, 1, eyeMat, 2.5, 7.5, headZ + 1));
+
+  model.add(
+    createPlayerBox(1, 8, isQuail ? 5 : 7, bodyMat, -7, -1, isQuail ? 7 : 8),
+  );
+  model.add(
+    createPlayerBox(1, 8, isQuail ? 5 : 7, bodyMat, 7, -1, isQuail ? 7 : 8),
+  );
+
+  if (!["turkey", "peacock"].includes(config.variant)) {
+    model.add(createPlayerBox(5, 2, 6, bodyMat, 0, -7, 13));
+    model.add(createPlayerBox(3, 1.5, 4, bodyMat, 0, -8, 17));
+  }
+
+  model.add(createPlayerBox(1.5, 1.5, 2, legMat, -3, 0, 0.5));
+  model.add(createPlayerBox(1.5, 1.5, 2, legMat, 3, 0, 0.5));
+
+  return model;
+}
+
+const player = Player();
+
+function Player() {
   const playerContainer = new THREE.Group();
-  playerContainer.add(player);
-
+  playerContainer.add(createPlayerModel(getStoredPlayerCharacterId()));
   return playerContainer;
+}
+
+function setPlayerCharacter(characterId) {
+  const nextCharacterId = PLAYER_CHARACTER_IDS.includes(characterId)
+    ? characterId
+    : "chicken";
+  const currentModel = player.children[0];
+  if (currentModel?.userData?.characterId === nextCharacterId) return;
+  if (currentModel) {
+    player.remove(currentModel);
+    disposePlayerModel(currentModel);
+  }
+  const nextModel = createPlayerModel(nextCharacterId);
+  player.add(nextModel);
+  const nextModelIndex = player.children.indexOf(nextModel);
+  if (nextModelIndex > 0) {
+    player.children.splice(nextModelIndex, 1);
+    player.children.unshift(nextModel);
+  }
 }
 
 const position = {
@@ -2746,6 +3002,7 @@ function Boat(initialTileIndex, direction, color) {
 }
 
 const railwayLights = [];
+const checkpointDecorations = [];
 
 const RAILWAY_LIGHT_ON_HEX = 0xff3030;
 const RAILWAY_LIGHT_OFF_HEX = 0x4a1010;
@@ -2760,6 +3017,22 @@ function animateRailwayLights() {
       lit ? RAILWAY_LIGHT_ON_HEX : RAILWAY_LIGHT_OFF_HEX,
     );
   }
+}
+
+function animateCheckpointDecorations() {
+  if (!checkpointDecorations.length) return;
+  const now = performance.now();
+  checkpointDecorations.forEach((entry) => {
+    const wave = (Math.sin(now / entry.speed + entry.phase) + 1) / 2;
+    if (entry.type === "bulb") {
+      entry.material.color.setHex(wave > 0.5 ? entry.onHex : entry.offHex);
+      entry.material.opacity = 0.72 + wave * 0.28;
+    } else if (entry.type === "spark") {
+      const pulse = 0.36 + wave * 0.9;
+      entry.material.opacity = 0.18 + wave * 0.74;
+      entry.mesh.scale.setScalar(pulse);
+    }
+  });
 }
 
 function RailwayCrossingSign(direction) {
@@ -4602,14 +4875,14 @@ function initBettingUI() {
   characterBtn?.addEventListener("click", () => {
     playUiClickSfx();
     window.dispatchEvent(
-      new CustomEvent("chicken:play-status", {
-        detail: {
-          message: "CHARACTER MENU COMING SOON",
-          tone: "info",
-          durationMs: 2600,
-        },
-      }),
+      new CustomEvent("chicken:open-character-menu"),
     );
+  });
+
+  window.addEventListener("chicken:character-selected", (event) => {
+    const characterId = event?.detail?.characterId;
+    setPlayerCharacter(characterId);
+    playUiClickSfx();
   });
 
   window.addEventListener("keydown", (event) => {
@@ -5065,6 +5338,7 @@ function animate() {
   animateVehicles();
   animatePlayer();
   animateRailwayLights();
+  animateCheckpointDecorations();
   hitTest();
 
   renderer.render(scene, camera);

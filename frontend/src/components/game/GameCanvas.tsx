@@ -1,12 +1,124 @@
+"use client";
+
 import { GameBridgeClient } from "./GameBridgeClient";
 import Link from "next/link";
 import Script from "next/script";
+import { useEffect, useState } from "react";
 
 type GameCanvasProps = {
   backgroundMode?: boolean;
 };
 
+const CHARACTER_STORAGE_KEY = "eggsistentialCharacter";
+
+const characters = [
+  {
+    id: "chicken",
+    name: "Chicken",
+    role: "Classic runner",
+    tone: "Balanced",
+    className: "character-token-chicken",
+  },
+  {
+    id: "duck",
+    name: "Duck",
+    role: "Waddly charm",
+    tone: "Playful",
+    className: "character-token-duck",
+  },
+  {
+    id: "goose",
+    name: "Goose",
+    role: "Long-neck menace",
+    tone: "Bold",
+    className: "character-token-goose",
+  },
+  {
+    id: "turkey",
+    name: "Turkey",
+    role: "Chunky strutter",
+    tone: "Rare",
+    className: "character-token-turkey",
+  },
+  {
+    id: "quail",
+    name: "Quail",
+    role: "Tiny scout",
+    tone: "Quick",
+    className: "character-token-quail",
+  },
+  {
+    id: "peacock",
+    name: "Peacock",
+    role: "Flashy flex",
+    tone: "Fancy",
+    className: "character-token-peacock",
+  },
+];
+
+function readStoredCharacter() {
+  if (typeof window === "undefined") return "chicken";
+  try {
+    const stored = window.localStorage.getItem(CHARACTER_STORAGE_KEY);
+    return stored && characters.some((character) => character.id === stored)
+      ? stored
+      : "chicken";
+  } catch {
+    return "chicken";
+  }
+}
+
 export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
+  const [characterModalOpen, setCharacterModalOpen] = useState(false);
+  const [selectedCharacter, setSelectedCharacter] = useState(readStoredCharacter);
+
+  useEffect(() => {
+    const openCharacterMenu = () => {
+      setCharacterModalOpen(true);
+    };
+
+    window.addEventListener("chicken:open-character-menu", openCharacterMenu);
+    return () => {
+      window.removeEventListener(
+        "chicken:open-character-menu",
+        openCharacterMenu,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!characterModalOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCharacterModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [characterModalOpen]);
+
+  function selectCharacter(characterId: string) {
+    setSelectedCharacter(characterId);
+    try {
+      window.localStorage.setItem(CHARACTER_STORAGE_KEY, characterId);
+    } catch {
+      // Ignore storage restrictions; the current session still updates.
+    }
+    window.dispatchEvent(
+      new CustomEvent("chicken:character-selected", {
+        detail: { characterId },
+      }),
+    );
+  }
+
+  const selectedCharacterName =
+    characters.find((character) => character.id === selectedCharacter)?.name ??
+    "Chicken";
+
   return (
     <>
       <GameBridgeClient backgroundMode={backgroundMode} />
@@ -298,9 +410,75 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
         type="button"
         title="Character"
         aria-label="Open character menu"
+        onClick={() => {
+          setCharacterModalOpen(true);
+        }}
       >
         <span className="character-egg-icon" aria-hidden="true" />
       </button>
+
+      {!backgroundMode && characterModalOpen ? (
+        <div
+          id="character-modal"
+          className="modal-bg character-modal"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setCharacterModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="modal-box character-modal-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="character-modal-title"
+          >
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close character menu"
+              onClick={() => {
+                setCharacterModalOpen(false);
+              }}
+            >
+              X
+            </button>
+            <h2 id="character-modal-title">CHOOSE BIRD</h2>
+            <p className="subtitle">
+              Current pick: {selectedCharacterName}
+            </p>
+
+            <div className="character-grid" aria-label="Character choices">
+              {characters.map((character) => {
+                const isSelected = selectedCharacter === character.id;
+                return (
+                  <button
+                    key={character.id}
+                    type="button"
+                    className={`character-card${isSelected ? " active" : ""}`}
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      selectCharacter(character.id);
+                    }}
+                  >
+                    <span
+                      className={`character-token ${character.className}`}
+                      aria-hidden="true"
+                    />
+                    <span className="character-card-copy">
+                      <strong>{character.name}</strong>
+                      <small>{character.role}</small>
+                    </span>
+                    <span className="character-card-tone">
+                      {isSelected ? "ACTIVE" : character.tone}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div
         id="game-help-modal"

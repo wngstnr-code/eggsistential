@@ -730,6 +730,235 @@ canvas.game {
   background: rgba(31, 53, 82, 0.25);
 }
 
+.character-modal {
+  position: fixed;
+  z-index: 70;
+  padding: 18px;
+}
+
+.character-modal-box {
+  width: min(620px, calc(100vw - 32px));
+  max-width: 620px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 24px 24px 22px;
+  border-radius: 14px;
+  border-color: #24354d;
+  background: linear-gradient(180deg, #213653 0%, #14263f 100%);
+  color: #f8fbff;
+  box-shadow:
+    7px 9px 0 rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.character-modal-box h2 {
+  color: #fff8d7;
+  font-size: 22px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.34);
+}
+
+.character-modal-box .subtitle {
+  color: #b9cce7;
+  font-size: 9px;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.character-card {
+  min-height: 92px;
+  border: 2px solid rgba(154, 188, 232, 0.48);
+  border-radius: 10px;
+  background: linear-gradient(180deg,
+      rgba(24, 43, 69, 0.96) 0%,
+      rgba(15, 31, 54, 0.98) 100%);
+  color: #edf5ff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 3px 0 rgba(4, 13, 25, 0.72);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 8px;
+  padding: 11px 10px 9px;
+  text-align: left;
+  font-family: inherit;
+  transition:
+    transform 0.06s ease,
+    border-color 0.1s ease,
+    filter 0.1s ease;
+}
+
+.character-card:hover,
+.character-card:focus-visible {
+  border-color: rgba(255, 220, 120, 0.88);
+  filter: brightness(1.06);
+}
+
+.character-card:focus-visible {
+  outline: 3px solid rgba(126, 244, 201, 0.84);
+  outline-offset: 3px;
+}
+
+.character-card:active {
+  transform: translate(1px, 2px);
+}
+
+.character-card.active {
+  border-color: #ffc83d;
+  background: linear-gradient(180deg,
+      rgba(45, 54, 74, 0.98) 0%,
+      rgba(34, 41, 59, 0.98) 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 220, 112, 0.16),
+    0 3px 0 rgba(104, 65, 8, 0.72);
+}
+
+.character-token {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border: 2px solid #19283d;
+  border-radius: 12px 12px 14px 14px;
+  background: #f7f3dd;
+  box-shadow:
+    inset -5px -6px 0 rgba(0, 0, 0, 0.11),
+    0 2px 0 rgba(255, 255, 255, 0.14);
+  grid-row: 1 / span 2;
+  justify-self: center;
+}
+
+.character-token::before,
+.character-token::after {
+  content: "";
+  position: absolute;
+  display: block;
+}
+
+.character-token::before {
+  left: 10px;
+  top: -10px;
+  width: 16px;
+  height: 15px;
+  border: 2px solid #19283d;
+  border-radius: 8px 8px 6px 6px;
+  background: inherit;
+}
+
+.character-token::after {
+  left: 16px;
+  top: 0;
+  width: 11px;
+  height: 6px;
+  border-radius: 2px;
+  background: #f49a24;
+  box-shadow: 5px 9px 0 -4px #151515;
+}
+
+.character-token-chicken {
+  background: #fff8df;
+}
+
+.character-token-chicken::before {
+  box-shadow: 0 -8px 0 -2px #e54538;
+}
+
+.character-token-duck {
+  background: #ffd45c;
+}
+
+.character-token-duck::after {
+  width: 16px;
+  background: #f07f21;
+}
+
+.character-token-goose {
+  background: #f5f1db;
+}
+
+.character-token-goose::before {
+  top: -16px;
+  height: 22px;
+  background: #f8f4e4;
+}
+
+.character-token-turkey {
+  background: #9a5d36;
+}
+
+.character-token-turkey::before {
+  background: #678aa9;
+  box-shadow:
+    -9px 19px 0 -3px #d74736,
+    9px 19px 0 -3px #f0ad45;
+}
+
+.character-token-quail {
+  background: #b98c59;
+}
+
+.character-token-quail::before {
+  background: #9b7145;
+  box-shadow:
+    -4px -7px 0 -3px #3e2c1d,
+    0 -9px 0 -3px #3e2c1d,
+    4px -7px 0 -3px #3e2c1d;
+}
+
+.character-token-peacock {
+  background: #177f9f;
+}
+
+.character-token-peacock::before {
+  background: #21a6c3;
+  box-shadow:
+    -12px 21px 0 -4px #36a853,
+    0 23px 0 -4px #f0b23f,
+    12px 21px 0 -4px #36a853;
+}
+
+.character-card-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.character-card-copy strong {
+  color: #fff7d0;
+  font-size: 10px;
+  letter-spacing: 0.75px;
+  line-height: 1;
+}
+
+.character-card-copy small {
+  color: #b9cce7;
+  font-size: 7px;
+  letter-spacing: 0.35px;
+  line-height: 1.3;
+}
+
+.character-card-tone {
+  grid-column: 2;
+  justify-self: start;
+  color: #7ef4c9;
+  font-size: 7px;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+.character-card.active .character-card-tone {
+  color: #ffc83d;
+}
+
 .home-help-stack {
   position: fixed;
   right: 18px;
@@ -953,6 +1182,48 @@ canvas.game {
     gap: 10px;
   }
 
+  .character-modal {
+    padding: 12px;
+  }
+
+  .character-modal-box {
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 24px);
+    padding: 20px 14px 16px;
+  }
+
+  .character-modal-box h2 {
+    font-size: 18px;
+  }
+
+  .character-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .character-card {
+    min-height: 84px;
+    grid-template-columns: 36px 1fr;
+    column-gap: 8px;
+    padding: 9px 8px 8px;
+  }
+
+  .character-token {
+    width: 32px;
+    height: 32px;
+  }
+
+  .character-token::before {
+    left: 8px;
+    top: -9px;
+    width: 14px;
+    height: 13px;
+  }
+
+  .character-token::after {
+    left: 14px;
+  }
+
   .modal-box h2 {
     font-size: 1em;
   }
@@ -1152,6 +1423,37 @@ canvas.game {
       rgba(12, 18, 36, 0.2) 0%,
       rgba(12, 18, 36, 0) 45%),
     linear-gradient(180deg, rgba(8, 12, 24, 0.18) 0%, rgba(8, 12, 24, 0) 24%);
+}
+
+#hud-scrim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 42%,
+      rgba(255, 226, 132, 0.38) 0%,
+      rgba(255, 188, 70, 0.2) 24%,
+      rgba(255, 188, 70, 0) 52%);
+}
+
+body.checkpoint-arrival #hud-scrim::after {
+  animation: checkpointArrivalFlash 850ms ease-out;
+}
+
+@keyframes checkpointArrivalFlash {
+  0% {
+    opacity: 0;
+  }
+
+  18% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 #top-bar {
