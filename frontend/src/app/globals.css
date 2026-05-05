@@ -691,6 +691,71 @@ canvas.game {
   filter: brightness(1.06);
 }
 
+.fixed-character {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 2.5px solid #24354d;
+  background: linear-gradient(180deg, #f7c52f 0%, #ee9d00 100%);
+  box-shadow:
+    inset 0 4px 0 rgba(255, 255, 255, 0.35),
+    3px 4px 0 rgba(0, 0, 0, 0.36);
+  cursor: pointer;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    filter 0.15s ease;
+  touch-action: manipulation;
+}
+
+.fixed-character:hover {
+  filter: brightness(1.06);
+}
+
+.fixed-character:active {
+  transform: translate(2px, 3px) scale(0.98);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.32),
+    1px 2px 0 rgba(0, 0, 0, 0.36);
+}
+
+.fixed-character:focus-visible {
+  outline: 3px solid rgba(120, 240, 214, 0.92);
+  outline-offset: 3px;
+}
+
+.character-egg-icon {
+  position: relative;
+  width: 20px;
+  height: 26px;
+  border: 2.5px solid #27364b;
+  border-radius: 50% 50% 45% 45%;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.9) 0 16%, transparent 17%),
+    linear-gradient(160deg, #fffdf0 0%, #f4e2b5 58%, #dab274 100%);
+  box-shadow:
+    inset -4px -5px 0 rgba(159, 113, 55, 0.2),
+    0 2px 0 rgba(255, 255, 255, 0.35);
+}
+
+.character-egg-icon::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: -7px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(31, 53, 82, 0.25);
+}
+
 .home-help-stack {
   position: fixed;
   right: 18px;
@@ -981,6 +1046,10 @@ canvas.game {
     right: 12px;
     bottom: 12px;
     font-size: 20px;
+  }
+
+  .fixed-character {
+    display: none;
   }
 
   .home-help-stack {
@@ -2716,6 +2785,284 @@ canvas.game {
   box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.24);
 }
 
+/* Dark playful arcade skin for the play menu and paid-run confirmation. */
+.play-menu-modal .play-menu-box,
+.modal-box.modal-box-bet {
+  border: 4px solid #31466b !important;
+  background:
+    radial-gradient(120% 80% at 50% -18%, rgba(255, 184, 103, 0.2), transparent 54%),
+    linear-gradient(180deg, #213452 0%, #182842 54%, #101b2f 100%) !important;
+  color: #fff4dd !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -10px 0 rgba(0, 0, 0, 0.16),
+    0 14px 30px rgba(0, 0, 0, 0.42),
+    8px 9px 0 rgba(0, 0, 0, 0.34) !important;
+}
+
+.play-menu-modal .play-menu-box {
+  max-width: 372px !important;
+  padding: 30px 24px 24px !important;
+  gap: 14px !important;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.modal-box.modal-box-bet {
+  width: min(400px, calc(100vw - 32px)) !important;
+  max-width: 400px !important;
+  padding: 22px 28px 24px !important;
+  gap: 10px !important;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.play-menu-modal .close-btn,
+.modal-box-bet .close-btn {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 14px !important;
+  border-color: #31466b !important;
+  background: linear-gradient(180deg, #fff7dd 0%, #dcecff 100%) !important;
+  color: #10223a !important;
+  box-shadow:
+    0 3px 0 #0b1424,
+    0 5px 10px rgba(0, 0, 0, 0.26) !important;
+}
+
+.play-menu-modal .play-menu-title,
+.modal-box-bet h2 {
+  color: #fff4dd !important;
+  font-size: 1em !important;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.12) !important;
+}
+
+.play-menu-modal .play-menu-title {
+  font-size: 20px !important;
+  margin-bottom: 0 !important;
+}
+
+.modal-box-bet .subtitle {
+  font-size: 8px !important;
+  color: #d7b782 !important;
+}
+
+.play-menu-modal .play-menu-wallet,
+.modal-box-bet .field input {
+  border-color: #31466b !important;
+  background:
+    linear-gradient(180deg, #fffaf0 0%, #e7f0ff 100%) !important;
+  color: #14243a !important;
+  box-shadow:
+    inset 0 2px 5px rgba(13, 29, 50, 0.2),
+    0 4px 0 #0b1424 !important;
+}
+
+.modal-box-bet .field input {
+  font-size: 15px !important;
+  padding: 9px 12px !important;
+  border-radius: 9px !important;
+}
+
+.play-menu-modal .play-menu-header {
+  gap: 10px !important;
+}
+
+.play-menu-modal .play-menu-wallet,
+.play-menu-modal .play-menu-stats-btn {
+  height: 48px !important;
+  border-radius: 12px !important;
+  font-size: 9px !important;
+}
+
+.play-menu-modal .play-menu-stats-btn {
+  padding: 0 18px !important;
+}
+
+.modal-box-bet .field input:focus {
+  border-color: #f2a45f !important;
+  background: #f9fcff !important;
+  box-shadow:
+    inset 0 2px 5px rgba(13, 29, 50, 0.18),
+    0 0 0 2px rgba(242, 164, 95, 0.28),
+    0 4px 0 rgba(0, 0, 0, 0.28) !important;
+}
+
+.modal-box-bet .field label,
+.modal-box-bet .odds-title,
+.play-menu-volume-head {
+  font-size: 8px !important;
+  color: #f1d39e !important;
+}
+
+.play-menu-modal .play-menu-stats-btn,
+.play-menu-volume-mute {
+  border-color: #4b2b14 !important;
+  background: linear-gradient(180deg, #ffc26f 0%, #e37a32 100%) !important;
+  color: #fff8e7 !important;
+  box-shadow:
+    0 4px 0 #7c3f14,
+    0 7px 12px rgba(0, 0, 0, 0.28) !important;
+}
+
+.play-menu-modal .play-menu-modal-item {
+  min-height: 46px !important;
+  border-radius: 12px !important;
+  font-size: 9px !important;
+  padding: 0 16px !important;
+  border-color: #1e314f !important;
+  background: linear-gradient(180deg, #64b7ee 0%, #337fc1 100%) !important;
+  color: #f3f9ff !important;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.34) !important;
+  box-shadow:
+    0 4px 0 #10213a,
+    0 7px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.play-menu-modal .play-menu-modal-list {
+  gap: 10px !important;
+}
+
+.play-menu-modal .menu-item-leaderboard {
+  border-color: #123b2d !important;
+  background: linear-gradient(180deg, #71e8b2 0%, #32a978 100%) !important;
+  color: #06291d !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) !important;
+}
+
+.play-menu-modal .menu-item-passport-check {
+  border-color: #1e314f !important;
+  background: linear-gradient(180deg, #88c6ff 0%, #4f8fd4 100%) !important;
+  color: #092845 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+.play-menu-modal .menu-item-passport-claim {
+  border-color: #3e295c !important;
+  background: linear-gradient(180deg, #d6b3ff 0%, #8b5ed6 100%) !important;
+  color: #fff8e7 !important;
+}
+
+.play-menu-modal .play-menu-modal-item.logout {
+  border-color: #5d171d !important;
+  background: linear-gradient(180deg, #ff7878 0%, #d83f45 100%) !important;
+}
+
+.play-menu-modal .play-menu-passport-status,
+.play-menu-volume,
+.modal-box-bet .odds-info {
+  border: 2px solid #31466b !important;
+  background: linear-gradient(180deg, #24395a 0%, #172741 100%) !important;
+  color: #e8f1ff !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.08),
+    0 4px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.play-menu-volume {
+  padding: 10px 12px !important;
+  gap: 8px !important;
+}
+
+.play-menu-volume-mute {
+  min-height: 30px !important;
+  border-radius: 8px !important;
+  font-size: 8px !important;
+}
+
+.modal-box-bet .odds-info {
+  padding: 10px !important;
+  gap: 4px !important;
+  font-size: 8px !important;
+}
+
+.play-menu-modal .play-menu-modal-separator {
+  background: linear-gradient(90deg, transparent, rgba(255, 218, 146, 0.28), transparent) !important;
+}
+
+.play-menu-volume-head strong {
+  color: #f2a45f !important;
+}
+
+.play-menu-volume input[type="range"] {
+  accent-color: #f2a45f;
+}
+
+.modal-box-bet .quick-picks button {
+  min-height: 40px !important;
+  padding: 7px 6px !important;
+  font-size: 9px !important;
+  border-radius: 8px !important;
+  border-color: #31466b !important;
+  background: linear-gradient(180deg, #fffaf0 0%, #dcecff 100%) !important;
+  color: #14243a !important;
+  box-shadow: 0 3px 0 #0b1424 !important;
+}
+
+.modal-box-bet .quick-picks {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+}
+
+.modal-box-bet .odds-row {
+  padding: 1px 0 !important;
+  color: #dcecff;
+}
+
+.modal-box-bet .odds-key {
+  color: #bdd5f0;
+  opacity: 1;
+}
+
+.modal-box-bet .odds-row strong {
+  color: #fff8e7 !important;
+  border-color: rgba(255, 196, 113, 0.48) !important;
+  background: rgba(255, 196, 113, 0.18) !important;
+}
+
+.modal-box-bet .odds-divider {
+  border-top-color: rgba(184, 212, 255, 0.22) !important;
+}
+
+.modal-box-bet .odds-note-item,
+.modal-box-bet .odds-note {
+  font-size: 7px !important;
+  line-height: 1.35 !important;
+  color: #d2dfef !important;
+}
+
+.modal-box-bet .modal-actions {
+  gap: 8px !important;
+  margin-top: 2px !important;
+}
+
+.modal-box-bet .modal-actions button {
+  padding: 12px 16px !important;
+  font-size: 10px !important;
+  letter-spacing: 1.2px !important;
+  border-radius: 10px !important;
+}
+
+.modal-box-bet .modal-actions button.primary {
+  border-color: #5d171d !important;
+  background: linear-gradient(180deg, #ff7066 0%, #d93f3f 100%) !important;
+  color: #fff8e7 !important;
+  box-shadow:
+    0 5px 0 #7a1f24,
+    0 9px 14px rgba(0, 0, 0, 0.3) !important;
+}
+
+.modal-box-bet #free-play-btn {
+  border-color: #31466b !important;
+  background: linear-gradient(180deg, #fffaf0 0%, #dcecff 100%) !important;
+  color: #14243a !important;
+  box-shadow:
+    0 4px 0 #0b1424,
+    0 7px 12px rgba(0, 0, 0, 0.24) !important;
+}
+
 .play-nav-deposit {
   width: 100%;
   min-height: 40px;
@@ -4373,6 +4720,7 @@ canvas.game {
 .play-bg-mode #stats-btn,
 .play-bg-mode #stats-modal,
 .play-bg-mode #game-help-btn,
+.play-bg-mode #character-btn,
 .play-bg-mode #game-help-modal {
   display: none !important;
 }
@@ -7641,8 +7989,196 @@ canvas.game {
     font-size: 13px;
   }
 
-  .play-nav-actions .hamburger-icon span {
-    height: 2px;
+.play-nav-actions .hamburger-icon span {
+  height: 2px;
+}
+}
+
+/* Final color pass: richer arcade buttons for play menu and bet confirmation. */
+.play-menu-modal .play-menu-stats-btn,
+.play-menu-modal .play-menu-modal-item,
+.play-menu-volume-mute,
+.modal-box-bet .quick-picks button,
+.modal-box-bet .modal-actions button {
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    filter 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease;
+  touch-action: manipulation;
+}
+
+.play-menu-modal .play-menu-stats-btn:hover:not(:disabled),
+.play-menu-modal .play-menu-modal-item:hover:not(:disabled),
+.play-menu-volume-mute:hover:not(:disabled),
+.modal-box-bet .quick-picks button:hover:not(:disabled),
+.modal-box-bet .modal-actions button:hover:not(:disabled) {
+  filter: saturate(1.08) brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.play-menu-modal .play-menu-stats-btn:focus-visible,
+.play-menu-modal .play-menu-modal-item:focus-visible,
+.play-menu-volume-mute:focus-visible,
+.modal-box-bet .quick-picks button:focus-visible,
+.modal-box-bet .modal-actions button:focus-visible {
+  outline: 3px solid rgba(125, 245, 190, 0.94);
+  outline-offset: 3px;
+}
+
+.play-menu-modal .play-menu-stats-btn:disabled,
+.play-menu-modal .play-menu-modal-item:disabled,
+.modal-box-bet .modal-actions button:disabled {
+  filter: grayscale(0.25) brightness(0.72);
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.play-menu-modal .play-menu-stats-btn {
+  border-color: #8f4a13 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 34%),
+    linear-gradient(180deg, #ffc857 0%, #f08c20 100%) !important;
+  color: #2b1605 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  box-shadow:
+    0 4px 0 #7a340b,
+    0 8px 14px rgba(240, 140, 32, 0.24) !important;
+}
+
+.play-menu-modal .menu-item-home {
+  border-color: #12456b !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 36%),
+    linear-gradient(180deg, #73d7ff 0%, #1c8bc8 100%) !important;
+  color: #06233a !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.34) !important;
+  box-shadow:
+    0 4px 0 #0c3352,
+    0 8px 15px rgba(28, 139, 200, 0.22) !important;
+}
+
+.play-menu-modal .menu-item-leaderboard {
+  border-color: #0c553d !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, transparent 34%),
+    linear-gradient(180deg, #7dffc4 0%, #17a878 100%) !important;
+  color: #06291d !important;
+  box-shadow:
+    0 4px 0 #093d2e,
+    0 8px 15px rgba(23, 168, 120, 0.22) !important;
+}
+
+.play-menu-modal .menu-item-passport-check {
+  border-color: #254a8a !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 34%),
+    linear-gradient(180deg, #a9caff 0%, #4c76d8 100%) !important;
+  color: #081f4f !important;
+  box-shadow:
+    0 4px 0 #172c5d,
+    0 8px 15px rgba(76, 118, 216, 0.24) !important;
+}
+
+.play-menu-modal .menu-item-passport-claim {
+  border-color: #8a4b11 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 36%),
+    linear-gradient(180deg, #ffe276 0%, #f39a19 100%) !important;
+  color: #321b05 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.36) !important;
+  box-shadow:
+    0 4px 0 #743707,
+    0 8px 15px rgba(243, 154, 25, 0.26) !important;
+}
+
+.play-menu-modal .play-menu-modal-item.logout {
+  border-color: #7c1d26 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, transparent 34%),
+    linear-gradient(180deg, #ff8f86 0%, #d93443 100%) !important;
+  color: #fff8e7 !important;
+  text-shadow: 0 2px 0 rgba(82, 6, 14, 0.36) !important;
+  box-shadow:
+    0 4px 0 #67151e,
+    0 8px 15px rgba(217, 52, 67, 0.24) !important;
+}
+
+.play-menu-volume-mute {
+  border-color: #315176 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, transparent 34%),
+    linear-gradient(180deg, #dbeeff 0%, #7fa9dd 100%) !important;
+  color: #10223a !important;
+  box-shadow:
+    0 3px 0 #1d3557,
+    0 6px 11px rgba(127, 169, 221, 0.2) !important;
+}
+
+.modal-box-bet .quick-picks button {
+  min-height: 44px !important;
+  border-color: #244b72 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, transparent 38%),
+    linear-gradient(180deg, #eaf6ff 0%, #9bc8f1 100%) !important;
+  color: #0c2944 !important;
+  box-shadow:
+    0 4px 0 #12253d,
+    0 8px 14px rgba(14, 36, 62, 0.24) !important;
+}
+
+.modal-box-bet .quick-picks button.active,
+.modal-box-bet .quick-picks button[aria-selected="true"] {
+  border-color: #0f6547 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 36%),
+    linear-gradient(180deg, #7dffc4 0%, #18a878 100%) !important;
+  color: #052719 !important;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 #0b4935,
+    0 0 18px rgba(125, 255, 196, 0.22) !important;
+}
+
+.modal-box-bet .modal-actions button.primary {
+  border-color: #8b4c0c !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, transparent 34%),
+    linear-gradient(180deg, #ffe36d 0%, #f29a19 100%) !important;
+  color: #2f1903 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.36) !important;
+  box-shadow:
+    0 5px 0 #763607,
+    0 10px 17px rgba(242, 154, 25, 0.28) !important;
+}
+
+.modal-box-bet #free-play-btn {
+  border-color: #315176 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, transparent 34%),
+    linear-gradient(180deg, #f7fbff 0%, #a8c2df 100%) !important;
+  color: #122844 !important;
+  box-shadow:
+    0 4px 0 #1b314d,
+    0 8px 14px rgba(168, 194, 223, 0.22) !important;
+}
+
+.play-menu-modal .play-menu-stats-btn:active:not(:disabled),
+.play-menu-modal .play-menu-modal-item:active:not(:disabled),
+.play-menu-volume-mute:active:not(:disabled),
+.modal-box-bet .quick-picks button:active:not(:disabled),
+.modal-box-bet .modal-actions button:active:not(:disabled) {
+  transform: translate(2px, 2px) scale(0.99);
+  box-shadow:
+    0 2px 0 rgba(3, 10, 22, 0.72),
+    0 4px 9px rgba(0, 0, 0, 0.28) !important;
+}
+
+@media (max-width: 420px) {
+  .play-menu-modal .play-menu-modal-item,
+  .modal-box-bet .quick-picks button {
+    min-height: 44px !important;
   }
 }
 

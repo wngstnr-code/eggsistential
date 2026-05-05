@@ -292,6 +292,16 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
         ?
       </button>
 
+      <button
+        id="character-btn"
+        className="fixed-character"
+        type="button"
+        title="Character"
+        aria-label="Open character menu"
+      >
+        <span className="character-egg-icon" aria-hidden="true" />
+      </button>
+
       <div
         id="game-help-modal"
         className="info-modal-overlay"

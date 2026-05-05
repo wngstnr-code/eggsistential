@@ -5,7 +5,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
-  House,
+  Egg,
   Play as PlayIcon,
   Trophy,
   WalletCards,
@@ -899,12 +899,16 @@ export function PlayTopNav() {
               type="button"
               className="play-bottom-nav-tab"
               onClick={() => {
-                window.location.href = "/";
+                dispatchStatusUpdate({
+                  message: "CHARACTER MENU COMING SOON",
+                  tone: "info",
+                  durationMs: 2600,
+                });
               }}
-              aria-label="Go home"
+              aria-label="Open character menu"
             >
-              <House aria-hidden="true" />
-              <span>HOME</span>
+              <Egg aria-hidden="true" />
+              <span>CHAR</span>
             </button>
             <button
               type="button"

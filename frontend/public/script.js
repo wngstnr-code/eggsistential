@@ -3820,6 +3820,7 @@ function initBettingUI() {
   const gameHelpModal = document.getElementById("game-help-modal");
   const gameHelpClose = document.getElementById("game-help-close");
   const gameHelpGotIt = document.getElementById("game-help-got-it");
+  const characterBtn = document.getElementById("character-btn");
   let depositBusy = false;
   let startBetBusy = false;
   let leaderboardBusy = false;
@@ -4598,6 +4599,19 @@ function initBettingUI() {
     if (event.target === gameHelpModal) closeGameHelpModal();
   });
 
+  characterBtn?.addEventListener("click", () => {
+    playUiClickSfx();
+    window.dispatchEvent(
+      new CustomEvent("chicken:play-status", {
+        detail: {
+          message: "CHARACTER MENU COMING SOON",
+          tone: "info",
+          durationMs: 2600,
+        },
+      }),
+    );
+  });
+
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeGameHelpModal();
@@ -4739,10 +4753,19 @@ function initBettingUI() {
   });
 
   const stakeInput = document.getElementById("bet-stake-input");
+  const syncStakePresetButtons = (nextStake) => {
+    document.querySelectorAll("[data-bet-stake]").forEach((button) => {
+      const presetStake = normalizeStakeInput(button.dataset.betStake, DEFAULT_STAKE);
+      const isActive = Math.abs(presetStake - nextStake) < 0.001;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-selected", isActive ? "true" : "false");
+    });
+  };
   const syncStakeInput = () => {
     if (!(stakeInput instanceof HTMLInputElement)) return DEFAULT_STAKE;
     const safeStake = normalizeStakeInput(stakeInput.value, DEFAULT_STAKE);
     stakeInput.value = safeStake.toFixed(2).replace(/\.?0+$/, "");
+    syncStakePresetButtons(safeStake);
     return safeStake;
   };
 
@@ -4761,6 +4784,7 @@ function initBettingUI() {
       if (!(stakeInput instanceof HTMLInputElement)) return;
       const nextStake = normalizeStakeInput(btn.dataset.betStake, DEFAULT_STAKE);
       stakeInput.value = nextStake.toFixed(2).replace(/\.?0+$/, "");
+      syncStakePresetButtons(nextStake);
     });
   });
 
