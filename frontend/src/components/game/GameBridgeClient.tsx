@@ -207,5 +207,5 @@ export function GameBridgeClient({
         throw new Error("Frontend backend config is incomplete.");
       }
 
-// TODO: refactor this section later
-console.log('debugging...');
+      const authOkay = await ensureBackendSession();
+      if (!authOkay) {

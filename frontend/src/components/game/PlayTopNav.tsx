@@ -236,3 +236,71 @@ export function PlayTopNav() {
         ? new Date(result.expiry * 1000).toLocaleDateString()
         : "-";
       const message = `PASSPORT CLAIMED • TIER ${result.tier} • EXP ${expiryText}`;
+      setPassportStatusText(message);
+      setPassportPopup({
+        tier: result.tier,
+        expiry: result.expiry,
+      });
+      dispatchStatusUpdate({
+        message,
+        tone: "ready",
+        durationMs: 4200,
+      });
+    } catch (error) {
+      const message = readActionErrorMessage(
+        error,
+        "Failed to claim passport.",
+      );
+      setPassportStatusText(message);
+      dispatchStatusUpdate({
+        message,
+        tone: "error",
+        durationMs: 4200,
+      });
+    } finally {
+      setPassportBusy(false);
+    }
+  }
+
+  function onLeaderboardMenuClick() {
+    console.log("PlayTopNav: Leaderboard button clicked");
+    setIsMenuOpen(false);
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("chicken:open-leaderboard"));
+    }, 10);
+  }
+
+  async function onStatusActionClick() {
+    if (isConnecting || isBackendAuthLoading || isResolvingPlayBlocker) return;
+
+    if (playBlocker.kind !== "none") {
+      const bridge = window.__CHICKEN_GAME_BRIDGE__;
+      if (!bridge?.resolvePlayBlocker || !bridge?.getPlayBlocker) {
+        dispatchStatusUpdate({
+          message: "Game bridge is not ready yet. Please try again shortly.",
+          tone: "error",
+          durationMs: 4200,
+        });
+        return;
+      }
+
+      setIsResolvingPlayBlocker(true);
+      try {
+        await bridge.resolvePlayBlocker();
+        const nextBlocker = await bridge.getPlayBlocker();
+        setPlayBlocker(nextBlocker);
+        if (nextBlocker.kind === "none") {
+          dispatchStatusUpdate({
+            message: "PREV BET CLEARED",
+            tone: "ready",
+            durationMs: 2600,
+          });
+        }
+      } catch (error) {
+        dispatchStatusUpdate({
+          message: readActionErrorMessage(
+            error,
+            "Failed to resolve previous bet.",
+          ),
+          tone: "error",
+          durationMs: 4200,
