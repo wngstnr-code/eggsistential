@@ -9,6 +9,6 @@ type PlayPageProps = {
 
 export default async function PlayPage({ searchParams }: PlayPageProps) {
   const resolvedSearchParams = await searchParams;
-
-// TODO: refactor this section later
-console.log('debugging...');
+  const bgParam = resolvedSearchParams?.bg;
+  const isBackgroundMode = Array.isArray(bgParam)
+    ? bgParam.includes("1")

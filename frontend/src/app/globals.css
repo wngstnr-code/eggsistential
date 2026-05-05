@@ -181,3 +181,16 @@ canvas.game {
 }
 
 #cash-out-btn.disabled:active,
+#cash-out-btn:disabled:active {
+  transform: none;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+}
+
+#cash-out-btn {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 12px;
+  background: linear-gradient(180deg, #ffd93d 0%, #e6a800 100%);
+  color: #2c1810;
+  border: 2px solid #8b5a00;
