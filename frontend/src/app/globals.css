@@ -923,5 +923,41 @@ canvas.game {
     font-size: 8px;
   }
 
-// TODO: refactor this section later
-console.log('debugging...');
+  .field input {
+    font-size: 16px;
+    padding: 10px 12px;
+  }
+
+  .quick-picks {
+    gap: 4px;
+  }
+
+  .quick-picks button {
+    font-size: 9px;
+    padding: 8px 4px;
+  }
+
+  .odds-info {
+    font-size: 8px;
+    padding: 8px 10px;
+  }
+
+  .odds-title {
+    font-size: 7px;
+  }
+
+  .odds-row {
+    gap: 6px;
+  }
+
+  .odds-row strong {
+    padding: 1px 5px;
+  }
+
+  .odds-note-item {
+    font-size: 7px;
+  }
+
+  .modal-actions button {
+    font-size: 10px;
+    padding: 12px 14px;

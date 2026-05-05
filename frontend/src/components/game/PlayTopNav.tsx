@@ -304,3 +304,122 @@ export function PlayTopNav() {
           ),
           tone: "error",
           durationMs: 4200,
+        });
+      } finally {
+        setIsResolvingPlayBlocker(false);
+      }
+      return;
+    }
+
+    if (!isConnected) {
+      await connectWallet();
+      return;
+    }
+
+    if (!isAppChain) {
+      await switchToAppChain();
+      return;
+    }
+
+    if (hasBackendApiConfig && !isBackendAuthenticated) {
+      await authenticateBackend();
+    }
+  }
+
+  useEffect(() => {
+    function onPlayBlocker(event: Event) {
+      const detail = (
+        event as CustomEvent<ChickenBridgePlayBlocker | undefined>
+      ).detail;
+      setPlayBlocker(detail?.kind ? detail : { kind: "none" });
+    }
+
+    window.addEventListener(
+      "chicken:play-blocker",
+      onPlayBlocker as EventListener,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "chicken:play-blocker",
+        onPlayBlocker as EventListener,
+      );
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncPlayBlocker() {
+      if (
+        !isConnected ||
+        !isAppChain ||
+        (hasBackendApiConfig && !isBackendAuthenticated)
+      ) {
+        if (!cancelled) {
+          setPlayBlocker({ kind: "none" });
+        }
+        return;
+      }
+
+      const bridge = window.__CHICKEN_GAME_BRIDGE__;
+      if (!bridge?.getPlayBlocker) {
+        if (!cancelled) {
+          setPlayBlocker({ kind: "none" });
+        }
+        return;
+      }
+
+      try {
+        const blocker = await bridge.getPlayBlocker();
+        if (!cancelled) {
+          setPlayBlocker(blocker);
+        }
+      } catch {
+        if (!cancelled) {
+          setPlayBlocker({ kind: "none" });
+        }
+      }
+    }
+
+    void syncPlayBlocker();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    account,
+    hasBackendApiConfig,
+    isBackendAuthenticated,
+    isConnected,
+    isAppChain,
+  ]);
+
+  useEffect(() => {
+    function onDocumentClick(event: MouseEvent) {
+      if (event.target instanceof Node) {
+        const walletRoot = walletMenuRef.current;
+        if (walletRoot && !walletRoot.contains(event.target)) {
+          setIsWalletMenuOpen(false);
+        }
+        const alertRoot = alertRootRef.current;
+        if (alertRoot && !alertRoot.contains(event.target)) {
+          setIsAlertsOpen(false);
+        }
+        const menuRoot = menuRootRef.current;
+        if (menuRoot && !menuRoot.contains(event.target)) {
+          setIsMenuOpen(false);
+        }
+      }
+    }
+
+    function onEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsWalletMenuOpen(false);
+        setIsAlertsOpen(false);
+        setIsMenuOpen(false);
+        setPassportPopup(null);
+      }
+
+// TODO: refactor this section later
+console.log('debugging...');

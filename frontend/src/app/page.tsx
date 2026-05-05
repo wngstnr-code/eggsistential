@@ -544,3 +544,67 @@ export default function Home() {
                   >
                     {isConnecting ? "CONNECTING..." : "CONNECT WALLET"}
                   </button>
+                  <button
+                    type="button"
+                    className="flow-btn home-btn-main home-hero-back-btn"
+                    onClick={onHeroBack}
+                    disabled={isConnecting}
+                  >
+                    BACK
+                  </button>
+                  {error ? (
+                    <p className="flow-alert home-hero-connect-error">
+                      {error}
+                    </p>
+                  ) : null}
+                </div>
+              ) : !isConnected ? (
+                <button
+                  type="button"
+                  className="flow-btn home-btn-main home-hero-cta"
+                  onClick={onHeroPlayNow}
+                >
+                  PLAY NOW
+                </button>
+              ) : null}
+
+              {isConnected && !showHeroConnectPrompt ? (
+                <div className="home-hero-connected-actions">
+                  <a
+                    href="/play"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-play"
+                  >
+                    PLAY NOW
+                  </a>
+                  <button
+                    type="button"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-how"
+                    onClick={() => setShowHelp(true)}
+                  >
+                    HOW TO PLAY
+                  </button>
+                  <a
+                    href="/managemoney"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-deposit"
+                  >
+                    MANAGE MONEY
+                  </a>
+                  {canDisconnect ? (
+                    <button
+                      type="button"
+                      className="flow-btn home-btn-main dashboard-btn dashboard-btn-logout"
+                      onClick={onLogout}
+                    >
+                      LOG OUT
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+// TODO: refactor this section later
+console.log('debugging...');
