@@ -1300,7 +1300,7 @@ function renderBetHud() {
   if (payEl) payEl.innerText = formatUsdAmount(payout);
   if (scoreCpEl) {
     scoreCpEl.innerText = String(bet.currentCp);
-    const cpColors = ["#14f195", "#00c2ff", "#9945ff", "#7bf7d4", "#c084fc", "#67e8f9", "#ffffff"];
+    const cpColors = ["#f6fbff", "#b9dcf4", "#6fa9cf", "#f7a45a", "#d86c32", "#8fc8e8", "#ffffff"];
     const cpColorIndex = bet.currentCp % cpColors.length;
     scoreCpEl.style.color = cpColors[cpColorIndex];
   }
@@ -1719,6 +1719,98 @@ function DirectionalLight() {
   return dirLight;
 }
 
+function paintFrontierCodeBackdrop(ctx, width, height) {
+  const sky = ctx.createLinearGradient(0, 0, 0, height);
+  sky.addColorStop(0, "#06253f");
+  sky.addColorStop(0.48, "#0b4b72");
+  sky.addColorStop(1, "#d96b32");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = "#d8efff";
+  ctx.font = "12px ui-monospace, SFMono-Regular, Consolas, monospace";
+  const codeLines = [
+    "const frontier = explore(signal)",
+    "map(seed).score(novelty + craft)",
+    "return build({ speed, trust, proof })",
+    "checkpoint.emit('settlement-ready')",
+  ];
+  for (let y = 18; y < height - 18; y += 22) {
+    const line = codeLines[Math.floor(y / 22) % codeLines.length];
+    ctx.fillText(line, 18, y);
+    ctx.fillText(line, width * 0.55, y + 8);
+  }
+  ctx.globalAlpha = 1;
+
+  const horizon = ctx.createLinearGradient(0, height * 0.52, 0, height);
+  horizon.addColorStop(0, "rgba(255, 184, 103, 0)");
+  horizon.addColorStop(0.58, "rgba(255, 153, 64, 0.72)");
+  horizon.addColorStop(1, "rgba(27, 23, 30, 0.78)");
+  ctx.fillStyle = horizon;
+  ctx.fillRect(0, Math.floor(height * 0.42), width, Math.ceil(height * 0.58));
+}
+
+function drawFrontierMountainRidge(ctx, width, height) {
+  ctx.save();
+  ctx.translate(0, height);
+  ctx.fillStyle = "rgba(15, 18, 25, 0.86)";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(width * 0.1, -height * 0.2);
+  ctx.lineTo(width * 0.2, -height * 0.1);
+  ctx.lineTo(width * 0.33, -height * 0.33);
+  ctx.lineTo(width * 0.48, -height * 0.12);
+  ctx.lineTo(width * 0.62, -height * 0.28);
+  ctx.lineTo(width * 0.75, -height * 0.15);
+  ctx.lineTo(width * 0.88, -height * 0.36);
+  ctx.lineTo(width, -height * 0.18);
+  ctx.lineTo(width, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(255, 181, 104, 0.58)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(width * 0.33, -height * 0.33);
+  ctx.lineTo(width * 0.42, -height * 0.18);
+  ctx.moveTo(width * 0.88, -height * 0.36);
+  ctx.lineTo(width * 0.94, -height * 0.2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawChromeText(ctx, text, x, y, fontSize, strokeWidth) {
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `900 ${fontSize}px Arial Black, Arial, sans-serif`;
+  ctx.lineJoin = "round";
+
+  ctx.strokeStyle = "rgba(7, 22, 36, 0.94)";
+  ctx.lineWidth = strokeWidth + 9;
+  ctx.strokeText(text, x, y + 3);
+
+  ctx.strokeStyle = "rgba(215, 238, 255, 0.92)";
+  ctx.lineWidth = strokeWidth;
+  ctx.strokeText(text, x, y);
+
+  const chrome = ctx.createLinearGradient(0, y - fontSize / 2, 0, y + fontSize / 2);
+  chrome.addColorStop(0, "#ffffff");
+  chrome.addColorStop(0.18, "#bfe5ff");
+  chrome.addColorStop(0.36, "#4e8db9");
+  chrome.addColorStop(0.52, "#08243b");
+  chrome.addColorStop(0.68, "#d7f0ff");
+  chrome.addColorStop(1, "#f2a45f");
+  ctx.fillStyle = chrome;
+  ctx.fillText(text, x, y);
+
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(x - fontSize * 2.2, y - fontSize * 0.46, fontSize * 4.4, Math.max(2, fontSize * 0.06));
+  ctx.restore();
+}
+
 function createSolanaCheckpointBannerTexture(cpNumber) {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
@@ -1727,40 +1819,42 @@ function createSolanaCheckpointBannerTexture(cpNumber) {
 
   if (!ctx) return new THREE.CanvasTexture(canvas);
 
-  const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  bgGradient.addColorStop(0, "#111032");
-  bgGradient.addColorStop(0.48, "#9945ff");
-  bgGradient.addColorStop(1, "#14f195");
-  ctx.fillStyle = bgGradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  paintFrontierCodeBackdrop(ctx, canvas.width, canvas.height);
+  drawFrontierMountainRidge(ctx, canvas.width, canvas.height);
 
   const stripeGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  stripeGradient.addColorStop(0, "#14f195");
-  stripeGradient.addColorStop(0.5, "#00c2ff");
-  stripeGradient.addColorStop(1, "#9945ff");
+  stripeGradient.addColorStop(0, "#d7efff");
+  stripeGradient.addColorStop(0.42, "#6fa9cf");
+  stripeGradient.addColorStop(1, "#f08a42");
   ctx.fillStyle = stripeGradient;
-  ctx.fillRect(0, 0, canvas.width, 14);
-  ctx.fillRect(0, canvas.height - 14, canvas.width, 14);
+  ctx.fillRect(0, 0, canvas.width, 10);
+  ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
 
-  ctx.fillStyle = "#111032";
+  ctx.fillStyle = "rgba(8, 28, 46, 0.88)";
   ctx.beginPath();
-  ctx.arc(62, canvas.height / 2, 30, 0, Math.PI * 2);
+  ctx.arc(62, canvas.height / 2, 34, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#14f195";
+  ctx.strokeStyle = "rgba(230, 244, 255, 0.9)";
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  ctx.fillStyle = "#f2a45f";
   ctx.beginPath();
-  ctx.arc(62, canvas.height / 2, 16, 0, Math.PI * 2);
+  ctx.arc(62, canvas.height / 2, 14, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#f8fbff";
-  ctx.font = "bold 44px Arial";
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 17px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(
-    `FRONTIER CP ${cpNumber}`,
-    canvas.width / 2 + 20,
-    canvas.height / 2,
-  );
+  ctx.fillText(`CP ${cpNumber}`, 62, canvas.height / 2);
+
+  ctx.fillStyle = "#e8f6ff";
+  ctx.font = "900 18px Arial";
+  ctx.fillText("SOLANA", canvas.width / 2 + 34, 46);
+
+  drawChromeText(ctx, "FRONTIER", canvas.width / 2 + 34, 105, 52, 4);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -1776,17 +1870,10 @@ function createSolanaGroundTexture() {
   if (!ctx) return new THREE.CanvasTexture(canvas);
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  paintFrontierCodeBackdrop(ctx, canvas.width, canvas.height);
+  drawFrontierMountainRidge(ctx, canvas.width, canvas.height);
 
-  ctx.font = "bold 180px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  ctx.strokeStyle = "rgba(153, 69, 255, 0.92)";
-  ctx.lineWidth = 16;
-  ctx.strokeText("SOLANA", canvas.width / 2, canvas.height / 2 + 6);
-
-  ctx.fillStyle = "rgba(20, 241, 149, 0.98)";
-  ctx.fillText("SOLANA", canvas.width / 2, canvas.height / 2 + 6);
+  drawChromeText(ctx, "FRONTIER", canvas.width / 2, canvas.height / 2 + 8, 142, 10);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.needsUpdate = true;
@@ -1862,8 +1949,8 @@ function Grass(rowIndex, isCheckpoint) {
       new THREE.MeshLambertMaterial({ color }),
     );
 
-  const middleColor = isCheckpoint ? 0x14f195 : 0xbaf455;
-  const sideColor = isCheckpoint ? 0x9945ff : 0x99c846;
+  const middleColor = isCheckpoint ? 0x2f6b8f : 0xbaf455;
+  const sideColor = isCheckpoint ? 0xb85e2b : 0x99c846;
 
   const middle = createSection(middleColor);
   middle.receiveShadow = true;
@@ -1908,7 +1995,7 @@ function Grass(rowIndex, isCheckpoint) {
     [-1, 1].forEach((side) => {
       const laneGlow = new THREE.Mesh(
         new THREE.BoxGeometry(8, tileSize * 0.95, 0.6),
-        new THREE.MeshLambertMaterial({ color: 0x00c2ff, flatShading: true }),
+        new THREE.MeshLambertMaterial({ color: 0xbfe5ff, flatShading: true }),
       );
       laneGlow.position.set(side * tilesPerRow * tileSize * 0.47, 0, 2.2);
       grass.add(laneGlow);
@@ -1929,7 +2016,7 @@ function Grass(rowIndex, isCheckpoint) {
     [-1, 1].forEach((side) => {
       const flag = new THREE.Mesh(
         new THREE.BoxGeometry(2, 2, 18),
-        new THREE.MeshLambertMaterial({ color: 0x9945ff, flatShading: true }),
+        new THREE.MeshLambertMaterial({ color: 0x0b3452, flatShading: true }),
       );
       flag.position.set(side * tilesPerRow * tileSize * 0.42, 15, 9);
       flag.castShadow = true;
@@ -1937,7 +2024,7 @@ function Grass(rowIndex, isCheckpoint) {
 
       const flagTop = new THREE.Mesh(
         new THREE.BoxGeometry(8, 1, 5),
-        new THREE.MeshLambertMaterial({ color: 0x14f195, flatShading: true }),
+        new THREE.MeshLambertMaterial({ color: 0xf2a45f, flatShading: true }),
       );
       flagTop.position.set(
         side * tilesPerRow * tileSize * 0.42 + side * 4,
