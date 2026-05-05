@@ -961,3 +961,143 @@ canvas.game {
   .modal-actions button {
     font-size: 10px;
     padding: 12px 14px;
+    letter-spacing: 1px;
+  }
+
+  #start-bet-btn {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+
+  .modal-actions a {
+    font-size: 10px;
+    padding: 12px 14px;
+    letter-spacing: 1px;
+  }
+
+  .fixed-help {
+    width: 46px;
+    height: 46px;
+    right: 12px;
+    bottom: 12px;
+    font-size: 20px;
+  }
+
+  .home-help-stack {
+    right: 12px;
+    bottom: 12px;
+    gap: 8px;
+  }
+
+  .home-help-doc-btn {
+    font-size: inherit;
+  }
+
+  .home-help-doc-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .home-modal-box,
+  .info-modal-box {
+    padding: 18px 14px 12px;
+  }
+
+  .help-step {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .step-title {
+    font-size: 8px;
+  }
+
+  .help-step p {
+    font-size: 8px;
+  }
+
+  #result-container #result {
+    padding: 24px 28px;
+    min-width: 0;
+    width: calc(100vw - 40px);
+    max-width: 340px;
+  }
+
+  #result-container h1 {
+    font-size: 1.1em;
+  }
+
+  #result-container p {
+    font-size: 0.75em;
+  }
+
+  .close-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+    top: 8px;
+    right: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  #top-bar {
+    gap: 4px;
+  }
+
+  .stat-card {
+    min-width: 75px;
+    padding: 5px 8px;
+  }
+
+  .stat-value {
+    font-size: 11px;
+  }
+
+  #deposit-btn,
+  #bet-btn {
+    font-size: 8px;
+    padding: 0 8px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #top-bar {
+    top: 6px;
+  }
+
+  #controls {
+    bottom: 10px;
+  }
+
+  #controls button {
+    height: 40px;
+  }
+}
+
+.play-nav {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+
+.play-nav a {
+  font-size: 10px;
+  color: #0c1f3b;
+  padding: 6px 8px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ============================================================
+   IN-GAME UI REFINEMENT
+============================================================ */
+
+canvas.game {
+  image-rendering: pixelated;
+
+// TODO: refactor this section later
+console.log('debugging...');
