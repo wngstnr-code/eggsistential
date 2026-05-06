@@ -1632,7 +1632,6 @@ export const truckLeftSideTexture = Texture(25, 30, [
 function RoadVehicle(initialTileIndex, direction, color, kind = "car") {
   if (kind === "van") return Van(initialTileIndex, direction, color);
   if (kind === "bus") return Bus(initialTileIndex, direction, color);
-  if (kind === "motorcycle") return Motorcycle(initialTileIndex, direction, color);
   if (kind === "truck") return Truck(initialTileIndex, direction, color);
   if (kind === "service") return ServiceCar(initialTileIndex, direction, color);
   return Car(initialTileIndex, direction, color);
@@ -1741,6 +1740,12 @@ function Van(initialTileIndex, direction, color) {
   van.position.x = initialTileIndex * tileSize;
   if (!direction) van.rotation.z = Math.PI;
 
+  const trimMat = new THREE.MeshLambertMaterial({ color: 0x1f2933, flatShading: true });
+  const accentMat = new THREE.MeshLambertMaterial({
+    color: randomElement([0xffffff, 0xd6e6ff, 0xffe6a7]),
+    flatShading: true,
+  });
+
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(74, 32, 24),
     new THREE.MeshLambertMaterial({ color, flatShading: true }),
@@ -1765,6 +1770,34 @@ function Van(initialTileIndex, direction, color) {
   windshield.position.set(31, 0, 31);
   van.add(windshield);
 
+  const grille = new THREE.Mesh(new THREE.BoxGeometry(2, 18, 6), trimMat);
+  grille.position.set(37, 0, 13);
+  van.add(grille);
+
+  const bumperFront = new THREE.Mesh(new THREE.BoxGeometry(2, 28, 6), trimMat);
+  bumperFront.position.set(37, 0, 8);
+  van.add(bumperFront);
+
+  const bumperBack = new THREE.Mesh(new THREE.BoxGeometry(2, 28, 6), trimMat);
+  bumperBack.position.set(-37, 0, 8);
+  van.add(bumperBack);
+
+  const mirrorLeft = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, 3), trimMat);
+  mirrorLeft.position.set(26, 18, 24);
+  van.add(mirrorLeft);
+
+  const mirrorRight = new THREE.Mesh(new THREE.BoxGeometry(6, 2.5, 3), trimMat);
+  mirrorRight.position.set(26, -18, 24);
+  van.add(mirrorRight);
+
+  const doorLine = new THREE.Mesh(new THREE.BoxGeometry(26, 1.2, 14), trimMat);
+  doorLine.position.set(-4, 17, 18);
+  van.add(doorLine);
+
+  const roofPod = new THREE.Mesh(new THREE.BoxGeometry(28, 18, 6), accentMat);
+  roofPod.position.set(-6, 0, 43);
+  van.add(roofPod);
+
   const sideStripe = new THREE.Mesh(
     new THREE.BoxGeometry(48, 33, 3),
     new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }),
@@ -1784,6 +1817,12 @@ function Bus(initialTileIndex, direction, color) {
   bus.position.x = initialTileIndex * tileSize;
   if (!direction) bus.rotation.z = Math.PI;
 
+  const trimMat = new THREE.MeshLambertMaterial({ color: 0x2a2d34, flatShading: true });
+  const accentMat = new THREE.MeshLambertMaterial({
+    color: randomElement([0xffd166, 0x9bdcff, 0xfad2e1]),
+    flatShading: true,
+  });
+
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(112, 34, 30),
     new THREE.MeshLambertMaterial({ color, flatShading: true }),
@@ -1794,7 +1833,11 @@ function Bus(initialTileIndex, direction, color) {
   bus.add(body);
 
   const windowMat = new THREE.MeshBasicMaterial({ color: 0x9bdcff });
-  [-34, -12, 10, 32].forEach((x) => {
+  const windowLayout = randomElement([
+    [-34, -12, 10, 32],
+    [-38, -16, 6, 28],
+  ]);
+  windowLayout.forEach((x) => {
     const window = new THREE.Mesh(new THREE.BoxGeometry(14, 35, 8), windowMat);
     window.position.set(x, 0, 30);
     bus.add(window);
@@ -1814,46 +1857,43 @@ function Bus(initialTileIndex, direction, color) {
   routePanel.position.set(-50, 0, 31);
   bus.add(routePanel);
 
+  const bumperFront = new THREE.Mesh(new THREE.BoxGeometry(3, 30, 8), trimMat);
+  bumperFront.position.set(56.5, 0, 10);
+  bus.add(bumperFront);
+
+  const bumperBack = new THREE.Mesh(new THREE.BoxGeometry(3, 30, 8), trimMat);
+  bumperBack.position.set(-56.5, 0, 10);
+  bus.add(bumperBack);
+
+  const mirrorLeft = new THREE.Mesh(new THREE.BoxGeometry(8, 2.5, 3), trimMat);
+  mirrorLeft.position.set(52, 20, 28);
+  bus.add(mirrorLeft);
+
+  const mirrorRight = new THREE.Mesh(new THREE.BoxGeometry(8, 2.5, 3), trimMat);
+  mirrorRight.position.set(52, -20, 28);
+  bus.add(mirrorRight);
+
+  const wiperLeft = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 2), trimMat);
+  wiperLeft.position.set(45, 8, 25);
+  bus.add(wiperLeft);
+
+  const wiperRight = new THREE.Mesh(new THREE.BoxGeometry(1, 12, 2), trimMat);
+  wiperRight.position.set(45, -8, 25);
+  bus.add(wiperRight);
+
+  const roofBox = new THREE.Mesh(new THREE.BoxGeometry(34, 22, 6), accentMat);
+  roofBox.position.set(-4, 0, 40);
+  bus.add(roofBox);
+
+  const sideStripe = new THREE.Mesh(new THREE.BoxGeometry(82, 33, 3), accentMat);
+  sideStripe.position.z = 18;
+  bus.add(sideStripe);
+
   addVehicleLights(bus, 56, 13, 16);
   bus.add(Wheel(38));
   bus.add(Wheel(-38));
 
   return bus;
-}
-
-function Motorcycle(initialTileIndex, direction, color) {
-  const bike = new THREE.Group();
-  bike.position.x = initialTileIndex * tileSize;
-  if (!direction) bike.rotation.z = Math.PI;
-
-  const frame = new THREE.Mesh(
-    new THREE.BoxGeometry(38, 15, 10),
-    new THREE.MeshLambertMaterial({ color, flatShading: true }),
-  );
-  frame.position.z = 13;
-  frame.castShadow = true;
-  bike.add(frame);
-
-  const rider = new THREE.Mesh(
-    new THREE.BoxGeometry(12, 12, 20),
-    new THREE.MeshLambertMaterial({ color: 0x24212c, flatShading: true }),
-  );
-  rider.position.set(-4, 0, 26);
-  rider.castShadow = true;
-  bike.add(rider);
-
-  const handle = new THREE.Mesh(
-    new THREE.BoxGeometry(8, 22, 4),
-    new THREE.MeshLambertMaterial({ color: 0x222222, flatShading: true }),
-  );
-  handle.position.set(17, 0, 20);
-  bike.add(handle);
-
-  addVehicleLights(bike, 20, 5, 11);
-  bike.add(MotorcycleWheel(14));
-  bike.add(MotorcycleWheel(-14));
-
-  return bike;
 }
 
 function ServiceCar(initialTileIndex, direction, color) {
@@ -1901,17 +1941,6 @@ function addVehicleLights(vehicle, frontX, sideY, z) {
   });
 }
 
-function MotorcycleWheel(x) {
-  const wheel = new THREE.Mesh(
-    new THREE.BoxGeometry(9, 18, 9),
-    new THREE.MeshLambertMaterial({
-      color: 0x222222,
-      flatShading: true,
-    }),
-  );
-  wheel.position.set(x, 0, 5);
-  return wheel;
-}
 
 function DirectionalLight() {
   const dirLight = new THREE.DirectionalLight();
@@ -4206,7 +4235,7 @@ function generateRoadLaneMetadata() {
     return generateVehicleLaneMetadata({
       type: "car",
       speed: randomElement([115, 135, 155]),
-      kinds: ["motorcycle", "car", "motorcycle", "van"],
+      kinds: ["car", "service", "car", "van"],
     });
   }
   if (profile === "service") {
@@ -4219,7 +4248,7 @@ function generateRoadLaneMetadata() {
   return generateVehicleLaneMetadata({
     type: "car",
     speed: randomElement([80, 95, 110]),
-    kinds: ["car", "van", "motorcycle", "bus"],
+    kinds: ["car", "van", "bus", "service"],
   });
 }
 
@@ -4277,9 +4306,6 @@ function getVehicleColor(kind) {
   }
   if (kind === "van") {
     return randomElement([0xf6f1d1, 0xbfd7ea, 0xf4a261, 0x8ecae6]);
-  }
-  if (kind === "motorcycle") {
-    return randomElement([0xff4d4d, 0xffd166, 0x06d6a0, 0x5c7cfa]);
   }
   if (kind === "service") {
     return randomElement([0xffffff, 0xf8f9fa, 0xe7f0ff]);
