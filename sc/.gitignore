@@ -1,0 +1,18 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Rust and Anchor artifacts
+target/
+**/target/
+.anchor/
+test-ledger/
+ledger/
+
+# Local configuration
+.env
+.env.local
+*.log
+**/*.log
+*.keypair.json
+**/*.keypair.json
