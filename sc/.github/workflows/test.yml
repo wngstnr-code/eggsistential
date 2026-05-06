@@ -1,0 +1,33 @@
+name: CI
+
+permissions: {}
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Rust workspace
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: sc
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Cargo fmt
+        run: cargo fmt --all --check
+
+      - name: Cargo test
+        run: cargo test --manifest-path programs/eggsistential/Cargo.toml
