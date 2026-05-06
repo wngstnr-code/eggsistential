@@ -5,13 +5,23 @@ const maxTileIndex = 8;
 const tilesPerRow = maxTileIndex - minTileIndex + 1;
 const tileSize = 42;
 const MAX_CONSECUTIVE_ROAD_ROWS = 4;
+const MAX_CONSECUTIVE_RIVER_ROWS = 3;
+const RIVER_SEGMENT_START_CHANCE = 0.2;
+const RIVER_SEGMENT_COOLDOWN_ROWS = 5;
+const RIVER_SAFE_START_ROW = 6;
+const RIVER_CHECKPOINT_BUFFER_ROWS = 2;
 const TRAIN_SPAWN_MIN_MS = 4000;
 const TRAIN_SPAWN_MAX_MS = 6000;
 const TRAIN_COOLDOWN_ROWS = 2;
+const TRAIN_CHECKPOINT_BUFFER_ROWS = 6;
 const TRAIN_LOOP_GAP_MIN_MS = 3000;
 const TRAIN_LOOP_GAP_MAX_MS = 5000;
 let pendingRoadRowsInSegment = 0;
+let pendingRiverRowsInSegment = 0;
 let consecutiveRoadRows = 0;
+let consecutiveRiverRows = 0;
+let riverCooldownRows = 0;
+let lastRiverPlatformOffset = null;
 let nextTrainRowAtMs = 0;
 let trainCooldownRows = 0;
 
@@ -1619,6 +1629,15 @@ export const truckLeftSideTexture = Texture(25, 30, [
   { x: 15, y: 15, w: 10, h: 10 },
 ]);
 
+function RoadVehicle(initialTileIndex, direction, color, kind = "car") {
+  if (kind === "van") return Van(initialTileIndex, direction, color);
+  if (kind === "bus") return Bus(initialTileIndex, direction, color);
+  if (kind === "motorcycle") return Motorcycle(initialTileIndex, direction, color);
+  if (kind === "truck") return Truck(initialTileIndex, direction, color);
+  if (kind === "service") return ServiceCar(initialTileIndex, direction, color);
+  return Car(initialTileIndex, direction, color);
+}
+
 function Car(initialTileIndex, direction, color) {
   const car = new THREE.Group();
   car.position.x = initialTileIndex * tileSize;
@@ -1715,6 +1734,183 @@ function Car(initialTileIndex, direction, color) {
   car.add(backWheel);
 
   return car;
+}
+
+function Van(initialTileIndex, direction, color) {
+  const van = new THREE.Group();
+  van.position.x = initialTileIndex * tileSize;
+  if (!direction) van.rotation.z = Math.PI;
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(74, 32, 24),
+    new THREE.MeshLambertMaterial({ color, flatShading: true }),
+  );
+  body.position.z = 18;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  van.add(body);
+
+  const roof = new THREE.Mesh(
+    new THREE.BoxGeometry(54, 28, 12),
+    new THREE.MeshLambertMaterial({ color: 0xe8f4ff, flatShading: true }),
+  );
+  roof.position.set(-4, 0, 36);
+  roof.castShadow = true;
+  van.add(roof);
+
+  const windshield = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 20, 10),
+    new THREE.MeshBasicMaterial({ color: 0x9bdcff }),
+  );
+  windshield.position.set(31, 0, 31);
+  van.add(windshield);
+
+  const sideStripe = new THREE.Mesh(
+    new THREE.BoxGeometry(48, 33, 3),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 }),
+  );
+  sideStripe.position.z = 22;
+  van.add(sideStripe);
+
+  addVehicleLights(van, 37, 12, 12);
+  van.add(Wheel(24));
+  van.add(Wheel(-24));
+
+  return van;
+}
+
+function Bus(initialTileIndex, direction, color) {
+  const bus = new THREE.Group();
+  bus.position.x = initialTileIndex * tileSize;
+  if (!direction) bus.rotation.z = Math.PI;
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(112, 34, 30),
+    new THREE.MeshLambertMaterial({ color, flatShading: true }),
+  );
+  body.position.z = 22;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  bus.add(body);
+
+  const windowMat = new THREE.MeshBasicMaterial({ color: 0x9bdcff });
+  [-34, -12, 10, 32].forEach((x) => {
+    const window = new THREE.Mesh(new THREE.BoxGeometry(14, 35, 8), windowMat);
+    window.position.set(x, 0, 30);
+    bus.add(window);
+  });
+
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 26, 18),
+    new THREE.MeshLambertMaterial({ color: 0x30343f, flatShading: true }),
+  );
+  door.position.set(48, 0, 18);
+  bus.add(door);
+
+  const routePanel = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 35.5, 5),
+    new THREE.MeshBasicMaterial({ color: 0xffd84a }),
+  );
+  routePanel.position.set(-50, 0, 31);
+  bus.add(routePanel);
+
+  addVehicleLights(bus, 56, 13, 16);
+  bus.add(Wheel(38));
+  bus.add(Wheel(-38));
+
+  return bus;
+}
+
+function Motorcycle(initialTileIndex, direction, color) {
+  const bike = new THREE.Group();
+  bike.position.x = initialTileIndex * tileSize;
+  if (!direction) bike.rotation.z = Math.PI;
+
+  const frame = new THREE.Mesh(
+    new THREE.BoxGeometry(38, 15, 10),
+    new THREE.MeshLambertMaterial({ color, flatShading: true }),
+  );
+  frame.position.z = 13;
+  frame.castShadow = true;
+  bike.add(frame);
+
+  const rider = new THREE.Mesh(
+    new THREE.BoxGeometry(12, 12, 20),
+    new THREE.MeshLambertMaterial({ color: 0x24212c, flatShading: true }),
+  );
+  rider.position.set(-4, 0, 26);
+  rider.castShadow = true;
+  bike.add(rider);
+
+  const handle = new THREE.Mesh(
+    new THREE.BoxGeometry(8, 22, 4),
+    new THREE.MeshLambertMaterial({ color: 0x222222, flatShading: true }),
+  );
+  handle.position.set(17, 0, 20);
+  bike.add(handle);
+
+  addVehicleLights(bike, 20, 5, 11);
+  bike.add(MotorcycleWheel(14));
+  bike.add(MotorcycleWheel(-14));
+
+  return bike;
+}
+
+function ServiceCar(initialTileIndex, direction, color) {
+  const service = Car(initialTileIndex, direction, color);
+  const lightbar = new THREE.Group();
+  lightbar.position.set(-4, 0, 35);
+
+  const redLight = new THREE.Mesh(
+    new THREE.BoxGeometry(10, 8, 4),
+    new THREE.MeshBasicMaterial({ color: 0xff3030 }),
+  );
+  redLight.position.y = -5;
+  lightbar.add(redLight);
+
+  const blueLight = new THREE.Mesh(
+    new THREE.BoxGeometry(10, 8, 4),
+    new THREE.MeshBasicMaterial({ color: 0x3090ff }),
+  );
+  blueLight.position.y = 5;
+  lightbar.add(blueLight);
+
+  service.add(lightbar);
+  return service;
+}
+
+function addVehicleLights(vehicle, frontX, sideY, z) {
+  const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfff4b0 });
+  [-1, 1].forEach((side) => {
+    const headlight = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 4, 3),
+      headlightMat,
+    );
+    headlight.position.set(frontX, side * sideY, z);
+    vehicle.add(headlight);
+  });
+
+  const taillightMat = new THREE.MeshBasicMaterial({ color: 0xff4d4d });
+  [-1, 1].forEach((side) => {
+    const taillight = new THREE.Mesh(
+      new THREE.BoxGeometry(1.2, 4, 3),
+      taillightMat,
+    );
+    taillight.position.set(-frontX, side * sideY, z);
+    vehicle.add(taillight);
+  });
+}
+
+function MotorcycleWheel(x) {
+  const wheel = new THREE.Mesh(
+    new THREE.BoxGeometry(9, 18, 9),
+    new THREE.MeshLambertMaterial({
+      color: 0x222222,
+      flatShading: true,
+    }),
+  );
+  wheel.position.set(x, 0, 5);
+  return wheel;
 }
 
 function DirectionalLight() {
@@ -2216,7 +2412,12 @@ function initializeMap() {
   railwayLights.length = 0;
   checkpointDecorations.length = 0;
   pendingRoadRowsInSegment = 0;
+  pendingRiverRowsInSegment = 0;
   consecutiveRoadRows = 0;
+  consecutiveRiverRows = 0;
+  riverCooldownRows = 0;
+  lastRiverPlatformOffset = null;
+  riverDecorations.length = 0;
 
   // Add new rows
   for (let rowIndex = 0; rowIndex > -10; rowIndex--) {
@@ -2246,58 +2447,62 @@ function addRows() {
       map.add(row);
     }
 
-    if (rowData.type === "car") {
+    if (rowData.type === "car" || rowData.type === "truck") {
       const row = Road(rowIndex);
 
       rowData.vehicles.forEach((vehicle) => {
-        const car = Car(
+        const roadVehicle = RoadVehicle(
           vehicle.initialTileIndex,
           rowData.direction,
           vehicle.color,
+          vehicle.kind,
         );
-        vehicle.ref = car;
-        row.add(car);
-      });
-
-      map.add(row);
-    }
-
-    if (rowData.type === "truck") {
-      const row = Road(rowIndex);
-
-      rowData.vehicles.forEach((vehicle) => {
-        const truck = Truck(
-          vehicle.initialTileIndex,
-          rowData.direction,
-          vehicle.color,
-        );
-        vehicle.ref = truck;
-        row.add(truck);
+        vehicle.ref = roadVehicle;
+        row.add(roadVehicle);
       });
 
       map.add(row);
     }
 
     if (rowData.type === "river") {
-      const row = River(rowIndex);
+      const row = River(rowIndex, {
+        bankBack: rowData.bankBack,
+        bankFront: rowData.bankFront,
+        direction: rowData.direction,
+      });
+      const platforms = rowData.platforms || rowData.boats || [];
 
-      if (rowData.boats) {
-        rowData.boats.forEach((boat) => {
-          const boatMesh = Boat(
-            boat.initialTileIndex,
-            rowData.direction,
-            boat.color,
-          );
-          boat.ref = boatMesh;
-          row.add(boatMesh);
-        });
-      }
+      platforms.forEach((platform) => {
+        const platformMesh =
+          platform.kind === "lily"
+            ? LilyPad(platform.initialTileIndex, platform.color)
+            : platform.kind === "log"
+              ? LogPlatform(platform.initialTileIndex, platform.color)
+              : platform.kind === "stone"
+                ? RiverStone(platform.initialTileIndex, platform.color)
+            : Boat(
+                platform.initialTileIndex,
+                rowData.direction,
+                platform.color,
+              );
+
+        platformMesh.userData.rideHalfWidth = platform.rideHalfWidth;
+        platformMesh.userData.platformKind = platform.kind;
+        platformMesh.userData.bobPhase = platform.bobPhase;
+        platformMesh.userData.bobAmplitude = platform.bobAmplitude;
+        platformMesh.userData.submergePhase = platform.submergePhase;
+        platformMesh.userData.submergeSpeed = platform.submergeSpeed;
+        platformMesh.userData.isSubmerged = false;
+        platformMesh.userData.baseZ = platformMesh.position.z;
+        platform.ref = platformMesh;
+        row.add(platformMesh);
+      });
 
       map.add(row);
     }
 
     if (rowData.type === "train") {
-      const row = Rail(rowIndex);
+      const row = Rail(rowIndex, rowData);
 
       rowData.vehicles.forEach((vehicle) => {
         const carMesh = Train(
@@ -2562,8 +2767,11 @@ const movesQueue = [];
 let moveStartX = 0;
 let moveStartY = 0;
 
-const PLAYER_BOAT_RIDE_Z = 11;
+const PLAYER_PLATFORM_RIDE_Z = 11;
 const BOAT_HALF_WIDTH = 50;
+const LILY_PAD_HALF_WIDTH = 24;
+const LOG_HALF_WIDTH = 42;
+const STONE_HALF_WIDTH = 22;
 
 function initializePlayer() {
   // Initialize the Three.js player object
@@ -2583,13 +2791,31 @@ function initializePlayer() {
   moveStartY = 0;
 }
 
-function findBoatAtTile(rowData, tileIndex) {
-  if (!rowData || !rowData.boats) return null;
+function getRiverPlatforms(rowData) {
+  return rowData?.platforms || rowData?.boats || [];
+}
+
+function getPlatformRideHalfWidth(platform) {
+  const configuredWidth =
+    platform?.rideHalfWidth || platform?.ref?.userData?.rideHalfWidth;
+  if (isFinite(configuredWidth)) return configuredWidth;
+  if (platform?.kind === "lily") return LILY_PAD_HALF_WIDTH;
+  if (platform?.kind === "log") return LOG_HALF_WIDTH;
+  if (platform?.kind === "stone") return STONE_HALF_WIDTH;
+  return BOAT_HALF_WIDTH;
+}
+
+function findRiverPlatformAtTile(rowData, tileIndex) {
+  if (!rowData) return null;
   const targetX = tileIndex * tileSize;
-  for (const boat of rowData.boats) {
-    if (!boat.ref) continue;
-    if (Math.abs(boat.ref.position.x - targetX) <= BOAT_HALF_WIDTH) {
-      return boat.ref;
+  for (const platform of getRiverPlatforms(rowData)) {
+    if (!platform.ref) continue;
+    if (platform.ref.userData.isSubmerged) continue;
+    if (
+      Math.abs(platform.ref.position.x - targetX) <=
+      getPlatformRideHalfWidth(platform)
+    ) {
+      return platform.ref;
     }
   }
   return null;
@@ -2612,10 +2838,11 @@ function onDrown() {
 function evaluateBoatRide() {
   const newRow = metadata[position.currentRow - 1];
   if (newRow && newRow.type === "river") {
-    const boatRef = findBoatAtTile(newRow, position.currentTile);
-    if (boatRef) {
-      position.ridingBoat = boatRef;
-      player.position.z = PLAYER_BOAT_RIDE_Z;
+    const platformRef = findRiverPlatformAtTile(newRow, position.currentTile);
+    if (platformRef) {
+      position.ridingBoat = platformRef;
+      player.position.z =
+        PLAYER_PLATFORM_RIDE_Z + (platformRef.position.z || 0);
       return;
     }
     position.ridingBoat = null;
@@ -2851,9 +3078,12 @@ function Road(rowIndex) {
   return road;
 }
 
-function River(rowIndex) {
+function River(rowIndex, opts = {}) {
   const river = new THREE.Group();
   river.position.y = rowIndex * tileSize;
+  const bankBackEnabled = opts.bankBack !== false;
+  const bankFrontEnabled = opts.bankFront !== false;
+  const flowDirection = opts.direction === false ? -1 : 1;
 
   const waterMat = new THREE.MeshLambertMaterial({ color: 0x3aa3d6 });
   const sideMat = new THREE.MeshLambertMaterial({ color: 0x276f9f });
@@ -2879,47 +3109,76 @@ function River(rowIndex) {
   right.position.x = tilesPerRow * tileSize;
   river.add(right);
 
-  const sparkleMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.55,
-  });
-  for (let i = 0; i < 8; i++) {
-    const sparkle = new THREE.Mesh(
-      new THREE.BoxGeometry(5, 1.2, 0.5),
-      sparkleMat,
-    );
-    sparkle.position.set(
-      (Math.random() - 0.5) * tilesPerRow * tileSize * 0.95,
-      (Math.random() - 0.5) * tileSize * 0.7,
-      1.8,
-    );
-    river.add(sparkle);
-  }
+  addRiverFlowDecorations(river, flowDirection);
 
   const bankMat = new THREE.MeshLambertMaterial({
     color: 0x8a6f4a,
     flatShading: true,
   });
-  const bankFront = new THREE.Mesh(
-    new THREE.BoxGeometry(tilesPerRow * tileSize, 3, 6),
-    bankMat,
-  );
-  bankFront.position.set(0, tileSize / 2 - 1.5, 3);
-  bankFront.receiveShadow = true;
-  river.add(bankFront);
+  if (bankFrontEnabled) {
+    const bankFront = new THREE.Mesh(
+      new THREE.BoxGeometry(tilesPerRow * tileSize, 3, 6),
+      bankMat,
+    );
+    bankFront.position.set(0, tileSize / 2 - 1.5, 3);
+    bankFront.receiveShadow = true;
+    river.add(bankFront);
+  }
 
-  const bankBack = new THREE.Mesh(
-    new THREE.BoxGeometry(tilesPerRow * tileSize, 3, 6),
-    bankMat,
-  );
-  bankBack.position.set(0, -tileSize / 2 + 1.5, 3);
-  bankBack.receiveShadow = true;
-  river.add(bankBack);
+  if (bankBackEnabled) {
+    const bankBack = new THREE.Mesh(
+      new THREE.BoxGeometry(tilesPerRow * tileSize, 3, 6),
+      bankMat,
+    );
+    bankBack.position.set(0, -tileSize / 2 + 1.5, 3);
+    bankBack.receiveShadow = true;
+    river.add(bankBack);
+  }
 
   river.add(MapEdgeRocks());
 
   return river;
+}
+
+function addRiverFlowDecorations(river, direction) {
+  const flowMat = new THREE.MeshBasicMaterial({
+    color: 0xcff8ff,
+    transparent: true,
+    opacity: 0.42,
+  });
+  const shimmerMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.32,
+  });
+  const flowSpan = tilesPerRow * tileSize;
+  const wrapPadding = 44;
+
+  for (let i = 0; i < 10; i += 1) {
+    const lineLength = randomElement([18, 24, 32, 42]);
+    const line = new THREE.Mesh(
+      new THREE.BoxGeometry(lineLength, 1.2, 0.5),
+      i % 3 === 0 ? shimmerMat.clone() : flowMat.clone(),
+    );
+    line.position.set(
+      (Math.random() - 0.5) * flowSpan,
+      (Math.random() - 0.5) * tileSize * 0.72,
+      2.25,
+    );
+    line.rotation.z = (Math.random() - 0.5) * 0.08;
+    river.add(line);
+    riverDecorations.push({
+      type: "flow",
+      mesh: line,
+      material: line.material,
+      direction,
+      speed: randomElement([18, 24, 30, 36]),
+      minX: -flowSpan / 2 - wrapPadding,
+      maxX: flowSpan / 2 + wrapPadding,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+
 }
 
 function Boat(initialTileIndex, direction, color) {
@@ -3001,8 +3260,144 @@ function Boat(initialTileIndex, direction, color) {
   return boat;
 }
 
+function LilyPad(initialTileIndex, color = 0x4f9b49) {
+  const pad = new THREE.Group();
+  pad.position.x = initialTileIndex * tileSize;
+
+  const padMat = new THREE.MeshLambertMaterial({
+    color,
+    flatShading: true,
+  });
+  const padDarkMat = new THREE.MeshLambertMaterial({
+    color: 0x2f6e3c,
+    flatShading: true,
+  });
+  const flowerMat = new THREE.MeshLambertMaterial({
+    color: 0xffc4e1,
+    flatShading: true,
+  });
+  const pollenMat = new THREE.MeshLambertMaterial({
+    color: 0xfff0a8,
+    flatShading: true,
+  });
+
+  const leaf = new THREE.Mesh(new THREE.CylinderGeometry(21, 23, 3, 28), padMat);
+  leaf.rotation.x = Math.PI / 2;
+  leaf.position.z = 4;
+  leaf.castShadow = true;
+  leaf.receiveShadow = true;
+  pad.add(leaf);
+
+  const notch = new THREE.Mesh(new THREE.BoxGeometry(14, 18, 3.2), padDarkMat);
+  notch.position.set(15, 0, 4.3);
+  notch.rotation.z = Math.PI / 4;
+  pad.add(notch);
+
+  const vein = new THREE.Mesh(new THREE.BoxGeometry(26, 2, 1), padDarkMat);
+  vein.position.set(-2, 0, 6);
+  pad.add(vein);
+
+  const flowerCenter = new THREE.Mesh(
+    new THREE.CylinderGeometry(3.5, 3.5, 2, 12),
+    pollenMat,
+  );
+  flowerCenter.rotation.x = Math.PI / 2;
+  flowerCenter.position.set(-7, 7, 7.2);
+  pad.add(flowerCenter);
+
+  for (let i = 0; i < 5; i += 1) {
+    const petal = new THREE.Mesh(
+      new THREE.BoxGeometry(3.5, 8, 1.5),
+      flowerMat,
+    );
+    petal.position.set(-7, 7, 7.4);
+    petal.rotation.z = (i / 5) * Math.PI * 2;
+    pad.add(petal);
+  }
+
+  return pad;
+}
+
+function LogPlatform(initialTileIndex, color = 0x7a4c2b) {
+  const log = new THREE.Group();
+  log.position.x = initialTileIndex * tileSize;
+
+  const barkMat = new THREE.MeshLambertMaterial({
+    color,
+    flatShading: true,
+  });
+  const cutMat = new THREE.MeshLambertMaterial({
+    color: 0xc28f5f,
+    flatShading: true,
+  });
+  const ringMat = new THREE.MeshLambertMaterial({
+    color: 0x6a3a20,
+    flatShading: true,
+  });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(92, 24, 14), barkMat);
+  body.position.z = 7;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  log.add(body);
+
+  [-47, 47].forEach((x) => {
+    const endCap = new THREE.Mesh(new THREE.BoxGeometry(3, 25, 15), cutMat);
+    endCap.position.set(x, 0, 7);
+    log.add(endCap);
+
+    const ring = new THREE.Mesh(new THREE.BoxGeometry(3.4, 14, 8), ringMat);
+    ring.position.set(x + (x < 0 ? -0.2 : 0.2), 0, 7);
+    log.add(ring);
+  });
+
+  [-22, 7, 31].forEach((x, index) => {
+    const stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 25, 15.5),
+      ringMat,
+    );
+    stripe.position.set(x, 0, 7.2);
+    stripe.rotation.z = index % 2 === 0 ? 0.14 : -0.12;
+    log.add(stripe);
+  });
+
+  return log;
+}
+
+function RiverStone(initialTileIndex, color = 0x7c8a90) {
+  const stone = new THREE.Group();
+  stone.position.x = initialTileIndex * tileSize;
+
+  const stoneMat = new THREE.MeshLambertMaterial({
+    color,
+    flatShading: true,
+  });
+  const highlightMat = new THREE.MeshLambertMaterial({
+    color: 0xaeb8ba,
+    flatShading: true,
+  });
+
+  const body = new THREE.Mesh(new THREE.BoxGeometry(42, 29, 8), stoneMat);
+  body.position.z = 4;
+  body.rotation.z = 0.1;
+  body.castShadow = true;
+  body.receiveShadow = true;
+  stone.add(body);
+
+  const crown = new THREE.Mesh(new THREE.BoxGeometry(27, 18, 4), highlightMat);
+  crown.position.set(-3, 1, 9);
+  crown.rotation.z = -0.16;
+  stone.add(crown);
+
+  stone.userData.bodyMaterial = stoneMat;
+  stone.userData.highlightMaterial = highlightMat;
+
+  return stone;
+}
+
 const railwayLights = [];
 const checkpointDecorations = [];
+const riverDecorations = [];
 
 const RAILWAY_LIGHT_ON_HEX = 0xff3030;
 const RAILWAY_LIGHT_OFF_HEX = 0x4a1010;
@@ -3012,10 +3407,12 @@ function animateRailwayLights() {
   const onPhase = Math.floor(performance.now() / 280) % 2;
   for (let i = 0; i < railwayLights.length; i++) {
     const entry = railwayLights[i];
-    const lit = entry.phase === onPhase;
-    entry.material.color.setHex(
-      lit ? RAILWAY_LIGHT_ON_HEX : RAILWAY_LIGHT_OFF_HEX,
-    );
+    const active = Boolean(entry.rowData?.lightsActive);
+    const lit = active && entry.phase === onPhase;
+    entry.material.color.setHex(lit ? RAILWAY_LIGHT_ON_HEX : RAILWAY_LIGHT_OFF_HEX);
+    if (entry.haloMaterial) {
+      entry.haloMaterial.opacity = lit ? 0.28 : 0;
+    }
   }
 }
 
@@ -3035,7 +3432,42 @@ function animateCheckpointDecorations() {
   });
 }
 
-function RailwayCrossingSign(direction) {
+function animateRiverDecorations(delta) {
+  if (!riverDecorations.length) return;
+  const now = performance.now() / 1000;
+
+  riverDecorations.forEach((entry) => {
+    if (!entry.mesh) return;
+
+    if (entry.type === "flow") {
+      entry.mesh.position.x += entry.direction * entry.speed * delta;
+      if (entry.direction > 0 && entry.mesh.position.x > entry.maxX) {
+        entry.mesh.position.x = entry.minX;
+      } else if (entry.direction < 0 && entry.mesh.position.x < entry.minX) {
+        entry.mesh.position.x = entry.maxX;
+      }
+      entry.material.opacity =
+        0.24 + (Math.sin(now * 2.2 + entry.phase) + 1) * 0.12;
+      return;
+    }
+
+  });
+}
+
+function updateStoneWarning(ref, sinkWave) {
+  const bodyMaterial = ref.userData.bodyMaterial;
+  const highlightMaterial = ref.userData.highlightMaterial;
+  const danger = THREE.MathUtils.clamp((-sinkWave - 0.08) / 0.52, 0, 1);
+
+  if (bodyMaterial) {
+    bodyMaterial.color.setHex(danger > 0.35 ? 0x56656a : 0x78888d);
+  }
+  if (highlightMaterial) {
+    highlightMaterial.color.setHex(danger > 0.35 ? 0x8fa1a4 : 0xaeb8ba);
+  }
+}
+
+function RailwayCrossingSign(direction, rowData) {
   const sign = new THREE.Group();
 
   const poleMat = new THREE.MeshLambertMaterial({
@@ -3044,6 +3476,14 @@ function RailwayCrossingSign(direction) {
   });
   const whiteMat = new THREE.MeshLambertMaterial({
     color: 0xfafafa,
+    flatShading: true,
+  });
+  const redMat = new THREE.MeshLambertMaterial({
+    color: 0xd7262f,
+    flatShading: true,
+  });
+  const grooveMat = new THREE.MeshLambertMaterial({
+    color: 0xd9dde1,
     flatShading: true,
   });
   const blackMat = new THREE.MeshLambertMaterial({
@@ -3060,17 +3500,56 @@ function RailwayCrossingSign(direction) {
   pole.castShadow = true;
   sign.add(pole);
 
-  const arm1 = new THREE.Mesh(new THREE.BoxGeometry(28, 4, 4), whiteMat);
-  arm1.position.z = 54;
-  arm1.rotation.y = Math.PI / 4;
-  arm1.castShadow = true;
-  sign.add(arm1);
+  function addCrossbuckArm(rotationY) {
+    const arm = new THREE.Group();
+    arm.position.z = 54;
+    arm.rotation.y = rotationY;
 
-  const arm2 = new THREE.Mesh(new THREE.BoxGeometry(28, 4, 4), whiteMat);
-  arm2.position.z = 54;
-  arm2.rotation.y = -Math.PI / 4;
-  arm2.castShadow = true;
-  sign.add(arm2);
+    const face = new THREE.Mesh(new THREE.BoxGeometry(34, 4.6, 5.2), whiteMat);
+    face.castShadow = true;
+    arm.add(face);
+
+    [-2.65, 2.65].forEach((z) => {
+      const edge = new THREE.Mesh(
+        new THREE.BoxGeometry(34.5, 4.8, 0.8),
+        redMat,
+      );
+      edge.position.z = z;
+      edge.castShadow = true;
+      arm.add(edge);
+    });
+
+    [-17.2, 17.2].forEach((x) => {
+      const cap = new THREE.Mesh(
+        new THREE.BoxGeometry(1.1, 4.8, 5.8),
+        redMat,
+      );
+      cap.position.x = x;
+      cap.castShadow = true;
+      arm.add(cap);
+    });
+
+    [-8, 0, 8].forEach((x) => {
+      const groove = new THREE.Mesh(
+        new THREE.BoxGeometry(0.55, 4.9, 3.6),
+        grooveMat,
+      );
+      groove.position.set(x, 0.05, 0);
+      arm.add(groove);
+    });
+
+    sign.add(arm);
+  }
+
+  addCrossbuckArm(Math.PI / 4);
+  addCrossbuckArm(-Math.PI / 4);
+
+  const centerBolt = new THREE.Mesh(
+    new THREE.BoxGeometry(5.2, 5.2, 5.2),
+    new THREE.MeshLambertMaterial({ color: 0xb9bfc4, flatShading: true }),
+  );
+  centerBolt.position.z = 54;
+  sign.add(centerBolt);
 
   [-1, 1].forEach((dy, idx) => {
     const lightMat = new THREE.MeshBasicMaterial({
@@ -3079,18 +3558,24 @@ function RailwayCrossingSign(direction) {
     const light = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 6), lightMat);
     light.position.set(0, dy * 10, 40);
     sign.add(light);
-    railwayLights.push({ material: lightMat, phase: idx });
 
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0,
+    });
     const halo = new THREE.Mesh(
       new THREE.BoxGeometry(8, 8, 8),
-      new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.18,
-      }),
+      haloMat,
     );
     halo.position.copy(light.position);
     sign.add(halo);
+    railwayLights.push({
+      material: lightMat,
+      haloMaterial: haloMat,
+      phase: idx,
+      rowData,
+    });
   });
 
   const panel = new THREE.Mesh(new THREE.BoxGeometry(2, 14, 12), yellowMat);
@@ -3111,7 +3596,7 @@ function RailwayCrossingSign(direction) {
   return sign;
 }
 
-function Rail(rowIndex) {
+function Rail(rowIndex, rowData) {
   const rail = new THREE.Group();
   rail.position.y = rowIndex * tileSize;
 
@@ -3168,21 +3653,9 @@ function Rail(rowIndex) {
     rail.add(r);
   });
 
-  const signL = RailwayCrossingSign(-1);
-  signL.position.set(
-    -(tilesPerRow / 2) * tileSize,
-    -tileSize / 2 + 4,
-    0,
-  );
-  rail.add(signL);
-
-  const signR = RailwayCrossingSign(1);
-  signR.position.set(
-    (tilesPerRow / 2) * tileSize,
-    -tileSize / 2 + 4,
-    0,
-  );
-  rail.add(signR);
+  const sign = RailwayCrossingSign(1, rowData);
+  sign.position.set(0, -tileSize / 2 + 4, 0);
+  rail.add(sign);
 
   rail.add(MapEdgeRocks());
 
@@ -3531,7 +4004,7 @@ function endsUpInValidPosition(currentPosition, moves) {
     return false;
   }
 
-  // River row moves are always queueable; landing is validated against live boat
+  // River row moves are always queueable; landing is validated against live platform
   // positions in evaluateBoatRide() at stepCompleted time.
 
   return true;
@@ -3546,42 +4019,100 @@ function generateRows(amount, startIndex) {
   return rows;
 }
 
+function resetRiverLayoutMemory() {
+  lastRiverPlatformOffset = null;
+}
+
 function generateRow(rowIndex) {
   if (trainCooldownRows > 0) {
     trainCooldownRows = Math.max(0, trainCooldownRows - 1);
+  }
+  if (riverCooldownRows > 0) {
+    riverCooldownRows = Math.max(0, riverCooldownRows - 1);
   }
 
   // Force grass row at every checkpoint position
   if (rowIndex > 0 && rowIndex % CP_INTERVAL === 0) {
     pendingRoadRowsInSegment = 0;
+    pendingRiverRowsInSegment = 0;
     consecutiveRoadRows = 0;
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
     return generateCheckpointMetadata();
   }
 
-  // River guard: place a river one row before each checkpoint
-  if (rowIndex > 0 && rowIndex % CP_INTERVAL === CP_INTERVAL - 1) {
+  const nearCheckpoint = isNearCheckpointRow(rowIndex);
+
+  if (pendingRiverRowsInSegment > 0) {
+    if (nearCheckpoint) {
+      pendingRiverRowsInSegment = 0;
+      consecutiveRiverRows = 0;
+    } else {
+      const isLastRiverRow = pendingRiverRowsInSegment === 1;
+      pendingRiverRowsInSegment -= 1;
+      consecutiveRiverRows += 1;
+      pendingRoadRowsInSegment = 0;
+      consecutiveRoadRows = 0;
+      return generateRiverMetadata({
+        bankBack: false,
+        bankFront: isLastRiverRow,
+      });
+    }
+  }
+
+  if (shouldStartRiverSegment(rowIndex, nearCheckpoint)) {
+    const segmentLength = getRiverSegmentLength(rowIndex);
+    if (segmentLength > 0) {
+      pendingRiverRowsInSegment = Math.max(0, segmentLength - 1);
+      riverCooldownRows = RIVER_SEGMENT_COOLDOWN_ROWS + segmentLength;
+      consecutiveRiverRows = 1;
+      pendingRoadRowsInSegment = 0;
+      consecutiveRoadRows = 0;
+      return generateRiverMetadata({
+        bankBack: true,
+        bankFront: segmentLength === 1,
+      });
+    }
+  }
+
+  if (nearCheckpoint && consecutiveRiverRows > 0) {
     pendingRoadRowsInSegment = 0;
+    pendingRiverRowsInSegment = 0;
     consecutiveRoadRows = 0;
-    return generateRiverMetadata();
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
+    return generateForesMetadata();
   }
 
   // Hard rule: after 4 consecutive road rows, next row must be grass.
   if (consecutiveRoadRows >= MAX_CONSECUTIVE_ROAD_ROWS) {
     pendingRoadRowsInSegment = 0;
+    pendingRiverRowsInSegment = 0;
     consecutiveRoadRows = 0;
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
     return generateForesMetadata();
   }
 
   if (pendingRoadRowsInSegment > 0) {
     pendingRoadRowsInSegment -= 1;
     consecutiveRoadRows += 1;
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
     return generateRoadLaneMetadata();
   }
 
-  // Occasional train track row — single row, breaks any road segment buildup
-  if (trainCooldownRows === 0 && Date.now() >= nextTrainRowAtMs) {
+  // Occasional train track row — keep it away from checkpoint exits.
+  if (
+    trainCooldownRows === 0 &&
+    !isTrainBlockedNearCheckpoint(rowIndex) &&
+    Date.now() >= nextTrainRowAtMs
+  ) {
     pendingRoadRowsInSegment = 0;
+    pendingRiverRowsInSegment = 0;
     consecutiveRoadRows = 0;
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
     nextTrainRowAtMs =
       Date.now() + THREE.MathUtils.randInt(TRAIN_SPAWN_MIN_MS, TRAIN_SPAWN_MAX_MS);
     trainCooldownRows = TRAIN_COOLDOWN_ROWS;
@@ -3595,40 +4126,245 @@ function generateRow(rowIndex) {
     // We generate one row now, and keep the rest for upcoming rows.
     pendingRoadRowsInSegment = Math.max(0, segmentLength - 1);
     consecutiveRoadRows += 1;
+    consecutiveRiverRows = 0;
+    resetRiverLayoutMemory();
     return generateRoadLaneMetadata();
   }
 
   consecutiveRoadRows = 0;
+  consecutiveRiverRows = 0;
+  resetRiverLayoutMemory();
   return generateForesMetadata();
 }
 
+function isNearCheckpointRow(rowIndex) {
+  if (rowIndex <= 0) return false;
+  const checkpointRemainder = rowIndex % CP_INTERVAL;
+  const rowsUntilCheckpoint =
+    checkpointRemainder === 0 ? 0 : CP_INTERVAL - checkpointRemainder;
+  return (
+    checkpointRemainder <= RIVER_CHECKPOINT_BUFFER_ROWS ||
+    rowsUntilCheckpoint <= RIVER_CHECKPOINT_BUFFER_ROWS
+  );
+}
+
+function isTrainBlockedNearCheckpoint(rowIndex) {
+  if (rowIndex <= 0) return true;
+  const checkpointRemainder = rowIndex % CP_INTERVAL;
+  const rowsUntilCheckpoint =
+    checkpointRemainder === 0 ? 0 : CP_INTERVAL - checkpointRemainder;
+  return (
+    checkpointRemainder <= TRAIN_CHECKPOINT_BUFFER_ROWS ||
+    rowsUntilCheckpoint <= RIVER_CHECKPOINT_BUFFER_ROWS
+  );
+}
+
+function getRowsUntilCheckpoint(rowIndex) {
+  if (rowIndex <= 0) return CP_INTERVAL;
+  const checkpointRemainder = rowIndex % CP_INTERVAL;
+  return checkpointRemainder === 0 ? CP_INTERVAL : CP_INTERVAL - checkpointRemainder;
+}
+
+function getRiverSegmentLength(rowIndex) {
+  const rowsBeforeCheckpointBuffer =
+    getRowsUntilCheckpoint(rowIndex) - RIVER_CHECKPOINT_BUFFER_ROWS;
+  const maxLength = Math.min(
+    MAX_CONSECUTIVE_RIVER_ROWS,
+    Math.max(0, rowsBeforeCheckpointBuffer),
+  );
+  if (maxLength <= 0) return 0;
+  return THREE.MathUtils.randInt(1, maxLength);
+}
+
+function shouldStartRiverSegment(rowIndex, nearCheckpoint) {
+  return (
+    rowIndex >= RIVER_SAFE_START_ROW &&
+    !nearCheckpoint &&
+    riverCooldownRows === 0 &&
+    consecutiveRiverRows < MAX_CONSECUTIVE_RIVER_ROWS &&
+    Math.random() < RIVER_SEGMENT_START_CHANCE
+  );
+}
+
 function generateRoadLaneMetadata() {
-  return Math.random() < 0.5
-    ? generateCarLaneMetadata()
-    : generateTruckLaneMetadata();
+  const profile = randomElement(["city", "heavy", "fast", "mixed", "service"]);
+  if (profile === "city") {
+    return generateVehicleLaneMetadata({
+      type: "car",
+      speed: randomElement([70, 85, 100]),
+      kinds: ["car", "van", "car"],
+    });
+  }
+  if (profile === "heavy") {
+    return generateVehicleLaneMetadata({
+      type: "truck",
+      speed: randomElement([55, 70, 85]),
+      kinds: ["bus", "truck"],
+    });
+  }
+  if (profile === "fast") {
+    return generateVehicleLaneMetadata({
+      type: "car",
+      speed: randomElement([115, 135, 155]),
+      kinds: ["motorcycle", "car", "motorcycle", "van"],
+    });
+  }
+  if (profile === "service") {
+    return generateVehicleLaneMetadata({
+      type: "car",
+      speed: randomElement([80, 100, 120]),
+      kinds: ["service", "car", "van"],
+    });
+  }
+  return generateVehicleLaneMetadata({
+    type: "car",
+    speed: randomElement([80, 95, 110]),
+    kinds: ["car", "van", "motorcycle", "bus"],
+  });
+}
+
+function generateVehicleLaneMetadata({ type, speed, kinds }) {
+  const direction = randomElement([true, false]);
+  const shuffledKinds = shuffleArray(kinds);
+  const vehicles = [];
+  const occupiedTiles = new Set();
+
+  shuffledKinds.forEach((kind) => {
+    const initialTileIndex = findOpenVehicleTile(occupiedTiles, kind);
+    markVehicleTiles(occupiedTiles, initialTileIndex, kind);
+    vehicles.push({
+      kind,
+      initialTileIndex,
+      color: getVehicleColor(kind),
+    });
+  });
+
+  return { type, direction, speed, vehicles };
+}
+
+function findOpenVehicleTile(occupiedTiles, kind) {
+  const footprint = getVehicleTileFootprint(kind);
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    const tile = THREE.MathUtils.randInt(minTileIndex, maxTileIndex);
+    let open = true;
+    for (let offset = -footprint; offset <= footprint; offset += 1) {
+      if (occupiedTiles.has(tile + offset)) {
+        open = false;
+        break;
+      }
+    }
+    if (open) return tile;
+  }
+  return THREE.MathUtils.randInt(minTileIndex, maxTileIndex);
+}
+
+function markVehicleTiles(occupiedTiles, tile, kind) {
+  const footprint = getVehicleTileFootprint(kind);
+  for (let offset = -footprint; offset <= footprint; offset += 1) {
+    occupiedTiles.add(tile + offset);
+  }
+}
+
+function getVehicleTileFootprint(kind) {
+  if (kind === "bus" || kind === "truck") return 2;
+  if (kind === "van" || kind === "service") return 1;
+  return 1;
+}
+
+function getVehicleColor(kind) {
+  if (kind === "bus") {
+    return randomElement([0xffc857, 0x4d96ff, 0xef476f, 0x2ec4b6]);
+  }
+  if (kind === "van") {
+    return randomElement([0xf6f1d1, 0xbfd7ea, 0xf4a261, 0x8ecae6]);
+  }
+  if (kind === "motorcycle") {
+    return randomElement([0xff4d4d, 0xffd166, 0x06d6a0, 0x5c7cfa]);
+  }
+  if (kind === "service") {
+    return randomElement([0xffffff, 0xf8f9fa, 0xe7f0ff]);
+  }
+  if (kind === "truck") {
+    return randomElement([0x1d3557, 0xe63946, 0x2a9d8f, 0xe76f51, 0x6d597a]);
+  }
+  return randomElement([
+    0xe63946, 0xf4a261, 0x2a9d8f, 0x457b9d, 0xe76f51, 0xffb703, 0x9b5de5,
+    0x06d6a0,
+  ]);
 }
 
 function generateCheckpointMetadata() {
   return { type: "forest", trees: [], isCheckpoint: true };
 }
 
-function generateRiverMetadata() {
+function generateRiverMetadata({ bankBack = true, bankFront = true } = {}) {
   const direction = randomElement([true, false]);
-  const speed = randomElement([45, 60, 75]);
-
-  const boatCount = 3;
-  const stride = Math.max(1, Math.floor(tilesPerRow / boatCount));
-  const offset = THREE.MathUtils.randInt(0, stride - 1);
-  const boats = Array.from({ length: boatCount }, (_, i) => {
+  const speed = randomElement([42, 54, 66, 78]);
+  const platformPattern = "mixed";
+  const platformKinds = shuffleArray(["lily", "log", "stone", "boat"]);
+  const platformCount = platformKinds.length;
+  const stride = Math.max(1, Math.floor(tilesPerRow / platformCount));
+  const offsetOptions = Array.from({ length: stride }, (_, index) => index);
+  const availableOffsets =
+    lastRiverPlatformOffset == null
+      ? offsetOptions
+      : offsetOptions.filter((option) => option !== lastRiverPlatformOffset);
+  const offset = randomElement(availableOffsets.length ? availableOffsets : offsetOptions);
+  lastRiverPlatformOffset = offset;
+  const platforms = Array.from({ length: platformCount }, (_, i) => {
     let tile = minTileIndex + offset + i * stride;
     if (tile > maxTileIndex) tile -= tilesPerRow;
+    const kind = platformKinds[i % platformKinds.length];
     return {
+      kind,
       initialTileIndex: tile,
-      color: randomElement([0xc94a4a, 0xe6a23c, 0x7c5cff, 0x4ecdc4, 0xf76b8a]),
+      color: getRiverPlatformColor(kind),
+      rideHalfWidth: getRiverPlatformRideHalfWidth(kind),
+      bobPhase: Math.random() * Math.PI * 2,
+      bobAmplitude: kind === "lily" || kind === "stone" ? 1.8 : 0.8,
+      submergePhase: Math.random() * Math.PI * 2,
+      submergeSpeed: kind === "stone" ? randomElement([0.45, 0.55, 0.65]) : 0,
     };
   });
 
-  return { type: "river", boats, direction, speed };
+  return {
+    type: "river",
+    platforms,
+    direction,
+    speed,
+    platformPattern,
+    bankBack,
+    bankFront,
+  };
+}
+
+function shuffleArray(array) {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = THREE.MathUtils.randInt(0, i);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function getRiverPlatformColor(kind) {
+  if (kind === "lily") {
+    return randomElement([0x3d8f4d, 0x54a65b, 0x2f7d46, 0x6dbb63]);
+  }
+  if (kind === "log") {
+    return randomElement([0x6b4226, 0x7a4c2b, 0x8b5a2b, 0x5f351f]);
+  }
+  if (kind === "stone") {
+    return randomElement([0x66767d, 0x78888d, 0x5f6f76, 0x849093]);
+  }
+  return randomElement([0xc94a4a, 0xe6a23c, 0x7c5cff, 0x4ecdc4, 0xf76b8a]);
+}
+
+function getRiverPlatformRideHalfWidth(kind) {
+  if (kind === "lily") return LILY_PAD_HALF_WIDTH;
+  if (kind === "log") return LOG_HALF_WIDTH;
+  if (kind === "stone") return STONE_HALF_WIDTH;
+  return BOAT_HALF_WIDTH;
 }
 
 function randomElement(array) {
@@ -3730,23 +4466,28 @@ function generateTrainLaneMetadata() {
     isLocomotive: i === 0,
   }));
 
-  return { type: "train", direction, speed, vehicles, trainGapMs };
+  return { type: "train", direction, speed, vehicles, trainGapMs, lightsActive: false };
 }
 
 const moveClock = new THREE.Clock(false);
 
 function animatePlayer() {
   if (!movesQueue.length) {
-    // Idle ride: while standing on a moving boat, sync visual position and check bounds
+    // Idle ride: while standing on a moving river platform, sync visual position and check bounds.
     if (position.ridingBoat && !gameOver) {
-      const boatX = position.ridingBoat.position.x;
-      const newTile = Math.round(boatX / tileSize);
+      if (position.ridingBoat.userData.isSubmerged) {
+        onDrown();
+        return;
+      }
+      const platformX = position.ridingBoat.position.x;
+      const newTile = Math.round(platformX / tileSize);
       if (newTile < minTileIndex || newTile > maxTileIndex) {
         onDrown();
         return;
       }
-      player.position.x = boatX;
-      player.position.z = PLAYER_BOAT_RIDE_Z;
+      player.position.x = platformX;
+      player.position.z =
+        PLAYER_PLATFORM_RIDE_Z + (position.ridingBoat.position.z || 0);
       position.currentTile = newTile;
     }
     return;
@@ -3801,8 +4542,7 @@ function setRotation(progress) {
 
 const clock = new THREE.Clock();
 
-function animateVehicles() {
-  const delta = clock.getDelta();
+function animateVehicles(delta = clock.getDelta()) {
   const playerX = position.currentTile * tileSize;
   const playerRowIndex = position.currentRow - 1;
 
@@ -3839,6 +4579,12 @@ function animateVehicles() {
         }
       }
 
+      if (rowData.type === "train") {
+        rowData.lightsActive = rowData.vehicles.some(({ ref }) =>
+          ref ? Math.abs(ref.position.x) < tilesPerRow * tileSize * 0.62 : false,
+        );
+      }
+
       rowData.vehicles.forEach(({ ref }) => {
         if (!ref) throw Error("Vehicle reference is missing");
 
@@ -3856,10 +4602,12 @@ function animateVehicles() {
       });
     }
 
-    if (rowData.type === "river" && rowData.boats) {
+    if (rowData.type === "river") {
       const boatSpeed = rowData.speed;
+      const platforms = getRiverPlatforms(rowData);
+      const now = performance.now() / 1000;
 
-      rowData.boats.forEach(({ ref }) => {
+      platforms.forEach(({ ref }) => {
         if (!ref) return;
 
         if (rowData.direction) {
@@ -3873,6 +4621,24 @@ function animateVehicles() {
               ? endOfRow
               : ref.position.x - boatSpeed * delta;
         }
+
+        const baseZ = ref.userData.baseZ || 0;
+        const bobPhase = ref.userData.bobPhase || 0;
+        const bobAmplitude = ref.userData.bobAmplitude || 0;
+        const platformKind = ref.userData.platformKind;
+        let submergeOffset = 0;
+        if (platformKind === "stone") {
+          const submergePhase = ref.userData.submergePhase || 0;
+          const submergeSpeed = ref.userData.submergeSpeed || 0.55;
+          const sinkWave = Math.sin(now * submergeSpeed + submergePhase);
+          updateStoneWarning(ref, sinkWave);
+          ref.userData.isSubmerged = sinkWave < -0.45;
+          submergeOffset = ref.userData.isSubmerged ? -11 : 0;
+        } else {
+          ref.userData.isSubmerged = false;
+        }
+        ref.position.z =
+          baseZ + Math.sin(now * 2.4 + bobPhase) * bobAmplitude + submergeOffset;
       });
     }
   });
@@ -5335,7 +6101,9 @@ window.addEventListener("resize", () => {
 });
 
 function animate() {
-  animateVehicles();
+  const delta = clock.getDelta();
+  animateVehicles(delta);
+  animateRiverDecorations(delta);
   animatePlayer();
   animateRailwayLights();
   animateCheckpointDecorations();
