@@ -1634,7 +1634,6 @@ function RoadVehicle(initialTileIndex, direction, color, kind = "car") {
   if (kind === "police") return PoliceCar(initialTileIndex, direction);
   if (kind === "coupe") return Coupe(initialTileIndex, direction, color);
   if (kind === "truck") return Truck(initialTileIndex, direction, color);
-  if (kind === "service") return ServiceCar(initialTileIndex, direction, color);
   return Car(initialTileIndex, direction, color);
 }
 
@@ -1858,29 +1857,6 @@ function PoliceCar(initialTileIndex, direction) {
   return police;
 }
 
-
-function ServiceCar(initialTileIndex, direction, color) {
-  const service = Car(initialTileIndex, direction, color);
-  const lightbar = new THREE.Group();
-  lightbar.position.set(-4, 0, 35);
-
-  const redLight = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 8, 4),
-    new THREE.MeshBasicMaterial({ color: 0xff3030 }),
-  );
-  redLight.position.y = -5;
-  lightbar.add(redLight);
-
-  const blueLight = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 8, 4),
-    new THREE.MeshBasicMaterial({ color: 0x3090ff }),
-  );
-  blueLight.position.y = 5;
-  lightbar.add(blueLight);
-
-  service.add(lightbar);
-  return service;
-}
 
 function addVehicleLights(vehicle, frontX, sideY, z) {
   const headlightMat = new THREE.MeshBasicMaterial({ color: 0xfff4b0 });
@@ -4184,7 +4160,7 @@ function generateRoadLaneMetadata() {
     return generateVehicleLaneMetadata({
       type: "car",
       speed: randomElement([70, 85, 100]),
-      kinds: ["car", "car", "taxi", "coupe", "truck", "service"],
+      kinds: ["car", "car", "taxi", "coupe", "truck", "car"],
     });
   }
   if (profile === "heavy") {
@@ -4205,7 +4181,7 @@ function generateRoadLaneMetadata() {
     return generateVehicleLaneMetadata({
       type: "car",
       speed: randomElement([80, 100, 120]),
-      kinds: ["service", "car", "police"],
+      kinds: ["car", "car", "police"],
     });
   }
   return generateVehicleLaneMetadata({
@@ -4259,7 +4235,6 @@ function markVehicleTiles(occupiedTiles, tile, kind) {
 
 function getVehicleTileFootprint(kind) {
   if (kind === "truck") return 2;
-  if (kind === "service") return 1;
   return 1;
 }
 
@@ -4272,9 +4247,6 @@ function getVehicleColor(kind) {
   }
   if (kind === "coupe") {
     return randomElement([0xf4a261, 0x2a9d8f, 0xe76f51, 0x457b9d]);
-  }
-  if (kind === "service") {
-    return randomElement([0xffffff, 0xf8f9fa, 0xe7f0ff]);
   }
   if (kind === "truck") {
     return randomElement([0x1d3557, 0xe63946, 0x2a9d8f, 0xe76f51, 0x6d597a]);
