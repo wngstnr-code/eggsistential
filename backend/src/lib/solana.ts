@@ -2,6 +2,7 @@ import {
   Connection,
   Keypair,
   PublicKey,
+  SYSVAR_RENT_PUBKEY,
   SystemProgram,
   Transaction,
   TransactionInstruction,
@@ -136,6 +137,55 @@ export function buildClaimFaucetIx(player: PublicKey): TransactionInstruction {
   });
 }
 
+function buildAmountInstructionData(name: string, amount: bigint): Buffer {
+  const data = Buffer.alloc(8 + 8);
+  anchorDiscriminator(name).copy(data, 0);
+  data.writeBigUInt64LE(amount, 8);
+  return data;
+}
+
+export function buildDepositIx(
+  player: PublicKey,
+  amount: bigint,
+): TransactionInstruction {
+  return new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: CONFIG_PDA, isSigner: false, isWritable: true },
+      { pubkey: player, isSigner: true, isWritable: true },
+      { pubkey: playerBalancePda(player), isSigner: false, isWritable: true },
+      { pubkey: TOKEN_MINT, isSigner: false, isWritable: false },
+      { pubkey: playerAssociatedTokenAccount(player), isSigner: false, isWritable: true },
+      { pubkey: VAULT_TOKEN_ACCOUNT, isSigner: false, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+    ],
+    data: buildAmountInstructionData("deposit", amount),
+  });
+}
+
+export function buildWithdrawIx(
+  player: PublicKey,
+  amount: bigint,
+): TransactionInstruction {
+  return new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: CONFIG_PDA, isSigner: false, isWritable: true },
+      { pubkey: player, isSigner: true, isWritable: true },
+      { pubkey: playerBalancePda(player), isSigner: false, isWritable: true },
+      { pubkey: TOKEN_MINT, isSigner: false, isWritable: false },
+      { pubkey: VAULT_AUTHORITY_PDA, isSigner: false, isWritable: false },
+      { pubkey: VAULT_TOKEN_ACCOUNT, isSigner: false, isWritable: true },
+      { pubkey: playerAssociatedTokenAccount(player), isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    ],
+    data: buildAmountInstructionData("withdraw", amount),
+  });
+}
+
 /**
  * Builds an unsigned transaction that the player wallet will sign and submit:
  *   1. Idempotent ATA creation (no-op if already exists)
@@ -157,6 +207,54 @@ export async function buildClaimFaucetTransaction(player: PublicKey): Promise<st
       TOKEN_MINT,
     ),
     buildClaimFaucetIx(player),
+  );
+  return tx
+    .serialize({ requireAllSignatures: false, verifySignatures: false })
+    .toString("base64");
+}
+
+export async function buildDepositTransaction(
+  player: PublicKey,
+  amount: bigint,
+): Promise<string> {
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({
+    feePayer: player,
+    blockhash,
+    lastValidBlockHeight,
+  });
+  tx.add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      player,
+      playerAssociatedTokenAccount(player),
+      player,
+      TOKEN_MINT,
+    ),
+    buildDepositIx(player, amount),
+  );
+  return tx
+    .serialize({ requireAllSignatures: false, verifySignatures: false })
+    .toString("base64");
+}
+
+export async function buildWithdrawTransaction(
+  player: PublicKey,
+  amount: bigint,
+): Promise<string> {
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({
+    feePayer: player,
+    blockhash,
+    lastValidBlockHeight,
+  });
+  tx.add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      player,
+      playerAssociatedTokenAccount(player),
+      player,
+      TOKEN_MINT,
+    ),
+    buildWithdrawIx(player, amount),
   );
   return tx
     .serialize({ requireAllSignatures: false, verifySignatures: false })

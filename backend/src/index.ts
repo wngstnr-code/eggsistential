@@ -12,6 +12,7 @@ import leaderboardRoutes from "./routes/leaderboard.js";
 import playerRoutes from "./routes/player.js";
 import passportRoutes from "./routes/passport.js";
 import faucetRoutes from "./routes/faucet.js";
+import vaultRoutes from "./routes/vault.js";
 import { getActiveGameCount } from "./services/gameState.js";
 import { readBackendSignerHealth } from "./services/opsHealth.js";
 
@@ -60,6 +61,7 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/player", playerRoutes);
 app.use("/api/passport", passportRoutes);
 app.use("/api/faucet", faucetRoutes);
+app.use("/api/vault", vaultRoutes);
 app.use((_req, res) => {
   res.status(404).json({ error: "Not found" });
 });

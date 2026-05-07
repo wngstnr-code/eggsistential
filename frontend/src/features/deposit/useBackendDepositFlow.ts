@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useAppKitProvider } from "@reown/appkit/react";
+import { Connection, Transaction } from "@solana/web3.js";
 import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch, backendPost } from "~/lib/backend/api";
 import { hasBackendApiConfig } from "~/lib/backend/config";
-import { explorerTxUrl } from "~/lib/web3/solana";
+import { SOLANA_NAMESPACE } from "~/lib/web3/appKit";
+import { explorerTxUrl, SOLANA_RPC_URL } from "~/lib/web3/solana";
 import type { DepositFlowViewModel } from "./types";
 
 type FaucetStatusPayload = {
@@ -17,9 +20,23 @@ type FaucetStatusPayload = {
 
 type FaucetRequestPayload = {
   success: boolean;
-  txHash?: string;
+  unsignedTx?: string;
   cooldownSeconds?: number;
   nextEligibleAt?: string | null;
+};
+
+type VaultStatusPayload = {
+  success: boolean;
+  walletBalance?: string;
+  availableBalance?: string;
+  lockedBalance?: string;
+};
+
+type VaultTxPayload = {
+  success: boolean;
+  unsignedTx: string;
+  amount?: string;
+  amountUnits?: string;
 };
 
 function normalizeError(error: unknown, fallback: string) {
@@ -38,7 +55,17 @@ function parseAmount(value: string) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function base64ToBytes(base64: string) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export function useBackendDepositFlow(): DepositFlowViewModel {
+  const { walletProvider } = useAppKitProvider<unknown>(SOLANA_NAMESPACE);
   const {
     account,
     isAppChain,
@@ -54,6 +81,11 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
   const [faucetEnabled, setFaucetEnabled] = useState(false);
   const [faucetCooldownSeconds, setFaucetCooldownSeconds] = useState(0);
   const [faucetTxHash, setFaucetTxHash] = useState("");
+  const [depositTxHash, setDepositTxHash] = useState("");
+  const [withdrawTxHash, setWithdrawTxHash] = useState("");
+  const [walletBalanceDisplay, setWalletBalanceDisplay] = useState("-");
+  const [availableBalanceDisplay, setAvailableBalanceDisplay] = useState("-");
+  const [lockedBalanceDisplay, setLockedBalanceDisplay] = useState("-");
 
   const isConnected = Boolean(account);
   const hasBackendConfig = hasBackendApiConfig();
@@ -75,6 +107,29 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
         if (cancelled) return;
         setFaucetEnabled(false);
         setFaucetCooldownSeconds(0);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canUseBackend, isBackendAuthenticated]);
+
+  useEffect(() => {
+    if (!canUseBackend || !isBackendAuthenticated) return;
+    let cancelled = false;
+
+    void backendFetch<VaultStatusPayload>("/api/vault/status")
+      .then((status) => {
+        if (cancelled) return;
+        setWalletBalanceDisplay(String(status.walletBalance || "-"));
+        setAvailableBalanceDisplay(String(status.availableBalance || "-"));
+        setLockedBalanceDisplay(String(status.lockedBalance || "-"));
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setWalletBalanceDisplay("-");
+        setAvailableBalanceDisplay("-");
+        setLockedBalanceDisplay("-");
       });
 
     return () => {
@@ -113,6 +168,10 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       setErrorMessage("Solana RPC config is missing.");
       return false;
     }
+    if (!walletProvider) {
+      setErrorMessage("Solana wallet provider is not ready yet.");
+      return false;
+    }
 
     const authed = await ensureBackendSession();
     if (!authed) {
@@ -121,6 +180,27 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     }
 
     return true;
+  }
+
+  async function sendUnsignedTx(unsignedTx: string) {
+    const wallet = walletProvider as {
+      sendTransaction: (
+        transaction: Transaction,
+        connection: Connection,
+      ) => Promise<string>;
+    };
+    const tx = Transaction.from(base64ToBytes(unsignedTx));
+    const connection = new Connection(SOLANA_RPC_URL, "confirmed");
+    const txHash = await wallet.sendTransaction(tx, connection);
+    await connection.confirmTransaction(txHash, "confirmed");
+    return txHash;
+  }
+
+  async function refreshVaultStatus() {
+    const status = await backendFetch<VaultStatusPayload>("/api/vault/status");
+    setWalletBalanceDisplay(String(status.walletBalance || "-"));
+    setAvailableBalanceDisplay(String(status.availableBalance || "-"));
+    setLockedBalanceDisplay(String(status.lockedBalance || "-"));
   }
 
   async function onDeposit() {
@@ -133,10 +213,22 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
         setErrorMessage("Masukkan amount USDC yang valid.");
         return;
       }
-
-      setErrorMessage(
-        "Deposit Solana belum tersambung. Butuh endpoint backend untuk build/send transaction ke vault program.",
-      );
+      setStatusMessage("Preparing deposit transaction...");
+      const payload = await backendPost<VaultTxPayload>("/api/vault/deposit", {
+        amount: parsedAmount.toString(),
+      });
+      if (!payload?.unsignedTx) {
+        throw new Error("Backend did not return deposit transaction.");
+      }
+      setStatusMessage("Sign deposit in wallet...");
+      const txHash = await sendUnsignedTx(payload.unsignedTx);
+      setDepositTxHash(txHash);
+      setStatusMessage("Deposit confirmed on-chain.");
+      await refreshVaultStatus();
+      setAmount("10");
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(normalizeError(error, "Deposit failed."));
     } finally {
       setIsDepositBusy(false);
     }
@@ -152,10 +244,22 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
         setErrorMessage("Masukkan amount USDC yang valid.");
         return;
       }
-
-      setErrorMessage(
-        "Withdraw Solana belum tersambung. Butuh endpoint backend untuk vault withdraw instruction.",
-      );
+      setStatusMessage("Preparing withdraw transaction...");
+      const payload = await backendPost<VaultTxPayload>("/api/vault/withdraw", {
+        amount: parsedAmount.toString(),
+      });
+      if (!payload?.unsignedTx) {
+        throw new Error("Backend did not return withdraw transaction.");
+      }
+      setStatusMessage("Sign withdraw in wallet...");
+      const txHash = await sendUnsignedTx(payload.unsignedTx);
+      setWithdrawTxHash(txHash);
+      setStatusMessage("Withdraw confirmed on-chain.");
+      await refreshVaultStatus();
+      setAmount("10");
+      setErrorMessage("");
+    } catch (error) {
+      setErrorMessage(normalizeError(error, "Withdraw failed."));
     } finally {
       setIsWithdrawBusy(false);
     }
@@ -186,13 +290,19 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       }
 
       const result = await backendPost<FaucetRequestPayload>("/api/faucet/request");
-      const txHash = result.txHash || "";
+      const unsignedTx = String(result.unsignedTx || "");
+      if (!unsignedTx) {
+        throw new Error("Backend did not return faucet transaction.");
+      }
+      setStatusMessage("Sign faucet claim in wallet...");
+      const txHash = await sendUnsignedTx(unsignedTx);
       setFaucetTxHash(txHash);
       setFaucetCooldownSeconds(Number(result.cooldownSeconds || status.cooldownSeconds || 0));
-      setStatusMessage("Faucet request submitted by backend.");
+      setStatusMessage("Faucet claim confirmed on-chain.");
+      await refreshVaultStatus();
     } catch (error) {
       setErrorMessage(
-        normalizeError(error, "Faucet request failed. Backend faucet may still be using the legacy implementation."),
+        normalizeError(error, "Faucet request failed."),
       );
     } finally {
       setIsFaucetBusy(false);
@@ -211,20 +321,20 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     hasValidContracts: hasBackendConfig,
     usdcAddress: process.env.NEXT_PUBLIC_USDC_MINT || "",
     vaultAddress: process.env.NEXT_PUBLIC_VAULT_ADDRESS || "",
-    walletBalanceDisplay: "-",
+    walletBalanceDisplay,
     allowanceDisplay: "-",
-    availableBalanceDisplay: "-",
-    lockedBalanceDisplay: "-",
+    availableBalanceDisplay,
+    lockedBalanceDisplay,
     isWalletBalanceFetching: false,
     isAllowanceFetching: false,
     isVaultBalanceFetching: false,
     needsApproval: false,
     approveTxHash: "",
     approveTxUrl: "",
-    depositTxHash: "",
-    depositTxUrl: "",
-    withdrawTxHash: "",
-    withdrawTxUrl: "",
+    depositTxHash,
+    depositTxUrl: explorerTxUrl(depositTxHash),
+    withdrawTxHash,
+    withdrawTxUrl: explorerTxUrl(withdrawTxHash),
     faucetTxHash,
     faucetTxUrl: explorerTxUrl(faucetTxHash),
     isApproveBusy: false,
