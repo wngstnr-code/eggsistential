@@ -28,3 +28,9 @@ backend/tsconfig.tsbuildinfo
 auto_commit.py
 skills-lock.json
 **/skills-lock.json
+skill.md
+**/skill.md
+SKILL.md
+**/SKILL.md
+.agents/skills/
+**/.agents/skills/

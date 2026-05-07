@@ -67,40 +67,6 @@ function readErrorMessage(error: unknown, fallback: string) {
 }
 
 export function WalletProvider({ children }: WalletProviderProps) {
-  if (!hasReownProjectId()) {
-    const value: WalletContextValue = {
-      account: "",
-      chainIdHex: SOLANA_CLUSTER,
-      walletProviderName: "",
-      canDisconnect: false,
-      isAppChain: hasSolanaConfig(),
-      isConnecting: false,
-      error: "Reown Project ID is missing. Set NEXT_PUBLIC_REOWN_PROJECT_ID first.",
-      connectWallet: async () => {},
-      disconnectWallet: async () => {},
-      switchToAppChain: async () => {},
-      clearWalletError: () => {},
-      hasAppChainConfig: hasSolanaConfig(),
-      appChainIdHex: SOLANA_CLUSTER,
-      appChainName: `Solana ${SOLANA_CLUSTER}`,
-      backendApiUrl: BACKEND_API_URL,
-      hasBackendApiConfig: hasBackendApiConfig(),
-      isBackendAuthenticated: false,
-      isBackendAuthLoading: false,
-      backendAuthError: "",
-      authenticateBackend: async () => false,
-      ensureBackendSession: async () => false,
-      logoutBackend: async () => {},
-      refreshBackendSession: async () => false,
-    };
-
-    return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
-  }
-
-  return <WalletProviderConnected>{children}</WalletProviderConnected>;
-}
-
-function WalletProviderConnected({ children }: WalletProviderProps) {
   const { open } = useAppKit();
   const appKitAccount = useAppKitAccount({ namespace: SOLANA_NAMESPACE });
   const { walletInfo } = useWalletInfo(SOLANA_NAMESPACE);
