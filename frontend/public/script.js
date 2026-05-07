@@ -25,18 +25,14 @@ let lastRiverPlatformOffset = null;
 let nextTrainRowAtMs = 0;
 let trainCooldownRows = 0;
 
-// ============================================================
-// BETTING SYSTEM
-// ============================================================
-
-const STEP_INCREMENT_BP = 250; // +0.025x per forward step
-const CP_BONUS_NUM = 12; // × 1.2 at CP
+const STEP_INCREMENT_BP = 250;
+const CP_BONUS_NUM = 12;
 const CP_BONUS_DEN = 10;
-const CP_INTERVAL = 40; // checkpoint every 40 steps
-const SEGMENT_TIME_MS = 60 * 1000; // 60s between CPs
-const CP_MAX_STAY_MS = 60 * 1000; // auto-exit CP after 60s
-const DECAY_BP_PER_SEC = 1000; // -0.1x per second = -1000 bp/s
-const SPEED_MULT_PER_CP = 1.1; // vehicle speed × 1.3 per CP
+const CP_INTERVAL = 40;
+const SEGMENT_TIME_MS = 60 * 1000;
+const CP_MAX_STAY_MS = 60 * 1000;
+const DECAY_BP_PER_SEC = 1000;
+const SPEED_MULT_PER_CP = 1.1;
 const MAX_MOVE_QUEUE = 8;
 const DEFAULT_STAKE = 10;
 const MIN_STAKE = 1;
@@ -46,21 +42,15 @@ const bet = {
   balance: 0,
   active: false,
   stake: 0,
-  multiplierBp: 0, // starts at 0.00x (not 1.00x!)
+  multiplierBp: 0,
   maxRow: 0,
-  currentCp: 0, // number of CPs completed
-
-  // CP window state
+  currentCp: 0,
   cashoutWindow: false,
   cpEnterTime: 0,
   cpRowIndex: 0,
   cpStayRemainingMs: 0,
-
-  // Segment (between CP) timer
   segmentActive: false,
   segmentStart: 0,
-
-  // Decay tracking
   lastDecayTick: 0,
   isDecaying: false,
   reconnecting: false,
@@ -115,7 +105,6 @@ function writeStoredSfxVolume(value) {
   try {
     localStorage.setItem(SFX_STORAGE_KEY, String(clampSfxVolume(value)));
   } catch (_error) {
-    // ignore storage errors in private mode / restricted contexts
   }
 }
 
@@ -887,7 +876,7 @@ function activateBet(stake, availableBalance) {
   bet.cpEnterTime = 0;
   bet.cpRowIndex = 0;
   bet.cpStayRemainingMs = 0;
-  bet.segmentActive = true; // first segment starts immediately from step 0
+  bet.segmentActive = true;
   bet.segmentStart = Date.now();
   bet.lastDecayTick = Date.now();
   bet.isDecaying = false;
@@ -972,12 +961,9 @@ async function startBet(stake) {
 
 function onPlayerAdvance(newRowIndex) {
   if (!bet.active) return;
-
-  // Check if this row is a checkpoint (every 40 steps, grass row)
   if (newRowIndex > 0 && newRowIndex % CP_INTERVAL === 0) {
     reachCheckpoint(newRowIndex);
   } else {
-    // moved forward past the CP row — close cashout window
     if (bet.cashoutWindow && newRowIndex > bet.cpRowIndex) {
       closeCashoutWindow();
     }
@@ -991,11 +977,7 @@ function reachCheckpoint(rowIndex) {
   showCheckpointArrivalCue();
   bet.currentCp += 1;
   bet.cpRowIndex = rowIndex;
-
-  // × 1.2 compound bonus
   bet.multiplierBp = getCurrentEffectiveMultiplierBp();
-
-  // Open cashout window, freeze segment timer while at CP
   bet.cashoutWindow = true;
   bet.cpEnterTime = Date.now();
   bet.segmentActive = false;
@@ -1021,7 +1003,6 @@ function showCheckpointArrivalCue() {
 
 function closeCashoutWindow() {
   bet.cashoutWindow = false;
-  // Start new segment timer (60s to reach next CP)
   bet.segmentActive = true;
   bet.segmentStart = Date.now();
   bet.lastDecayTick = Date.now();
@@ -1033,7 +1014,7 @@ function canCashOut() {
 
 async function cashOut(reason) {
   if (!bet.active) return;
-  if (!bet.cashoutWindow) return; // only at CP with window open
+  if (!bet.cashoutWindow) return;
   if (settlementPending) return;
 
   if (hasLiveBridge()) {
@@ -1064,8 +1045,6 @@ async function cashOut(reason) {
       });
     } catch (error) {
       console.error("Failed to settle cashout:", error);
-      // Backend already finalized the offchain session, so keep UI in sync
-      // and force the player back to a clean pre-bet state.
       bet.active = false;
       bet.cashoutWindow = false;
       bet.segmentActive = false;
@@ -1228,27 +1207,22 @@ function stopBetTicker({ resetTimer = true } = {}) {
 function tickBet() {
   if (!bet.active) return;
   const now = Date.now();
-
-  // --- CP stay timeout check ---
   if (bet.cashoutWindow) {
     const stayElapsed = now - bet.cpEnterTime;
     const remaining = Math.max(0, CP_MAX_STAY_MS - stayElapsed);
-    renderTimer(remaining, true); // "AT CP" mode
+    renderTimer(remaining, true);
     bet.cpStayRemainingMs = remaining;
     bet.isDecaying = false;
     bet.multiplierBp = getCurrentEffectiveMultiplierBp(now);
-    renderBetHud(); // update CP timer row in HUD every tick
+    renderBetHud();
     if (remaining <= 0) {
       closeCashoutWindow();
     }
   } else if (bet.segmentActive) {
-    // --- Segment timer ---
     const segElapsed = now - bet.segmentStart;
     const remaining = Math.max(0, SEGMENT_TIME_MS - segElapsed);
     renderTimer(remaining, false);
     bet.cpStayRemainingMs = 0;
-
-    // --- Decay logic: after segment time is up, -0.1x per second ---
     const decayWasActive = bet.isDecaying;
     const decayPenaltyBp = getCurrentDecayPenaltyBp(now);
 
@@ -1285,8 +1259,6 @@ function renderTimer(ms, atCp) {
   el.innerText = `${m}:${s.toString().padStart(2, "0")}`;
 
   if (labelEl) labelEl.innerText = atCp ? "AT CP" : "RUSH";
-
-  // Logic for timer colors and flashing
   if (bet.active && ms <= 10000) {
     el.classList.add("timer-flash");
     el.style.color = "#ffffff";
@@ -1356,8 +1328,6 @@ function renderBetHud() {
   if (idleHudEl) {
     idleHudEl.style.display = bet.active ? "none" : "block";
   }
-
-  // Decay indicator
   if (decayRow) {
     decayRow.hidden = !isDecayActive;
     decayRow.style.display = isDecayActive ? "flex" : "none";
@@ -1574,12 +1544,12 @@ function Camera() {
   const height = viewRatio < 1 ? size / viewRatio : size;
 
   const camera = new THREE.OrthographicCamera(
-    width / -2, // left
-    width / 2, // right
-    height / 2, // top
-    height / -2, // bottom
-    1, // near
-    3000, // far
+    width / -2,
+    width / 2,
+    height / 2,
+    height / -2,
+    1,
+    3000,
   );
 
   camera.up.set(0, 0, 1);
@@ -1589,7 +1559,6 @@ function Camera() {
 }
 
 function applyCameraPose(camera, isMobile = window.innerWidth <= 768) {
-  // Keep desktop and mobile aligned to the same camera angle.
   camera.position.set(190, -420, 370);
   camera.lookAt(-108, 250, -100);
 }
@@ -1672,8 +1641,8 @@ function Car(initialTileIndex, direction, color) {
       flatShading: true,
       map: carLeftSideTexture,
     }),
-    new THREE.MeshPhongMaterial({ color: 0xd9ecff, flatShading: true }), // top
-    new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true }), // bottom
+    new THREE.MeshPhongMaterial({ color: 0xd9ecff, flatShading: true }),
+    new THREE.MeshPhongMaterial({ color: 0xcccccc, flatShading: true }),
   ]);
   cabin.position.x = -6;
   cabin.position.z = 25.5;
@@ -2191,9 +2160,6 @@ const __rockMatC = new THREE.MeshLambertMaterial({
   color: 0x3b362f,
   flatShading: true,
 });
-
-// Layers cover from playable edge (tile 9) all the way to side mesh edge (tile 17).
-// tilePos is the rock's center in tile units measured from the row center.
 const __nonTunnelRockLayers = [
   { tilePos: 9.5, sx: 1.0, sy: 1.0, h: 78, mat: __rockMatA, yOff: 0 },
   { tilePos: 11.0, sx: 2.0, sy: 1.05, h: 116, mat: __rockMatB, yOff: 7 },
@@ -2201,8 +2167,6 @@ const __nonTunnelRockLayers = [
   { tilePos: 15.0, sx: 2.0, sy: 1.05, h: 102, mat: __rockMatA, yOff: 4 },
   { tilePos: 16.5, sx: 1.0, sy: 1.0, h: 86, mat: __rockMatB, yOff: 0 },
 ];
-
-// Tunnel rows leave tile 9..10 free for the tunnel mouth and keep coverage 10..17.
 const __tunnelRockLayers = [
   { tilePos: 10.5, sx: 1.0, sy: 1.05, h: 96, mat: __rockMatA, yOff: 5 },
   { tilePos: 12.0, sx: 2.0, sy: 1.0, h: 130, mat: __rockMatC, yOff: -3 },
@@ -2374,7 +2338,6 @@ const metadata = [];
 const map = new THREE.Group();
 
 function initializeMap() {
-  // Remove all rows
   metadata.length = 0;
   map.remove(...map.children);
   railwayLights.length = 0;
@@ -2386,8 +2349,6 @@ function initializeMap() {
   riverCooldownRows = 0;
   lastRiverPlatformOffset = null;
   riverDecorations.length = 0;
-
-  // Add new rows
   for (let rowIndex = 0; rowIndex > -10; rowIndex--) {
     const grass = Grass(rowIndex);
     map.add(grass);
@@ -2805,18 +2766,13 @@ const LOG_HALF_WIDTH = 42;
 const STONE_HALF_WIDTH = 22;
 
 function initializePlayer() {
-  // Initialize the Three.js player object
   player.position.x = 0;
   player.position.y = 0;
   player.position.z = 0;
   player.children[0].position.z = 0;
-
-  // Initialize metadata
   position.currentRow = 0;
   position.currentTile = 0;
   position.ridingBoat = null;
-
-  // Clear the moves queue
   movesQueue.length = 0;
   moveStartX = 0;
   moveStartY = 0;
@@ -2930,11 +2886,7 @@ function stepCompleted() {
   if (hasLiveBridge()) {
     getBridge().sendMove(direction);
   }
-
-  // Add new rows if the player is running out of them
   if (position.currentRow > metadata.length - 10) addRows();
-
-  // Track multiplier for bet mode — only count NEW rows (anti-exploit)
   if (bet.active) {
     if (direction === "forward") {
       if (position.currentRow > bet.maxRow) {
@@ -2959,7 +2911,6 @@ function stepCompleted() {
   const scoreDOM = document.getElementById("score");
   if (scoreDOM) {
     scoreDOM.innerText = position.currentRow.toString();
-    // Change color every 20 hops
     const colors = ["#ffffff", "#50e3c2", "#ffb703", "#ff70a6", "#70d6ff", "#ff9770", "#ffd670", "#e9ff70"];
     const colorIndex = Math.floor(position.currentRow / 20) % colors.length;
     scoreDOM.style.color = colors[colorIndex];
@@ -3897,11 +3848,11 @@ function Truck(initialTileIndex, direction, color) {
       color,
       flatShading: true,
       map: truckFrontTexture,
-    }), // front
+    }),
     new THREE.MeshLambertMaterial({
       color,
       flatShading: true,
-    }), // back
+    }),
     new THREE.MeshLambertMaterial({
       color,
       flatShading: true,
@@ -3912,8 +3863,8 @@ function Truck(initialTileIndex, direction, color) {
       flatShading: true,
       map: truckRightSideTexture,
     }),
-    new THREE.MeshPhongMaterial({ color, flatShading: true }), // top
-    new THREE.MeshPhongMaterial({ color, flatShading: true }), // bottom
+    new THREE.MeshPhongMaterial({ color, flatShading: true }),
+    new THREE.MeshPhongMaterial({ color, flatShading: true }),
   ]);
   cabin.position.x = 35;
   cabin.position.z = 20;
@@ -4011,32 +3962,22 @@ function calculateFinalPosition(currentPosition, moves) {
 }
 
 function endsUpInValidPosition(currentPosition, moves) {
-  // Calculate where the player would end up after the move
   const finalPosition = calculateFinalPosition(currentPosition, moves);
-
-  // Detect if we hit the edge of the board
   if (
     finalPosition.rowIndex === -1 ||
     finalPosition.tileIndex === minTileIndex - 1 ||
     finalPosition.tileIndex === maxTileIndex + 1
   ) {
-    // Invalid move, ignore move command
     return false;
   }
-
-  // Detect if we hit a tree
   const finalRow = metadata[finalPosition.rowIndex - 1];
   if (
     finalRow &&
     finalRow.type === "forest" &&
     finalRow.trees.some((tree) => tree.tileIndex === finalPosition.tileIndex)
   ) {
-    // Invalid move, ignore move command
     return false;
   }
-
-  // River row moves are always queueable; landing is validated against live platform
-  // positions in evaluateBoatRide() at stepCompleted time.
 
   return true;
 }
@@ -4061,8 +4002,6 @@ function generateRow(rowIndex) {
   if (riverCooldownRows > 0) {
     riverCooldownRows = Math.max(0, riverCooldownRows - 1);
   }
-
-  // Force grass row at every checkpoint position
   if (rowIndex > 0 && rowIndex % CP_INTERVAL === 0) {
     pendingRoadRowsInSegment = 0;
     pendingRiverRowsInSegment = 0;
@@ -4114,8 +4053,6 @@ function generateRow(rowIndex) {
     resetRiverLayoutMemory();
     return generateForesMetadata();
   }
-
-  // Hard rule: after 4 consecutive road rows, next row must be grass.
   if (consecutiveRoadRows >= MAX_CONSECUTIVE_ROAD_ROWS) {
     pendingRoadRowsInSegment = 0;
     pendingRiverRowsInSegment = 0;
@@ -4132,8 +4069,6 @@ function generateRow(rowIndex) {
     resetRiverLayoutMemory();
     return generateRoadLaneMetadata();
   }
-
-  // Occasional train track row — keep it away from checkpoint exits.
   if (
     trainCooldownRows === 0 &&
     !isTrainBlockedNearCheckpoint(rowIndex) &&
@@ -4154,7 +4089,6 @@ function generateRow(rowIndex) {
   if (shouldStartRoadSegment) {
     const maxLength = Math.max(1, MAX_CONSECUTIVE_ROAD_ROWS - consecutiveRoadRows);
     const segmentLength = THREE.MathUtils.randInt(1, maxLength);
-    // We generate one row now, and keep the rest for upcoming rows.
     pendingRoadRowsInSegment = Math.max(0, segmentLength - 1);
     consecutiveRoadRows += 1;
     consecutiveRiverRows = 0;
@@ -4500,7 +4434,6 @@ const moveClock = new THREE.Clock(false);
 
 function animatePlayer() {
   if (!movesQueue.length) {
-    // Idle ride: while standing on a moving river platform, sync visual position and check bounds.
     if (position.ridingBoat && !gameOver) {
       if (position.ridingBoat.userData.isSubmerged) {
         onDrown();
@@ -4526,13 +4459,11 @@ function animatePlayer() {
     moveStartY = player.position.y;
   }
 
-  const stepTime = 0.2; // Seconds it takes to take a step
+  const stepTime = 0.2;
   const progress = Math.min(1, moveClock.getElapsedTime() / stepTime);
 
   setPosition(progress);
   setRotation(progress);
-
-  // Once a step has ended
   if (progress >= 1) {
     stepCompleted();
     moveClock.stop();
@@ -4572,8 +4503,6 @@ const clock = new THREE.Clock();
 function animateVehicles(delta = clock.getDelta()) {
   const playerX = position.currentTile * tileSize;
   const playerRowIndex = position.currentRow - 1;
-
-  // Speed multiplier scales with CP count (bet mode only)
   const speedMultiplier = bet.active
     ? Math.pow(SPEED_MULT_PER_CP, bet.currentCp)
     : 1;
@@ -4701,16 +4630,16 @@ window.addEventListener("keydown", (event) => {
 
   const key = String(event.key || "").toLowerCase();
   if (event.key === "ArrowUp" || key === "w") {
-    event.preventDefault(); // Avoid scrolling the page
+    event.preventDefault();
     queueMove("forward");
   } else if (event.key === "ArrowDown" || key === "s") {
-    event.preventDefault(); // Avoid scrolling the page
+    event.preventDefault();
     queueMove("backward");
   } else if (event.key === "ArrowLeft" || key === "a") {
-    event.preventDefault(); // Avoid scrolling the page
+    event.preventDefault();
     queueMove("left");
   } else if (event.key === "ArrowRight" || key === "d") {
-    event.preventDefault(); // Avoid scrolling the page
+    event.preventDefault();
     queueMove("right");
   }
 });
@@ -4741,7 +4670,6 @@ if (gameCanvas) {
     "touchmove",
     (event) => {
       if (!swipeTracking) return;
-      // Keep swipe interactions focused on gameplay (avoid browser pan gesture).
       event.preventDefault();
     },
     { passive: false },
@@ -6069,7 +5997,6 @@ function initBettingUI() {
   });
 
   window.addEventListener("chicken:cp-expired", (event) => {
-    // Backend closed the CP window — update local state and HUD
     bet.cashoutWindow = false;
     bet.cpStayRemainingMs = 0;
     bet.isDecaying = false;
@@ -6138,8 +6065,6 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
-// Remove loading screen after a short delay
 setTimeout(() => {
   const loader = document.getElementById("loading-screen");
   if (loader) {

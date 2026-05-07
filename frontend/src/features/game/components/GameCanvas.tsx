@@ -106,7 +106,6 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
     try {
       window.localStorage.setItem(CHARACTER_STORAGE_KEY, characterId);
     } catch {
-      // Ignore storage restrictions; the current session still updates.
     }
     window.dispatchEvent(
       new CustomEvent("chicken:character-selected", {

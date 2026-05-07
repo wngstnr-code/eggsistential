@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect */
+
 
 import { useEffect, useRef, useState } from "react";
 import {
@@ -15,7 +15,6 @@ import { useWallet } from "~/features/wallet/WalletProvider";
 function shortAddress(address: string, isMobile: boolean = false) {
   if (!address) return "NO WALLET";
   if (isMobile) {
-    // Shorter format for mobile to prevent overflow (e.g., 0x12...34)
     return `${address.slice(0, 4)}.${address.slice(-2)}`;
   }
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -154,7 +153,6 @@ export function PlayTopNav() {
     try {
       localStorage.setItem(SFX_STORAGE_KEY, String(normalized));
     } catch {
-      // ignore storage errors
     }
     window.dispatchEvent(
       new CustomEvent("chicken:set-sfx-volume", {

@@ -31,9 +31,7 @@ canvas.game {
   height: 100vh;
 }
 
-/* ============================================================
-   TOP BAR — balance, timer, deposit
-============================================================ */
+
 
 #top-bar {
   position: absolute;
@@ -124,15 +122,11 @@ canvas.game {
   box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* ============================================================
-   SCORE
-============================================================ */
 
-/* Score style is handled by .stat-card and .stat-value */
 
-/* ============================================================
-   BET HUD — shown during active bet
-============================================================ */
+
+
+
 
 .hud-row {
   display: flex;
@@ -208,9 +202,7 @@ canvas.game {
   box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* ============================================================
-   CONTROLS
-============================================================ */
+
 
 #controls {
   position: absolute;
@@ -255,9 +247,7 @@ canvas.game {
   grid-column: 1/-1;
 }
 
-/* ============================================================
-   MODALS — bet panel, deposit, result
-============================================================ */
+
 
 .modal-bg {
   position: absolute;
@@ -567,9 +557,7 @@ canvas.game {
   cursor: not-allowed;
 }
 
-/* ============================================================
-   RESULT MODAL
-============================================================ */
+
 
 #result-container {
   position: absolute;
@@ -637,9 +625,7 @@ canvas.game {
   width: 100%;
 }
 
-/* ============================================================
-   HELP UI (landing + in-game)
-============================================================ */
+
 
 .fixed-help {
   position: fixed;
@@ -1106,9 +1092,7 @@ canvas.game {
   box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.32);
 }
 
-/* ============================================================
-   RESPONSIVE — mobile & small screens
-============================================================ */
+
 
 @media (max-width: 768px) {
   #top-bar {
@@ -1150,7 +1134,7 @@ canvas.game {
     font-size: 1em;
     letter-spacing: 1px;
     display: none;
-    /* hide in mobile, bet-cp shows it */
+    
   }
 
   .hud-row {
@@ -1405,9 +1389,7 @@ canvas.game {
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* ============================================================
-   IN-GAME UI REFINEMENT
-============================================================ */
+
 
 canvas.game {
   image-rendering: pixelated;
@@ -2288,7 +2270,7 @@ body.checkpoint-arrival #hud-scrim::after {
   width: 100vw !important;
   height: 100vh !important;
   display: flex;
-  /* Remove !important here */
+  
   align-items: center !important;
   justify-content: center !important;
   background: rgba(4, 8, 20, 0.62) !important;
@@ -2818,7 +2800,7 @@ body.checkpoint-arrival #hud-scrim::after {
   color: #153680;
 }
 
-/* Force passport popup palette so it wins over shared .modal-box styles */
+
 .play-passport-modal.modal-bg {
   background: rgba(3, 9, 26, 0.72) !important;
   backdrop-filter: blur(10px) !important;
@@ -2985,7 +2967,7 @@ body.checkpoint-arrival #hud-scrim::after {
     0 2px 6px rgba(5, 19, 62, 0.42);
 }
 
-/* Hard override in case any legacy button palette still wins */
+
 .play-passport-modal .modal-box.play-passport-box .play-passport-cta {
   border: 3px solid #9bbcff !important;
   background: linear-gradient(180deg, #3c8dff 0%, #0052ff 100%) !important;
@@ -3009,7 +2991,7 @@ body.checkpoint-arrival #hud-scrim::after {
     0 2px 6px rgba(5, 19, 62, 0.42) !important;
 }
 
-/* Logout - Red */
+
 .play-menu-modal-item.logout {
   background: linear-gradient(180deg, #ff8a8a 0%, #dd3d3d 100%);
   color: #fff;
@@ -3055,7 +3037,7 @@ body.checkpoint-arrival #hud-scrim::after {
   cursor: pointer;
 }
 
-/* Dark playful arcade skin for the play menu and paid-run confirmation. */
+
 .play-menu-modal .play-menu-box,
 .modal-box.modal-box-bet {
   border: 4px solid #31466b !important;
@@ -3596,13 +3578,11 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* ============================================================
-   RESPONSIVE — mobile phones (play page)
-============================================================ */
+
 
 @media (max-width: 700px) and (orientation: portrait) {
 
-  /* --- Top bar (score, balance, timer, bet) --- */
+  
   #top-bar {
     top: 8px;
     left: 8px;
@@ -3665,7 +3645,7 @@ body.checkpoint-arrival #hud-scrim::after {
     gap: 6px;
   }
 
-  /* --- Bet HUD --- */
+  
   #bet-hud {
     border-radius: 10px;
     border-width: 1.5px;
@@ -3729,7 +3709,7 @@ body.checkpoint-arrival #hud-scrim::after {
     letter-spacing: 0.5px;
   }
 
-  /* --- Bet button --- */
+  
   #bet-btn {
     min-width: 62px;
     min-height: var(--top-bar-control-height);
@@ -3743,7 +3723,7 @@ body.checkpoint-arrival #hud-scrim::after {
     font-size: 10px;
   }
 
-  /* --- Play nav (wallet, hamburger, deposit, status) --- */
+  
   .play-nav {
     top: 44px;
     right: 8px;
@@ -3810,7 +3790,7 @@ body.checkpoint-arrival #hud-scrim::after {
     border-radius: 5px;
   }
 
-  /* --- D-pad controls --- */
+  
   #controls {
     bottom: 14px;
   }
@@ -3831,7 +3811,7 @@ body.checkpoint-arrival #hud-scrim::after {
     border-width: 1.5px;
   }
 
-  /* --- Help button --- */
+  
   .fixed-help {
     width: 52px;
     height: 52px;
@@ -3842,7 +3822,7 @@ body.checkpoint-arrival #hud-scrim::after {
     box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.3);
   }
 
-  /* --- Modals shrink --- */
+  
   .modal-box {
     padding: 16px 14px;
     gap: 8px;
@@ -7117,9 +7097,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* ============================================================
-   IPAD & TABLET PORTRAIT HUD (Variables Override)
-============================================================ */
+
 @media (min-width: 768px) and (max-width: 1023px) {
   :root {
     --play-mobile-edge-gutter: 16px;
@@ -7234,9 +7212,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* ============================================================
-   MOBILE GAMEPLAY ZOOM
-============================================================ */
+
 @media (max-width: 480px) and (orientation: portrait) {
   canvas.game {
     transform: scale(1.0);
@@ -7244,9 +7220,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* ==========================================================================
-   LOADING SCREEN
-   ========================================================================== */
+
 
 #loading-screen {
   position: absolute;
@@ -7322,9 +7296,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* ============================================================
-   PLAY MOBILE LAYOUT V2
-============================================================ */
+
 
 .play-nav-actions {
   display: flex;
@@ -7462,7 +7434,7 @@ body.checkpoint-arrival #hud-scrim::after {
   display: none;
 }
 
-/* Mobile-only floating bottom navbar — desktop uses the side stack instead. */
+
 .play-bottom-navbar-v2 {
   display: none !important;
 }
@@ -7519,10 +7491,10 @@ body.checkpoint-arrival #hud-scrim::after {
     transform: translateX(-50%);
     width: 116px;
     height: 40px;
-    border-radius: 20px; /* Fully rounded pill */
-    border: 2px solid #1a253d; /* Sleek dark rim */
-    background: #0b111d; /* Dark inset background */
-    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 1px rgba(255, 255, 255, 0.05); /* Recessed look */
+    border-radius: 20px; 
+    border: 2px solid #1a253d; 
+    background: #0b111d; 
+    box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 1px rgba(255, 255, 255, 0.05); 
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -7535,7 +7507,7 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-nav-balance-label {
     font-size: 6px;
     letter-spacing: 1px;
-    color: #8a9fb5; /* Cleaner muted blue */
+    color: #8a9fb5; 
     line-height: 1;
     margin-top: 2px;
   }
@@ -7543,8 +7515,8 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-nav-balance-value {
     font-size: 14px;
     line-height: 1;
-    color: #ffd93d; /* Brighter gold */
-    text-shadow: 0 0 8px rgba(255, 217, 61, 0.4); /* Glowing effect */
+    color: #ffd93d; 
+    text-shadow: 0 0 8px rgba(255, 217, 61, 0.4); 
   }
 
   .play-wallet-menu,
@@ -7563,7 +7535,7 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-wallet-trigger {
     height: 40px;
     min-height: 40px;
-    border-radius: 20px !important; /* Fully rounded pill */
+    border-radius: 20px !important; 
     font-size: 10px;
     letter-spacing: 0.5px;
     padding: 0 16px;
@@ -7623,9 +7595,9 @@ body.checkpoint-arrival #hud-scrim::after {
     width: 100vw;
     height: calc(78px + var(--play-safe-bottom));
     padding: 8px 10px calc(8px + var(--play-safe-bottom));
-    background: #151f33; /* Solid dark color to match reference */
+    background: #151f33; 
     border-top: 1px solid rgba(184, 212, 255, 0.15);
-    border-radius: 0 !important; /* Force no rounded corners */
+    border-radius: 0 !important; 
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
     box-sizing: border-box;
     display: grid !important;
@@ -7677,7 +7649,7 @@ body.checkpoint-arrival #hud-scrim::after {
     min-height: 58px;
     background: transparent;
     border: none;
-    color: #8a9fb5; /* Slightly muted blue/grey */
+    color: #8a9fb5; 
     font-family: inherit;
     font-size: 6px;
     letter-spacing: 0.55px;
@@ -7766,7 +7738,7 @@ body.checkpoint-arrival #hud-scrim::after {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: none; /* Removed hard border for floating look */
+    border: none; 
     background: linear-gradient(180deg, #ffe066 0%, #e7a303 100%);
     color: #2c1810;
     box-shadow: 0 4px 16px rgba(231, 163, 3, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
@@ -7780,7 +7752,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-bottom-nav-play-circle svg {
-    margin-left: 3px; /* Optically center the play triangle */
+    margin-left: 3px; 
     width: 28px;
     height: 28px;
     stroke-width: 2.5;
@@ -7927,7 +7899,7 @@ body.checkpoint-arrival #hud-scrim::after {
     text-transform: uppercase;
   }
 
-  /* Unify all HUD values */
+  
   #score,
   #score-cp,
   #timer {
@@ -7964,7 +7936,7 @@ body.checkpoint-arrival #hud-scrim::after {
     margin: 0;
   }
 
-  /* Timer Flash Animation */
+  
   @keyframes timer-pulse {
     0%, 100% { opacity: 1; color: #ffffff; }
     50% { opacity: 0.5; color: #ffffff; }
@@ -8121,7 +8093,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* Home hero title final override */
+
 .home-hero-copy {
   max-width: min(1200px, 100%);
 }
@@ -8145,7 +8117,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 }
 
-/* Keep alert/menu icons visually equal */
+
 .play-nav-actions .play-alert-icon,
 .play-nav-actions .hamburger-icon {
   width: 16px;
@@ -8206,7 +8178,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 }
 
-/* Final color pass: richer arcade buttons for play menu and bet confirmation. */
+
 .play-menu-modal .play-menu-stats-btn,
 .play-menu-modal .play-menu-modal-item,
 .play-menu-volume-mute,

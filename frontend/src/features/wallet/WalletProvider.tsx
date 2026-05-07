@@ -1,6 +1,6 @@
 "use client";
 
-/* eslint-disable react-hooks/set-state-in-effect */
+
 
 import {
   createContext,
@@ -310,7 +310,6 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       await backendPost<{ success: boolean }>("/auth/logout");
     } catch {
-      // Ignore logout failures on local dev; frontend state is still cleared.
     } finally {
       setBackendAddress("");
       setBackendAuthError("");
