@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "import-wallet": "node import-base58-wallet.mjs",
-    "init-config": "tsx initialize-config.ts"
+    "init-config": "tsx initialize-config.ts",
+    "smoke-test": "tsx smoke-test.ts"
   },
   "dependencies": {
     "@solana/spl-token": "^0.4.9",
