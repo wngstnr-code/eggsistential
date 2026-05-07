@@ -1,7 +1,11 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer, type Socket } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import { createPublicClient, http, isHex, parseAbi, type Address, type Hex } from "viem";
+import {
+  isZeroSessionId,
+  readActiveOnchainSession,
+  readTransactionStatus,
+} from "../lib/solana.js";
 import { getWalletFromSocketCookies } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
@@ -49,13 +53,6 @@ import { submitSettlementOnchain } from "../services/settlementExecutor.js";
 
 let io: SocketServer;
 const SIGN_SETTLEMENT_TIMEOUT_MS = 10_000;
-const GAME_SETTLEMENT_READ_ABI = parseAbi([
-  "function activeSessionOf(address player) view returns (bytes32)",
-  "function getSession(bytes32 sessionId) view returns (address player, uint256 stakeAmount, uint64 startedAt, bool active, bool settled)",
-]);
-const gatewayPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
 
 type MiniPaySocketAuthPayload = {
   walletAddress?: string;
@@ -109,7 +106,7 @@ function isAlreadySettledLikeGatewayError(error: unknown) {
 }
 
 function isZeroBytes32(value: string) {
-  return !isHex(value, { strict: true }) || /^0x0{64}$/i.test(value);
+  return isZeroSessionId(value);
 }
 
 function usdcUnitsToNumber(amount: bigint) {
@@ -126,40 +123,7 @@ function calculatePayoutFromUnits(stake: number, multiplierBp: number) {
   };
 }
 
-async function readActiveOnchainSession(walletAddress: string) {
-  const activeSessionId = await gatewayPublicClient.readContract({
-    address: env.GAME_SETTLEMENT_ADDRESS as Address,
-    abi: GAME_SETTLEMENT_READ_ABI,
-    functionName: "activeSessionOf",
-    args: [walletAddress as Address],
-  });
-
-  if (isZeroBytes32(activeSessionId)) {
-    return null;
-  }
-
-  const session = await gatewayPublicClient.readContract({
-    address: env.GAME_SETTLEMENT_ADDRESS as Address,
-    abi: GAME_SETTLEMENT_READ_ABI,
-    functionName: "getSession",
-    args: [activeSessionId],
-  });
-
-  const player = String(session[0] || "").toLowerCase();
-  const stakeAmountUnits = BigInt(session[1] ?? 0n);
-  const active = Boolean(session[3]);
-  const settled = Boolean(session[4]);
-
-  if (player !== walletAddress.toLowerCase() || !active || settled) {
-    return null;
-  }
-
-  return {
-    sessionId: activeSessionId,
-    player: player as Address,
-    stakeAmountUnits,
-  };
-}
+// Replaced by readActiveOnchainSession from lib/solana.ts
 
 async function clearActiveOnchainSession(walletAddress: string) {
   const activeOnchainSession = await readActiveOnchainSession(walletAddress);
@@ -395,14 +359,13 @@ async function canAbortStartSession(txHash?: string): Promise<{ canAbort: boolea
   }
 
   try {
-    const receipt = await gatewayPublicClient.getTransactionReceipt({
-      hash: txHash as Hex,
-    });
-
-    if (receipt.status === "reverted") {
+    const status = await readTransactionStatus(txHash);
+    if (!status.found) {
+      throw new Error("transaction not found");
+    }
+    if (status.success === false) {
       return { canAbort: true };
     }
-
     return {
       canAbort: false,
       message:

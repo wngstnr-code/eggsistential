@@ -1,18 +1,8 @@
-import { createPublicClient, http, parseAbiItem, type Address } from "viem";
+import { PublicKey } from "@solana/web3.js";
+import { createHash } from "node:crypto";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
-
-const DEPOSITED_EVENT = parseAbiItem("event Deposited(address indexed account, uint256 amount)");
-const WITHDRAWN_EVENT = parseAbiItem("event Withdrawn(address indexed account, uint256 amount)");
-const TREASURY_FUNDED_EVENT = parseAbiItem(
-  "event TreasuryFunded(address indexed funder, uint256 amount)"
-);
-const SESSION_STARTED_EVENT = parseAbiItem(
-  "event SessionStarted(address indexed player, bytes32 indexed sessionId, uint256 stakeAmount)"
-);
-const SESSION_SETTLED_EVENT = parseAbiItem(
-  "event SessionSettled(address indexed player, bytes32 indexed sessionId, uint8 outcome, uint256 stakeAmount, uint256 payoutAmount, uint256 finalMultiplierBp)"
-);
+import { connection, PROGRAM_ID } from "../lib/solana.js";
 
 type TransactionType =
   | "DEPOSIT"
@@ -21,25 +11,29 @@ type TransactionType =
   | "SESSION_STARTED"
   | "SESSION_SETTLED";
 
-const EVENT_POLL_INTERVAL_MS = 15_000;
-
-let publicClient: ReturnType<typeof createPublicClient> | null = null;
 let isListening = false;
-let lastProcessedBlock: bigint | null = null;
+let subscriptionId: number | null = null;
 
-function getPublicClient() {
-  if (!publicClient) {
-    publicClient = createPublicClient({ transport: http(env.RPC_URL) });
-  }
+function eventDiscriminator(eventName: string): Buffer {
+  return createHash("sha256").update(`event:${eventName}`).digest().subarray(0, 8);
+}
 
-  return publicClient;
+const DISCRIMINATORS = {
+  Deposited: eventDiscriminator("Deposited"),
+  Withdrawn: eventDiscriminator("Withdrawn"),
+  TreasuryFunded: eventDiscriminator("TreasuryFunded"),
+  SessionStarted: eventDiscriminator("SessionStarted"),
+  SessionSettled: eventDiscriminator("SessionSettled"),
+};
+
+function unitsToToken(amount: bigint): number {
+  return Number(amount) / 10 ** env.TOKEN_DECIMALS;
 }
 
 async function ensurePlayer(walletAddress: string) {
   const { error } = await supabase
     .from("players")
-    .upsert({ wallet_address: walletAddress.toLowerCase() }, { onConflict: "wallet_address" });
-
+    .upsert({ wallet_address: walletAddress }, { onConflict: "wallet_address" });
   if (error) {
     console.error(`❌ Failed to ensure player ${walletAddress}:`, error);
   }
@@ -55,210 +49,172 @@ async function logTransaction(params: {
   const { error } = await supabase.from("transactions").upsert(
     {
       tx_hash: params.txHash,
-      wallet_address: params.walletAddress.toLowerCase(),
+      wallet_address: params.walletAddress,
       type: params.type,
       amount: params.amount,
       onchain_session_id: params.onchainSessionId ?? null,
     },
-    { onConflict: "tx_hash" }
+    { onConflict: "tx_hash" },
   );
-
   if (error) {
     console.error(`❌ Failed to log transaction ${params.txHash}:`, error);
   }
 }
 
-async function syncVaultEventRange(vaultAddress: Address, fromBlock: bigint, toBlock: bigint) {
-  const client = getPublicClient();
-
-  const [deposits, withdrawals, treasuryFunded] = await Promise.all([
-    client.getLogs({
-      address: vaultAddress,
-      event: DEPOSITED_EVENT,
-      fromBlock,
-      toBlock,
-    }),
-    client.getLogs({
-      address: vaultAddress,
-      event: WITHDRAWN_EVENT,
-      fromBlock,
-      toBlock,
-    }),
-    client.getLogs({
-      address: vaultAddress,
-      event: TREASURY_FUNDED_EVENT,
-      fromBlock,
-      toBlock,
-    }),
-  ]);
-
-  for (const log of deposits) {
-    const { account, amount } = log.args;
-    if (!account || amount === undefined) continue;
-    await ensurePlayer(account);
-    if (log.transactionHash) {
-      await logTransaction({
-        txHash: log.transactionHash,
-        walletAddress: account,
-        type: "DEPOSIT",
-        amount: Number(amount) / 1e6,
-      });
-    }
-  }
-
-  for (const log of withdrawals) {
-    const { account, amount } = log.args;
-    if (!account || amount === undefined) continue;
-    await ensurePlayer(account);
-    if (log.transactionHash) {
-      await logTransaction({
-        txHash: log.transactionHash,
-        walletAddress: account,
-        type: "WITHDRAW",
-        amount: Number(amount) / 1e6,
-      });
-    }
-  }
-
-  for (const log of treasuryFunded) {
-    const { funder, amount } = log.args;
-    if (!funder || amount === undefined) continue;
-    await ensurePlayer(funder);
-    if (log.transactionHash) {
-      await logTransaction({
-        txHash: log.transactionHash,
-        walletAddress: funder,
-        type: "TREASURY_FUNDED",
-        amount: Number(amount) / 1e6,
-      });
-    }
-  }
+function readPubkey(data: Buffer, offset: number): string {
+  return new PublicKey(data.subarray(offset, offset + 32)).toBase58();
 }
 
-async function syncSettlementEventRange(settlementAddress: Address, fromBlock: bigint, toBlock: bigint) {
-  const client = getPublicClient();
+function readSessionIdHex(data: Buffer, offset: number): string {
+  return `0x${data.subarray(offset, offset + 32).toString("hex")}`;
+}
 
-  const [sessionStarted, sessionSettled] = await Promise.all([
-    client.getLogs({
-      address: settlementAddress,
-      event: SESSION_STARTED_EVENT,
-      fromBlock,
-      toBlock,
-    }),
-    client.getLogs({
-      address: settlementAddress,
-      event: SESSION_SETTLED_EVENT,
-      fromBlock,
-      toBlock,
-    }),
-  ]);
+async function handleEventData(eventData: Buffer, signature: string) {
+  if (eventData.length < 8) return;
+  const discriminator = eventData.subarray(0, 8);
+  const body = eventData.subarray(8);
 
-  for (const log of sessionStarted) {
-    const { player, sessionId, stakeAmount } = log.args;
-    if (!player || !sessionId || stakeAmount === undefined) continue;
-
+  if (discriminator.equals(DISCRIMINATORS.Deposited) && body.length >= 40) {
+    const player = readPubkey(body, 0);
+    const amount = body.readBigUInt64LE(32);
     await ensurePlayer(player);
-
-    if (log.transactionHash) {
-      await logTransaction({
-        txHash: log.transactionHash,
-        walletAddress: player,
-        type: "SESSION_STARTED",
-        amount: Number(stakeAmount) / 1e6,
-        onchainSessionId: sessionId.toLowerCase(),
-      });
-    }
+    await logTransaction({
+      txHash: signature,
+      walletAddress: player,
+      type: "DEPOSIT",
+      amount: unitsToToken(amount),
+    });
+    return;
   }
 
-  for (const log of sessionSettled) {
-    const { player, sessionId, outcome, payoutAmount, finalMultiplierBp } = log.args;
-    if (!player || !sessionId || outcome === undefined || payoutAmount === undefined || finalMultiplierBp === undefined) {
-      continue;
-    }
+  if (discriminator.equals(DISCRIMINATORS.Withdrawn) && body.length >= 40) {
+    const player = readPubkey(body, 0);
+    const amount = body.readBigUInt64LE(32);
+    await ensurePlayer(player);
+    await logTransaction({
+      txHash: signature,
+      walletAddress: player,
+      type: "WITHDRAW",
+      amount: unitsToToken(amount),
+    });
+    return;
+  }
 
+  if (discriminator.equals(DISCRIMINATORS.TreasuryFunded) && body.length >= 40) {
+    const funder = readPubkey(body, 0);
+    const amount = body.readBigUInt64LE(32);
+    await ensurePlayer(funder);
+    await logTransaction({
+      txHash: signature,
+      walletAddress: funder,
+      type: "TREASURY_FUNDED",
+      amount: unitsToToken(amount),
+    });
+    return;
+  }
+
+  if (discriminator.equals(DISCRIMINATORS.SessionStarted) && body.length >= 72) {
+    const player = readPubkey(body, 0);
+    const sessionId = readSessionIdHex(body, 32);
+    const stake = body.readBigUInt64LE(64);
+    await ensurePlayer(player);
+    await logTransaction({
+      txHash: signature,
+      walletAddress: player,
+      type: "SESSION_STARTED",
+      amount: unitsToToken(stake),
+      onchainSessionId: sessionId,
+    });
+    return;
+  }
+
+  if (discriminator.equals(DISCRIMINATORS.SessionSettled) && body.length >= 89) {
+    const player = readPubkey(body, 0);
+    const sessionId = readSessionIdHex(body, 32);
+    const outcome = body.readUInt8(64);
+    // stake at 65..73, payout at 73..81, multiplier at 81..89
+    const payout = body.readBigUInt64LE(73);
+    const finalMultiplierBp = body.readBigUInt64LE(81);
     await ensurePlayer(player);
 
     await supabase
       .from("game_sessions")
       .update({
-        settlement_tx_hash: log.transactionHash ?? null,
+        settlement_tx_hash: signature,
         final_multiplier: Number(finalMultiplierBp) / 10_000,
-        payout_amount: Number(payoutAmount) / 1e6,
+        payout_amount: unitsToToken(payout),
         status: outcome === 1 ? "CASHED_OUT" : "CRASHED",
       })
-      .eq("wallet_address", player.toLowerCase())
-      .eq("onchain_session_id", sessionId.toLowerCase());
+      .eq("wallet_address", player)
+      .eq("onchain_session_id", sessionId);
 
-    if (log.transactionHash) {
-      await logTransaction({
-        txHash: log.transactionHash,
-        walletAddress: player,
-        type: "SESSION_SETTLED",
-        amount: Number(payoutAmount) / 1e6,
-        onchainSessionId: sessionId.toLowerCase(),
-      });
-    }
+    await logTransaction({
+      txHash: signature,
+      walletAddress: player,
+      type: "SESSION_SETTLED",
+      amount: unitsToToken(payout),
+      onchainSessionId: sessionId,
+    });
   }
 }
 
-async function syncBlockRange(vaultAddress: Address, settlementAddress: Address, fromBlock: bigint, toBlock: bigint) {
-  if (fromBlock > toBlock) {
-    return;
+function isValidPubkey(value: string): boolean {
+  try {
+    new PublicKey(value);
+    return true;
+  } catch {
+    return false;
   }
-
-  await Promise.all([
-    syncVaultEventRange(vaultAddress, fromBlock, toBlock),
-    syncSettlementEventRange(settlementAddress, fromBlock, toBlock),
-  ]);
 }
 
 export async function startBlockchainListener(): Promise<void> {
-  if (isListening) {
+  if (isListening) return;
+
+  if (!env.PROGRAM_ID || !isValidPubkey(env.PROGRAM_ID)) {
+    console.log("⚠️  Blockchain listener SKIPPED — PROGRAM_ID belum dikonfigurasi.");
     return;
   }
-
-  const vaultAddress = env.GAME_VAULT_ADDRESS as Address;
-  const settlementAddress = env.GAME_SETTLEMENT_ADDRESS as Address;
-
-  if (!vaultAddress || !settlementAddress) {
-    console.log("⚠️  Blockchain listener SKIPPED — GAME_VAULT_ADDRESS or GAME_SETTLEMENT_ADDRESS is placeholder");
-    return;
-  }
-
-  const client = getPublicClient();
 
   try {
-    console.log(`🔗 Starting blockchain listener on ${env.RPC_URL}`);
-    console.log(`   Watching vault: ${vaultAddress}`);
-    console.log(`   Watching settlement: ${settlementAddress}`);
+    console.log(`🔗 Starting Solana log listener on ${env.RPC_URL}`);
+    console.log(`   Program: ${PROGRAM_ID.toBase58()}`);
 
-    const currentBlock = await client.getBlockNumber();
-    lastProcessedBlock = currentBlock;
+    subscriptionId = connection.onLogs(
+      PROGRAM_ID,
+      async (logsResult) => {
+        if (logsResult.err) return;
 
-    client.watchBlockNumber({
-      poll: true,
-      pollingInterval: EVENT_POLL_INTERVAL_MS,
-      emitOnBegin: false,
-      emitMissed: true,
-      onBlockNumber: async (blockNumber) => {
-        const fromBlock = lastProcessedBlock === null ? blockNumber : lastProcessedBlock + 1n;
-        lastProcessedBlock = blockNumber;
-
-        try {
-          await syncBlockRange(vaultAddress, settlementAddress, fromBlock, blockNumber);
-        } catch (error) {
-          console.error("❌ Blockchain sync error:", error);
+        for (const line of logsResult.logs) {
+          if (!line.startsWith("Program data: ")) continue;
+          const base64 = line.slice("Program data: ".length).trim();
+          if (!base64) continue;
+          try {
+            const eventData = Buffer.from(base64, "base64");
+            await handleEventData(eventData, logsResult.signature);
+          } catch (err) {
+            console.error("❌ Failed to handle program log event:", err);
+          }
         }
       },
-      onError: (error) => {
-        console.error("❌ Block watcher error:", error);
-      },
-    });
+      "confirmed",
+    );
 
     isListening = true;
-    console.log("✅ Blockchain event listeners active");
+    console.log("✅ Solana log listener active");
   } catch (err) {
-    console.error("❌ Failed to start blockchain listener:", err);
+    console.error("❌ Failed to start Solana log listener:", err);
     console.log("   Backend will continue without blockchain events.");
   }
+}
+
+export async function stopBlockchainListener(): Promise<void> {
+  if (subscriptionId !== null) {
+    try {
+      await connection.removeOnLogsListener(subscriptionId);
+    } catch (err) {
+      console.error("⚠️  Error removing log listener:", err);
+    }
+    subscriptionId = null;
+  }
+  isListening = false;
 }

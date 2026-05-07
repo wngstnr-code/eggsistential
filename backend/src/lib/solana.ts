@@ -284,6 +284,112 @@ export function buildClaimEggPassIx(
   });
 }
 
+// ───── Read helpers (replaces EVM contract reads) ─────────────────────
+
+const ZERO_SESSION_HEX = `0x${"00".repeat(32)}`;
+
+export interface PlayerBalanceState {
+  owner: string;
+  availableBalance: bigint;
+  lockedBalance: bigint;
+  activeSession: string; // 0x-prefixed hex
+  bump: number;
+}
+
+export async function readPlayerBalance(
+  player: PublicKey,
+): Promise<PlayerBalanceState | null> {
+  const acc = await connection.getAccountInfo(playerBalancePda(player));
+  if (!acc) return null;
+  const data = acc.data;
+  let o = 8;
+  const owner = new PublicKey(data.subarray(o, o + 32)).toBase58(); o += 32;
+  const availableBalance = data.readBigUInt64LE(o); o += 8;
+  const lockedBalance = data.readBigUInt64LE(o); o += 8;
+  const activeSession = `0x${data.subarray(o, o + 32).toString("hex")}`; o += 32;
+  const bump = data.readUInt8(o);
+  return { owner, availableBalance, lockedBalance, activeSession, bump };
+}
+
+export interface SessionState {
+  sessionId: string; // 0x-prefixed hex
+  player: string;
+  stakeAmount: bigint;
+  startedAt: number;
+  active: boolean;
+  settled: boolean;
+}
+
+export async function readSession(
+  sessionIdBytes: Buffer,
+): Promise<SessionState | null> {
+  const acc = await connection.getAccountInfo(sessionPda(sessionIdBytes));
+  if (!acc) return null;
+  const data = acc.data;
+  let o = 8;
+  const sessionId = `0x${data.subarray(o, o + 32).toString("hex")}`; o += 32;
+  const player = new PublicKey(data.subarray(o, o + 32)).toBase58(); o += 32;
+  const stakeAmount = data.readBigUInt64LE(o); o += 8;
+  const startedAt = Number(data.readBigInt64LE(o)); o += 8;
+  const active = data.readUInt8(o) !== 0; o += 1;
+  const settled = data.readUInt8(o) !== 0;
+  return { sessionId, player, stakeAmount, startedAt, active, settled };
+}
+
+/**
+ * Returns the player's active session if one exists and is still active &
+ * unsettled, otherwise null. Replaces the EVM `activeSessionOf` + `getSession`
+ * round-trip.
+ */
+export async function readActiveOnchainSession(walletAddress: string): Promise<{
+  sessionId: string;
+  player: string;
+  stakeAmountUnits: bigint;
+} | null> {
+  let player: PublicKey;
+  try {
+    player = new PublicKey(walletAddress);
+  } catch {
+    return null;
+  }
+
+  const balance = await readPlayerBalance(player);
+  if (!balance) return null;
+  if (balance.activeSession === ZERO_SESSION_HEX) return null;
+
+  const sessionIdBytes = Buffer.from(balance.activeSession.slice(2), "hex");
+  const session = await readSession(sessionIdBytes);
+  if (!session) return null;
+  if (!session.active || session.settled) return null;
+  if (session.player !== walletAddress) return null;
+
+  return {
+    sessionId: balance.activeSession,
+    player: session.player,
+    stakeAmountUnits: session.stakeAmount,
+  };
+}
+
+/**
+ * Returns the on-chain status of a Solana transaction by signature.
+ * Replaces viem `getTransactionReceipt`. Throws if signature is invalid.
+ */
+export async function readTransactionStatus(signature: string): Promise<{
+  found: boolean;
+  success: boolean | null;
+}> {
+  const tx = await connection.getTransaction(signature, {
+    commitment: "confirmed",
+    maxSupportedTransactionVersion: 0,
+  });
+  if (!tx) return { found: false, success: null };
+  return { found: true, success: tx.meta?.err == null };
+}
+
+export function isZeroSessionId(value: string): boolean {
+  return /^0x0{64}$/i.test(value);
+}
+
 /**
  * Builds a `claim_egg_pass` transaction signed by the backend authority and
  * serialized for the player's wallet to add their signature and submit.

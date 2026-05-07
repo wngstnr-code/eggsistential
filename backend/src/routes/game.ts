@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { createPublicClient, http, isHex, parseAbi, type Address, type Hex } from "viem";
+import { isZeroSessionId, readActiveOnchainSession } from "../lib/solana.js";
 import { requireAuth } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
@@ -16,13 +16,6 @@ import {
 } from "../services/settlementExecutor.js";
 
 const router = Router();
-const settlementPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
-const GAME_SETTLEMENT_READ_ABI = parseAbi([
-  "function activeSessionOf(address player) view returns (bytes32)",
-  "function getSession(bytes32 sessionId) view returns (address player, uint256 stakeAmount, uint64 startedAt, bool active, bool settled)",
-]);
 
 function toSettlementErrorMessage(error: unknown) {
   const raw = String(
@@ -459,34 +452,13 @@ async function persistRecoveredOnchainCrash(params: {
 }
 
 async function recoverOnchainActiveSession(walletAddress: string) {
-  const onchainSessionId = await settlementPublicClient.readContract({
-    address: env.GAME_SETTLEMENT_ADDRESS as Address,
-    abi: GAME_SETTLEMENT_READ_ABI,
-    functionName: "activeSessionOf",
-    args: [walletAddress as Address],
-  });
+  const active = await readActiveOnchainSession(walletAddress);
+  if (!active) return null;
 
-  if (!isHex(onchainSessionId, { strict: true }) || /^0x0{64}$/i.test(onchainSessionId)) {
-    return null;
-  }
+  const onchainSessionId = active.sessionId;
+  if (isZeroSessionId(onchainSessionId)) return null;
 
-  const session = await settlementPublicClient.readContract({
-    address: env.GAME_SETTLEMENT_ADDRESS as Address,
-    abi: GAME_SETTLEMENT_READ_ABI,
-    functionName: "getSession",
-    args: [onchainSessionId],
-  });
-
-  const player = String(session[0] || "").toLowerCase();
-  const stakeAmountUnits = session[1];
-  const active = Boolean(session[3]);
-  const settled = Boolean(session[4]);
-
-  if (player !== walletAddress.toLowerCase() || !active || settled) {
-    return null;
-  }
-
-  const stakeAmount = Number(stakeAmountUnits) / 1_000_000;
+  const stakeAmount = Number(active.stakeAmountUnits) / 1_000_000;
   const settlement = await signSettlement({
     playerAddress: walletAddress,
     onchainSessionId,
@@ -592,27 +564,17 @@ async function ensureSettlementSignature(
 
 async function isCurrentOnchainPendingSettlement(session: Record<string, unknown>) {
   const onchainSessionId = String(session.onchain_session_id ?? "");
-  if (!isHex(onchainSessionId, { strict: true })) {
+  if (!/^0x[0-9a-fA-F]{64}$/.test(onchainSessionId) || isZeroSessionId(onchainSessionId)) {
     return false;
   }
 
+  const walletAddress = String(session.wallet_address ?? "");
+  if (!walletAddress) return false;
+
   try {
-    const onchainSession = await settlementPublicClient.readContract({
-      address: env.GAME_SETTLEMENT_ADDRESS as Address,
-      abi: GAME_SETTLEMENT_READ_ABI,
-      functionName: "getSession",
-      args: [onchainSessionId as Hex],
-    });
-
-    const player = onchainSession[0];
-    const active = onchainSession[3];
-    const settled = onchainSession[4];
-
-    if (!player || /^0x0{40}$/i.test(player)) {
-      return false;
-    }
-
-    return Boolean(active && !settled);
+    const active = await readActiveOnchainSession(walletAddress);
+    if (!active) return false;
+    return active.sessionId.toLowerCase() === onchainSessionId.toLowerCase();
   } catch (inspectError) {
     console.error(`❌ Failed to inspect pending settlement ${onchainSessionId}:`, inspectError);
     return true;
@@ -875,7 +837,7 @@ async function clearSettlement(req: Request, res: Response) {
   }
 
   const normalizedTxHash = String(txHash).trim();
-  if (!isHex(normalizedTxHash, { strict: true }) || normalizedTxHash.length !== 66) {
+  if (!normalizedTxHash || normalizedTxHash.length < 32) {
     res.status(400).json({ error: "Invalid txHash format." });
     return;
   }
