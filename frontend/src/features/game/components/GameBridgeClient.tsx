@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { useAppKitProvider } from "@reown/appkit/react";
+import { Connection, VersionedTransaction } from "@solana/web3.js";
 import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
+import { SOLANA_NAMESPACE } from "~/lib/web3/appKit";
+import { SOLANA_RPC_URL } from "~/lib/web3/solana";
 
 type GameBridgeClientProps = {
   backgroundMode?: boolean;
@@ -26,6 +30,24 @@ type PendingSettlementSession = {
   };
   payload?: {
     sessionId?: string;
+  };
+};
+
+type PendingSettlementsPayload = {
+  hasPending: boolean;
+  pendingSettlements: PendingSettlementSession[];
+};
+
+type PassportIssueSignaturePayload = {
+  success: boolean;
+  unsignedTx: string;
+  claim?: {
+    tier?: number;
+    expiry?: string;
+  };
+  signatureExpiry?: number;
+  eligibility?: {
+    tier?: number;
   };
 };
 
@@ -71,10 +93,7 @@ async function fetchActiveBackendSession() {
 
 async function fetchPendingSettlements() {
   try {
-    return await backendFetch<{
-      hasPending: boolean;
-      pendingSettlements: PendingSettlementSession[];
-    }>("/api/game/pending-settlement");
+    return await backendFetch<PendingSettlementsPayload>("/api/game/pending-settlement");
   } catch {
     return {
       hasPending: false,
@@ -83,9 +102,19 @@ async function fetchPendingSettlements() {
   }
 }
 
+function toBase64Bytes(base64: string) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 export function GameBridgeClient({
   backgroundMode = false,
 }: GameBridgeClientProps) {
+  const { walletProvider } = useAppKitProvider<unknown>(SOLANA_NAMESPACE);
   const {
     account,
     isAppChain,
@@ -292,6 +321,31 @@ export function GameBridgeClient({
       return blocker;
     }
 
+    async function submitAllPendingSettlements() {
+      const pending = await fetchPendingSettlements();
+      if (!pending.hasPending || pending.pendingSettlements.length === 0) {
+        return 0;
+      }
+
+      let settledCount = 0;
+      for (const session of pending.pendingSettlements) {
+        const sessionId = String(session?.session_id || "").trim();
+        if (!sessionId) continue;
+        const response = await backendFetch<{ success: boolean; txHash?: string }>(
+          "/api/game/submit-settlement",
+          {
+            method: "POST",
+            body: JSON.stringify({ sessionId }),
+          },
+        );
+        if (response?.success) {
+          settledCount += 1;
+        }
+      }
+
+      return settledCount;
+    }
+
     window.__CHICKEN_GAME_BRIDGE__ = {
       backgroundMode: false,
       loadAvailableBalance: async () => {
@@ -393,7 +447,16 @@ export function GameBridgeClient({
         const blocker = await getPlayBlocker();
         emitPlayBlocker(blocker);
         if (blocker.kind === "none") return false;
-        throw pendingProgramError("Resolve previous bet");
+        const settledCount = await submitAllPendingSettlements();
+        await backendFetch<{
+          success: boolean;
+          resolved?: boolean;
+        }>("/api/game/force-end-active", {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        await refreshPlayBlockerStatus();
+        return settledCount > 0 || blocker.kind !== "none";
       },
       getPlayBlocker: async () => {
         const blocker = await getPlayBlocker();
@@ -404,7 +467,16 @@ export function GameBridgeClient({
         const blocker = await getPlayBlocker();
         emitPlayBlocker(blocker);
         if (blocker.kind === "none") return false;
-        throw pendingProgramError("Resolve previous bet");
+        const settledCount = await submitAllPendingSettlements();
+        await backendFetch<{
+          success: boolean;
+          resolved?: boolean;
+        }>("/api/game/force-end-active", {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        await refreshPlayBlockerStatus();
+        return settledCount > 0 || blocker.kind !== "none";
       },
       getPassportStatus: async () => {
         await requireBackendWalletSession();
@@ -412,7 +484,41 @@ export function GameBridgeClient({
       },
       claimPassport: async () => {
         await requireBackendWalletSession();
-        throw pendingProgramError("Claim passport");
+        if (!walletProvider) {
+          throw new Error("Solana wallet provider is not ready yet.");
+        }
+        const wallet = walletProvider as {
+          sendTransaction: (
+            transaction: VersionedTransaction,
+            connection: Connection,
+          ) => Promise<string>;
+        };
+
+        const payload = await backendFetch<PassportIssueSignaturePayload>(
+          "/api/passport/issue-signature",
+          {
+            method: "POST",
+            body: JSON.stringify({}),
+          },
+        );
+
+        if (!payload?.success || !payload?.unsignedTx) {
+          throw new Error("Backend did not return passport claim transaction.");
+        }
+
+        const transaction = VersionedTransaction.deserialize(
+          toBase64Bytes(payload.unsignedTx),
+        );
+        const connection = new Connection(SOLANA_RPC_URL, "confirmed");
+        const txHash = await wallet.sendTransaction(transaction, connection);
+        await connection.confirmTransaction(txHash, "confirmed");
+
+        return {
+          txHash,
+          tier: Number(payload?.claim?.tier ?? payload?.eligibility?.tier ?? 0),
+          expiry: Number(payload?.claim?.expiry ?? 0),
+          signatureExpiry: Number(payload?.signatureExpiry ?? 0),
+        };
       },
     };
 
@@ -430,6 +536,7 @@ export function GameBridgeClient({
     hasBackendApiConfig,
     isAppChain,
     refreshBackendSession,
+    walletProvider,
   ]);
 
   return null;

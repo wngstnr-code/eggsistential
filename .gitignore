@@ -26,3 +26,5 @@ backend/tsconfig.tsbuildinfo
 .DS_Store
 **/.DS_Store
 auto_commit.py
+skills-lock.json
+**/skills-lock.json
