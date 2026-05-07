@@ -11,19 +11,29 @@ pub mod events;
 pub mod instructions;
 pub mod state;
 
-use instructions::{
-    AdminOnly, ClaimEggPass, ClaimFaucet, Deposit, ExpireSession, InitializeConfig,
-    InitializeConfigParams, EggPassClaimParams, RevokeEggPass, SettleSession,
-    SettleSessionParams, StartSession, StartSessionParams, TreasuryWithdraw, Withdraw,
+pub use instructions::{
+    AdminOnly, ClaimEggPass, ClaimFaucet, Deposit, EggPassClaimParams, ExpireSession,
+    InitializeConfig, InitializeConfigParams, RevokeEggPass, SettleSession, SettleSessionParams,
+    StartSession, StartSessionParams, TreasuryWithdraw, Withdraw,
+};
+pub(crate) use instructions::{
+    __client_accounts_admin_only, __client_accounts_claim_egg_pass, __client_accounts_claim_faucet,
+    __client_accounts_deposit, __client_accounts_expire_session,
+    __client_accounts_initialize_config, __client_accounts_revoke_egg_pass,
+    __client_accounts_settle_session, __client_accounts_start_session,
+    __client_accounts_treasury_withdraw, __client_accounts_withdraw,
 };
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgMQhgM7ud1a");
+declare_id!("2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k");
 
 #[program]
 pub mod eggsistential {
     use super::*;
 
-    pub fn initialize_config(ctx: Context<InitializeConfig>, params: InitializeConfigParams) -> Result<()> {
+    pub fn initialize_config(
+        ctx: Context<InitializeConfig>,
+        params: InitializeConfigParams,
+    ) -> Result<()> {
         instructions::initialize_config(ctx, params)
     }
 
@@ -31,7 +41,10 @@ pub mod eggsistential {
         instructions::set_backend_signer(ctx, backend_signer)
     }
 
-    pub fn set_session_expiry_delay(ctx: Context<AdminOnly>, session_expiry_delay: i64) -> Result<()> {
+    pub fn set_session_expiry_delay(
+        ctx: Context<AdminOnly>,
+        session_expiry_delay: i64,
+    ) -> Result<()> {
         instructions::set_session_expiry_delay(ctx, session_expiry_delay)
     }
 

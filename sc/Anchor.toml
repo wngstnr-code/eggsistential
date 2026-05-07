@@ -1,15 +1,20 @@
+[toolchain]
+
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
+[programs.devnet]
+eggsistential = "2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k"
+
 [programs.localnet]
-eggsistential = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkgMQhgM7ud1a"
+eggsistential = "8cfSNA3TQjzWazzU9D7UEMSs8NeT27D35fkxPmonMyzd"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

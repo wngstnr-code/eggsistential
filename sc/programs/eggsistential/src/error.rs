@@ -46,8 +46,14 @@ pub enum EggsError {
     InvalidPlayer,
     #[msg("The claim amount must be greater than zero")]
     InvalidClaimAmount,
-    #[msg("The EggPass tier must be greater than zero")]
+    #[msg("The token mint authority must be the program vault authority")]
+    InvalidMintAuthority,
+    #[msg("The EggPass tier must be between 1 and 4")]
     InvalidEggPassTier,
+    #[msg("The EggPass evidence does not satisfy the requested tier")]
+    InvalidEggPassEvidence,
+    #[msg("The EggPass tier cannot be downgraded")]
+    EggPassTierDowngrade,
     #[msg("The EggPass issued timestamp must be positive")]
     InvalidEggPassIssuedAt,
     #[msg("The EggPass expiry timestamp must be greater than the issue timestamp")]

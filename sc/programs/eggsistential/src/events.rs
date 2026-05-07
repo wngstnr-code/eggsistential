@@ -86,6 +86,12 @@ pub struct SessionExpired {
 pub struct EggPassClaimed {
     pub player: Pubkey,
     pub tier: u8,
+    pub highest_checkpoint: u8,
+    pub cp2_cashouts: u16,
+    pub cp4_cashouts: u16,
+    pub cp6_cashouts: u16,
+    pub cp8_cashouts: u16,
+    pub reputation_score: u16,
     pub issued_at: i64,
     pub expiry: i64,
     pub nonce: [u8; 32],
