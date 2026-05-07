@@ -117,6 +117,7 @@ export function PlayTopNav() {
   const alertRootRef = useRef<HTMLDivElement | null>(null);
   const menuRootRef = useRef<HTMLDivElement | null>(null);
   const statusTimeoutRef = useRef<number | null>(null);
+  const syncRetryTimerRef = useRef<number | null>(null);
 
   const isConnected = Boolean(account);
 
@@ -497,6 +498,47 @@ export function PlayTopNav() {
   ]);
 
   useEffect(() => {
+    if (syncRetryTimerRef.current) {
+      window.clearTimeout(syncRetryTimerRef.current);
+      syncRetryTimerRef.current = null;
+    }
+
+    if (!hasBackendApiConfig || !isConnected || !isAppChain) {
+      return;
+    }
+
+    if (isBackendAuthenticated || isBackendAuthLoading) {
+      return;
+    }
+
+    const runSync = async () => {
+      await authenticateBackend();
+    };
+
+    void runSync();
+    syncRetryTimerRef.current = window.setTimeout(() => {
+      if (!isBackendAuthenticated && !isBackendAuthLoading) {
+        void runSync();
+      }
+    }, 9000);
+
+    return () => {
+      if (syncRetryTimerRef.current) {
+        window.clearTimeout(syncRetryTimerRef.current);
+        syncRetryTimerRef.current = null;
+      }
+    };
+  }, [
+    account,
+    authenticateBackend,
+    hasBackendApiConfig,
+    isAppChain,
+    isBackendAuthenticated,
+    isBackendAuthLoading,
+    isConnected,
+  ]);
+
+  useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
       if (event.target instanceof Node) {
         const walletRoot = walletMenuRef.current;
@@ -711,13 +753,11 @@ export function PlayTopNav() {
     statusTone = "busy";
     statusMessage = "SYNCING DATA...";
   } else if (hasBackendApiConfig && backendAuthError) {
-    statusTone = "error";
-    statusMessage = backendAuthError;
-    statusActionLabel = "SYNC NOW";
+    statusTone = "busy";
+    statusMessage = "RETRYING DATA SYNC...";
   } else if (hasBackendApiConfig && !isBackendAuthenticated) {
-    statusTone = "warning";
-    statusMessage = "SYNC DATA";
-    statusActionLabel = "SYNC NOW";
+    statusTone = "busy";
+    statusMessage = "SYNCING DATA...";
   } else if (isResolvingPlayBlocker) {
     statusTone = "busy";
     statusMessage = "ENDING PREV BET...";
@@ -1473,4 +1513,3 @@ export function PlayTopNav() {
     </>
   );
 }
-
