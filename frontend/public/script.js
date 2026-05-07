@@ -4156,35 +4156,35 @@ function generateRoadLaneMetadata() {
   if (profile === "city") {
     return generateVehicleLaneMetadata({
       type: "car",
-      speed: randomElement([70, 85, 100]),
-      kinds: ["car", "car", "taxi", "coupe", "truck", "car"],
+      speed: randomElement([65, 80, 95]),
+      kinds: ["car", "taxi", "coupe", "car"],
     });
   }
   if (profile === "heavy") {
     return generateVehicleLaneMetadata({
       type: "truck",
-      speed: randomElement([55, 70, 85]),
+      speed: randomElement([50, 65, 80]),
       kinds: ["truck", "truck"],
     });
   }
   if (profile === "fast") {
     return generateVehicleLaneMetadata({
       type: "car",
-      speed: randomElement([115, 135, 155]),
-      kinds: ["car", "car", "coupe", "truck"],
+      speed: randomElement([100, 120, 140]),
+      kinds: ["car", "coupe", "truck"],
     });
   }
   if (profile === "service") {
     return generateVehicleLaneMetadata({
       type: "car",
-      speed: randomElement([80, 100, 120]),
-      kinds: ["car", "car", "police"],
+      speed: randomElement([75, 95, 115]),
+      kinds: ["car", "police"],
     });
   }
   return generateVehicleLaneMetadata({
     type: "car",
-    speed: randomElement([80, 95, 110]),
-    kinds: ["car", "taxi", "truck", "car"],
+    speed: randomElement([75, 90, 105]),
+    kinds: ["car", "taxi", "truck"],
   });
 }
 
@@ -4212,7 +4212,8 @@ function findOpenVehicleTile(occupiedTiles, kind) {
   for (let attempt = 0; attempt < 30; attempt += 1) {
     const tile = THREE.MathUtils.randInt(minTileIndex, maxTileIndex);
     let open = true;
-    for (let offset = -footprint; offset <= footprint; offset += 1) {
+    const safeGap = 1;
+    for (let offset = -footprint - safeGap; offset <= footprint + safeGap; offset += 1) {
       if (occupiedTiles.has(tile + offset)) {
         open = false;
         break;
