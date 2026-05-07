@@ -50,6 +50,10 @@ type ChickenBridgeLeaderboardEntry = {
   max_row_reached?: number;
   games_played?: number;
   best_multiplier?: number;
+  passportTier?: number;
+  passportTierLabel?: string;
+  passportReward?: string;
+  passportAccessFlags?: ChickenBridgePassportAccessFlags;
 };
 
 type ChickenBridgeLeaderboardPayload = {
@@ -131,6 +135,10 @@ type ChickenBridgePassportEligibility = {
   eligible: boolean;
   tier: number;
   reason: string;
+  tierLabel?: string;
+  benefits?: ChickenBridgePassportBenefit[];
+  accessFlags?: ChickenBridgePassportAccessFlags;
+  tierReward?: ChickenBridgePassportTierReward | null;
   stats: ChickenBridgePassportStats;
 };
 
@@ -151,6 +159,48 @@ type ChickenBridgePassportRequirement = {
   met: boolean;
 };
 
+type ChickenBridgePassportAccessFlags = {
+  verifiedIdentity?: boolean;
+  allowlistEligible?: boolean;
+  tournamentAccess?: boolean;
+  partnerPerks?: boolean;
+  canAccessTier1?: boolean;
+  canAccessTier2?: boolean;
+  canAccessTier3?: boolean;
+  canAccessTier4?: boolean;
+  partnerRewardAccess?: boolean;
+  allowlistAccess?: boolean;
+  premiumRewardAccess?: boolean;
+  oracleAccess?: boolean;
+  eligibleToClaim?: boolean;
+  hasValidPassport?: boolean;
+};
+
+type ChickenBridgePassportBenefit = {
+  key: string;
+  label: string;
+  description: string;
+  category: "trust" | "access" | "reward";
+  tierRequired: number;
+  unlocked: boolean;
+};
+
+type ChickenBridgePassportTierReward = {
+  tier: number;
+  label: string;
+  checkpoint: number;
+  requiredCashouts: number;
+  unlocked: boolean;
+  benefits: ChickenBridgePassportBenefit[];
+  accessFlags: ChickenBridgePassportAccessFlags;
+};
+
+type ChickenBridgePassportBenefits = {
+  current: string[];
+  next: string[];
+  accessFlags: ChickenBridgePassportAccessFlags;
+};
+
 type ChickenBridgePassportProgression = {
   currentTier: number;
   currentTierLabel: string;
@@ -159,6 +209,8 @@ type ChickenBridgePassportProgression = {
   progressLabel: string;
   percentToNextTier: number;
   requirements: ChickenBridgePassportRequirement[];
+  currentTierReward?: ChickenBridgePassportTierReward | null;
+  nextTierReward?: ChickenBridgePassportTierReward | null;
   stats: ChickenBridgePassportStats;
 };
 
@@ -167,6 +219,11 @@ type ChickenBridgePassportStatus = {
   eligibility: ChickenBridgePassportEligibility;
   passport: ChickenBridgePassportOnchainStatus;
   progression: ChickenBridgePassportProgression;
+  benefits?: ChickenBridgePassportBenefits;
+  benefitDetails?: ChickenBridgePassportBenefit[];
+  accessFlags?: ChickenBridgePassportAccessFlags;
+  activeTierReward?: ChickenBridgePassportTierReward | null;
+  tierRewards?: ChickenBridgePassportTierReward[];
 };
 
 type ChickenBridgeApi = {

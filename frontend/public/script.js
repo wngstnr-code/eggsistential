@@ -4800,6 +4800,12 @@ function initBettingUI() {
   const leaderboardStatus = document.getElementById("leaderboard-status");
   const leaderboardYourRank = document.getElementById("leaderboard-your-rank");
   const leaderboardList = document.getElementById("leaderboard-list");
+  const leaderboardFilterAll = document.getElementById(
+    "leaderboard-filter-all",
+  );
+  const leaderboardFilterVerified = document.getElementById(
+    "leaderboard-filter-verified",
+  );
   const statsBtn = document.getElementById("stats-btn");
   const statsModal = document.getElementById("stats-modal");
   const statsRefresh = document.getElementById("stats-refresh");
@@ -4820,6 +4826,8 @@ function initBettingUI() {
   let startBetBusy = false;
   let leaderboardBusy = false;
   let leaderboardLastLoadedAt = 0;
+  let leaderboardFilter = "all";
+  let leaderboardCachedEntries = [];
   let statsBusy = false;
   let statsLastLoadedAt = 0;
   let statsActiveTab = "runs";
@@ -4880,6 +4888,40 @@ function initBettingUI() {
     const fallback = Number(entry?.max_row_reached);
     if (isFinite(fallback)) return fallback;
     return 0;
+  }
+
+  function leaderboardPassportTier(entry) {
+    const tier = Number(entry?.passportTier);
+    if (!isFinite(tier)) return 0;
+    return Math.max(0, Math.min(4, Math.floor(tier)));
+  }
+
+  function leaderboardPassportReward(entry) {
+    if (entry?.passportReward) return String(entry.passportReward);
+    const tier = leaderboardPassportTier(entry);
+    if (tier >= 4) return "Partner Perks Passport";
+    if (tier >= 3) return "Tournament Access";
+    if (tier >= 2) return "Allowlist Eligible";
+    if (tier >= 1) return "Verified Identity";
+    return "";
+  }
+
+  function setLeaderboardFilter(nextFilter) {
+    leaderboardFilter = nextFilter === "verified" ? "verified" : "all";
+    const isVerified = leaderboardFilter === "verified";
+
+    leaderboardFilterAll?.classList.toggle("active", !isVerified);
+    leaderboardFilterAll?.setAttribute(
+      "aria-selected",
+      !isVerified ? "true" : "false",
+    );
+    leaderboardFilterVerified?.classList.toggle("active", isVerified);
+    leaderboardFilterVerified?.setAttribute(
+      "aria-selected",
+      isVerified ? "true" : "false",
+    );
+
+    renderLeaderboardRows(leaderboardCachedEntries);
   }
 
   function setLeaderboardStatus(message, isError = false) {
@@ -5133,17 +5175,54 @@ function initBettingUI() {
     if (!leaderboardList) return;
     leaderboardList.innerHTML = "";
 
-    entries.forEach((entry, index) => {
+    const visibleEntries =
+      leaderboardFilter === "verified"
+        ? entries.filter((entry) => leaderboardPassportTier(entry) >= 1)
+        : entries;
+
+    if (!visibleEntries.length) {
+      const empty = document.createElement("li");
+      empty.className = "leaderboard-empty";
+      empty.innerText =
+        leaderboardFilter === "verified"
+          ? "No verified players yet."
+          : "No leaderboard data yet.";
+      leaderboardList.appendChild(empty);
+      return;
+    }
+
+    visibleEntries.forEach((entry, index) => {
+      const tier = leaderboardPassportTier(entry);
+      const reward = leaderboardPassportReward(entry);
       const row = document.createElement("li");
-      row.className = "leaderboard-row";
+      row.className = tier >= 1 ? "leaderboard-row verified" : "leaderboard-row";
 
       const rankEl = document.createElement("span");
       rankEl.className = "leaderboard-rank";
       rankEl.innerText = `#${index + 1}`;
 
-      const walletEl = document.createElement("span");
-      walletEl.className = "leaderboard-wallet";
-      walletEl.innerText = shortWalletAddress(entry?.wallet_address);
+      const walletEl = document.createElement("div");
+      walletEl.className = "leaderboard-wallet-stack";
+
+      const walletAddressEl = document.createElement("span");
+      walletAddressEl.className = "leaderboard-wallet";
+      walletAddressEl.innerText = shortWalletAddress(entry?.wallet_address);
+      walletEl.appendChild(walletAddressEl);
+
+      if (tier >= 1) {
+        const tierEl = document.createElement("span");
+        tierEl.className = "leaderboard-tier-badge";
+        tierEl.innerText = `T${tier}`;
+        walletEl.appendChild(tierEl);
+      }
+
+      if (reward) {
+        const rewardEl = document.createElement("span");
+        rewardEl.className = "leaderboard-reward-label";
+        rewardEl.innerText =
+          tier >= 3 ? `Cup Eligible - ${reward}` : reward;
+        walletEl.appendChild(rewardEl);
+      }
 
       const scoreEl = document.createElement("strong");
       scoreEl.className = "leaderboard-score";
@@ -5172,6 +5251,7 @@ function initBettingUI() {
 
     try {
       if (!hasLiveBridge()) {
+        leaderboardCachedEntries = [];
         if (leaderboardList) leaderboardList.innerHTML = "";
         if (leaderboardYourRank) leaderboardYourRank.innerText = "Demo mode";
         setLeaderboardStatus(
@@ -5194,7 +5274,8 @@ function initBettingUI() {
       );
 
       const topTen = leaderboard.slice(0, 10);
-      renderLeaderboardRows(topTen);
+      leaderboardCachedEntries = topTen;
+      renderLeaderboardRows(leaderboardCachedEntries);
 
       const bridgeWallet = bridge?.getWalletAddress
         ? bridge.getWalletAddress()
@@ -5226,11 +5307,21 @@ function initBettingUI() {
 
       if (topTen.length === 0) {
         setLeaderboardStatus("No leaderboard data yet.");
+      } else if (leaderboardFilter === "verified") {
+        const verifiedCount = topTen.filter(
+          (entry) => leaderboardPassportTier(entry) >= 1,
+        ).length;
+        setLeaderboardStatus(
+          verifiedCount > 0
+            ? "Verified players by best hops."
+            : "No verified players in the current top 10 yet.",
+        );
       } else {
         setLeaderboardStatus("Top 10 players by best hops.");
       }
       leaderboardLastLoadedAt = Date.now();
     } catch (error) {
+      leaderboardCachedEntries = [];
       if (leaderboardList) leaderboardList.innerHTML = "";
       if (leaderboardYourRank) leaderboardYourRank.innerText = "-";
       setLeaderboardStatus(
@@ -5568,6 +5659,25 @@ function initBettingUI() {
   leaderboardRefresh?.addEventListener("click", () => {
     playUiClickSfx();
     void refreshLeaderboard(true);
+  });
+
+  leaderboardFilterAll?.addEventListener("click", () => {
+    playUiClickSfx();
+    setLeaderboardFilter("all");
+    setLeaderboardStatus("Top 10 players by best hops.");
+  });
+
+  leaderboardFilterVerified?.addEventListener("click", () => {
+    playUiClickSfx();
+    setLeaderboardFilter("verified");
+    const verifiedCount = leaderboardCachedEntries.filter(
+      (entry) => leaderboardPassportTier(entry) >= 1,
+    ).length;
+    setLeaderboardStatus(
+      verifiedCount > 0
+        ? "Verified players by best hops."
+        : "No verified players in the current top 10 yet.",
+    );
   });
 
   statsRefresh?.addEventListener("click", () => {

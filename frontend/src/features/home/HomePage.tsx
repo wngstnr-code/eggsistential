@@ -3,6 +3,7 @@
 
 
 import Link from "next/link";
+import { BadgeCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
@@ -14,6 +15,9 @@ type ProfitLeaderboardEntry = {
   total_games?: number | string | null;
   total_wins?: number | string | null;
   total_losses?: number | string | null;
+  passportTier?: number;
+  passportTierLabel?: string;
+  passportReward?: string;
 };
 
 const HOME_CONNECT_PROMPT_KEY = "chicken-home-connect-prompt";
@@ -24,18 +28,27 @@ const FALLBACK_DISTANCE_BOARD: ChickenBridgeLeaderboardEntry[] = [
     best_score: 182,
     games_played: 36,
     best_multiplier: 6.4,
+    passportTier: 4,
+    passportTierLabel: "Egg Oracle",
+    passportReward: "Partner Perks Passport",
   },
   {
     wallet_address: "6Y4F9XgJ7bZVQ9uJkJQxGY7XvBhLheYq3wURVaKkXZ5H",
     best_score: 147,
     games_played: 28,
     best_multiplier: 4.8,
+    passportTier: 3,
+    passportTierLabel: "Elite Survivor",
+    passportReward: "Tournament Access",
   },
   {
     wallet_address: "4GJ2dGJxLJ9M7JtfWb1o7xT8DwV7m2qAZ2sYvJrJ1Dq8",
     best_score: 133,
     games_played: 19,
     best_multiplier: 4.2,
+    passportTier: 2,
+    passportTierLabel: "Disciplined Player",
+    passportReward: "Allowlist Eligible",
   },
 ];
 
@@ -45,18 +58,27 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
     total_profit: 214.4,
     total_games: 14,
     total_wins: 8,
+    passportTier: 4,
+    passportTierLabel: "Egg Oracle",
+    passportReward: "Partner Perks Passport",
   },
   {
     wallet_address: "8uM3p8jE4mvJp5gH9LTSuET6qeyMCrwVbi6R5Z7wGqRj",
     total_profit: 171.2,
     total_games: 21,
     total_wins: 11,
+    passportTier: 3,
+    passportTierLabel: "Elite Survivor",
+    passportReward: "Tournament Access",
   },
   {
     wallet_address: "2gQ7L6kLT3R1V4zJyX4u9gP4zNX4Zu1rvK8FQ3yK6xPb",
     total_profit: 138.75,
     total_games: 17,
     total_wins: 9,
+    passportTier: 1,
+    passportTierLabel: "Verified Runner",
+    passportReward: "Verified Identity",
   },
 ];
 
@@ -149,6 +171,28 @@ function readBestMultiplier(entry: ChickenBridgeLeaderboardEntry) {
   return toNumber(entry.best_multiplier);
 }
 
+function readPassportTier(
+  entry: Pick<ChickenBridgeLeaderboardEntry, "passportTier">,
+) {
+  return Math.max(0, Math.min(4, Math.floor(toNumber(entry.passportTier))));
+}
+
+function readPassportReward(
+  entry: Pick<
+    ChickenBridgeLeaderboardEntry,
+    "passportReward" | "passportTier"
+  >,
+) {
+  if (entry.passportReward) return entry.passportReward;
+
+  const tier = readPassportTier(entry);
+  if (tier >= 4) return "Partner Perks Passport";
+  if (tier >= 3) return "Tournament Access";
+  if (tier >= 2) return "Allowlist Eligible";
+  if (tier >= 1) return "Verified Identity";
+  return "Basic Profile";
+}
+
 export function HomePage() {
   const {
     account,
@@ -172,6 +216,7 @@ export function HomePage() {
     FALLBACK_PROFIT_BOARD,
   );
   const [isSocialLoading, setIsSocialLoading] = useState(false);
+  const [showVerifiedBoard, setShowVerifiedBoard] = useState(false);
   const profileWrapRef = useRef<HTMLDivElement | null>(null);
 
   const isConnected = Boolean(account);
@@ -397,6 +442,17 @@ export function HomePage() {
       ),
     },
   ];
+  const verifiedDistanceBoard = distanceBoard.filter(
+    (entry) => readPassportTier(entry) >= 1,
+  );
+  const visibleDistanceBoard =
+    showVerifiedBoard && verifiedDistanceBoard.length > 0
+      ? verifiedDistanceBoard
+      : distanceBoard;
+  const featuredVerifiedPlayer =
+    distanceBoard.find((entry) => readPassportTier(entry) >= 4) ??
+    distanceBoard.find((entry) => readPassportTier(entry) >= 1) ??
+    null;
 
   return (
     <main className="flow-page home-page">
@@ -602,6 +658,21 @@ export function HomePage() {
             </div>
           </div>
         </div>
+        {isConnected ? (
+          <Link
+            href="/play?passport=1"
+            className="home-passport-hero"
+            aria-label="Open trust passport status"
+          >
+            <span className="home-passport-hero-icon" aria-hidden="true">
+              <BadgeCheck size={18} strokeWidth={2.7} />
+            </span>
+            <span className="home-passport-hero-copy">
+              <strong>TRUST PASSPORT</strong>
+              <small>View status and tier</small>
+            </span>
+          </Link>
+        ) : null}
       </section>
 
       <section id="preview" className="home-section home-section-about">
@@ -668,24 +739,71 @@ export function HomePage() {
             ))}
           </div>
 
+          {featuredVerifiedPlayer ? (
+            <article className="home-verified-featured">
+              <div>
+                <p>TOP VERIFIED PLAYER</p>
+                <h3>{shortAddress(featuredVerifiedPlayer.wallet_address)}</h3>
+                <span>
+                  TIER {readPassportTier(featuredVerifiedPlayer)} -{" "}
+                  {featuredVerifiedPlayer.passportTierLabel || "Verified"}
+                </span>
+              </div>
+              <strong>{readPassportReward(featuredVerifiedPlayer)}</strong>
+            </article>
+          ) : null}
+
           <div className="home-social-grid">
             <article className="home-social-card">
               <div className="home-social-card-head">
                 <h3>BEST DISTANCE</h3>
+                <div className="home-social-tabs" aria-label="Leaderboard filter">
+                  <button
+                    type="button"
+                    className={!showVerifiedBoard ? "active" : ""}
+                    onClick={() => setShowVerifiedBoard(false)}
+                  >
+                    ALL
+                  </button>
+                  <button
+                    type="button"
+                    className={showVerifiedBoard ? "active" : ""}
+                    onClick={() => setShowVerifiedBoard(true)}
+                    disabled={verifiedDistanceBoard.length === 0}
+                  >
+                    VERIFIED
+                  </button>
+                </div>
               </div>
               <ul className="home-social-list">
-                {distanceBoard.slice(0, 3).map((entry, index) => (
+                {visibleDistanceBoard.slice(0, 3).map((entry, index) => (
                   <li
                     key={`${entry.wallet_address}-${index}`}
                     className="home-social-item"
                   >
                     <div>
                       <p>RANK #{index + 1}</p>
-                      <h4>{shortAddress(entry.wallet_address)}</h4>
+                      <h4>
+                        {shortAddress(entry.wallet_address)}
+                        {readPassportTier(entry) >= 1 ? (
+                          <span className="home-tier-badge">
+                            T{readPassportTier(entry)}
+                          </span>
+                        ) : null}
+                      </h4>
                       <span>
                         {toNumber(entry.games_played)} runs | Peak{" "}
                         {readBestMultiplier(entry).toFixed(2)}x
                       </span>
+                      {readPassportTier(entry) >= 3 ? (
+                        <span className="home-access-note">
+                          Cup Eligible - {readPassportReward(entry)}
+                        </span>
+                      ) : readPassportTier(entry) >= 1 ? (
+                        <span className="home-access-note">
+                          {readPassportReward(entry)}
+                        </span>
+                      ) : null}
                     </div>
                     <strong>{readBestScore(entry)} hops</strong>
                   </li>
@@ -705,11 +823,23 @@ export function HomePage() {
                   >
                     <div>
                       <p>RANK #{index + 1}</p>
-                      <h4>{shortAddress(entry.wallet_address)}</h4>
+                      <h4>
+                        {shortAddress(entry.wallet_address)}
+                        {readPassportTier(entry) >= 1 ? (
+                          <span className="home-tier-badge">
+                            T{readPassportTier(entry)}
+                          </span>
+                        ) : null}
+                      </h4>
                       <span>
                         {toNumber(entry.total_games)} runs |{" "}
                         {toNumber(entry.total_wins)} wins
                       </span>
+                      {readPassportTier(entry) >= 2 ? (
+                        <span className="home-access-note">
+                          {readPassportReward(entry)}
+                        </span>
+                      ) : null}
                     </div>
                     <strong>{formatMoney(entry.total_profit)}</strong>
                   </li>

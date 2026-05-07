@@ -1683,7 +1683,8 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .leaderboard-panel-head {
-  display: block;
+  display: grid;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
@@ -1695,6 +1696,31 @@ body.checkpoint-arrival #hud-scrim::after {
   color: #fff4dd;
   text-align: center;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.34);
+}
+
+.leaderboard-filter-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.leaderboard-filter-tabs button {
+  min-height: 34px;
+  border: 2px solid rgba(184, 212, 255, 0.34);
+  border-radius: 8px;
+  background: rgba(12, 24, 42, 0.58);
+  color: #bdd5f0;
+  font-family: "Press Start 2P", cursive;
+  font-size: 8px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+.leaderboard-filter-tabs button.active {
+  border-color: rgba(255, 224, 118, 0.86);
+  background: linear-gradient(180deg, #fff0a3 0%, #efb836 100%);
+  color: #15233f;
+  box-shadow: 0 3px 0 rgba(3, 10, 22, 0.54);
 }
 
 .leaderboard-status {
@@ -1754,10 +1780,25 @@ body.checkpoint-arrival #hud-scrim::after {
   box-shadow: 0 3px 0 rgba(4, 13, 28, 0.22);
 }
 
+.leaderboard-row.verified {
+  border-color: rgba(239, 184, 54, 0.74);
+  background:
+    linear-gradient(90deg, rgba(255, 224, 118, 0.26), transparent 42%),
+    rgba(242, 248, 255, 0.96);
+}
+
 .leaderboard-rank {
   color: #1a3858;
   font-family: "Press Start 2P", cursive;
   font-size: 9px;
+}
+
+.leaderboard-wallet-stack {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
 }
 
 .leaderboard-wallet {
@@ -1769,10 +1810,41 @@ body.checkpoint-arrival #hud-scrim::after {
   white-space: nowrap;
 }
 
+.leaderboard-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  border-radius: 6px;
+  padding: 0 6px;
+  background: #123a6a;
+  color: #fff2a9;
+  font-family: "Press Start 2P", cursive;
+  font-size: 7px;
+  line-height: 1;
+}
+
+.leaderboard-reward-label {
+  flex-basis: 100%;
+  color: #8a5c00;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
 .leaderboard-score {
   color: #0c7255;
   font-family: "Press Start 2P", cursive;
   font-size: 9px;
+}
+
+.leaderboard-empty {
+  margin: 0;
+  border-radius: 10px;
+  border: 2px dashed rgba(184, 212, 255, 0.26);
+  color: #bdd5f0;
+  padding: 14px;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.5;
 }
 
 #leaderboard-refresh,
@@ -3088,6 +3160,47 @@ body.checkpoint-arrival #hud-scrim::after {
   line-height: 1.25;
 }
 
+.play-passport-benefits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.play-passport-benefits > div {
+  border: 2px solid rgba(255, 226, 118, 0.5);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(255, 226, 118, 0.14), transparent 44%),
+    rgba(255, 255, 255, 0.07);
+  padding: 11px;
+  display: grid;
+  gap: 9px;
+}
+
+.play-passport-benefits span {
+  color: #ffe276;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.play-passport-benefit-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.play-passport-benefit-list strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 7px;
+  background: rgba(7, 18, 51, 0.58);
+  color: #f8fbff;
+  padding: 5px 7px;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
 .play-passport-progress-block {
   border: 2px solid rgba(143, 180, 255, 0.45);
   border-radius: 14px;
@@ -4274,6 +4387,21 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-passport-summary-row strong,
   .play-passport-progress-head strong {
     font-size: 9px;
+  }
+
+  .play-passport-benefits {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .play-passport-benefits > div {
+    border-radius: 10px;
+    padding: 9px;
+  }
+
+  .play-passport-benefits span,
+  .play-passport-benefit-list strong {
+    font-size: 7px;
   }
 
   .play-passport-progress-block {
@@ -5725,6 +5853,12 @@ body.checkpoint-arrival #hud-scrim::after {
   gap: 14px;
 }
 
+.home-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .home-nav-links {
   display: flex;
   align-items: center;
@@ -5872,6 +6006,86 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .home-hero-connected-actions>* {
   width: 100%;
+}
+
+.home-passport-hero {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  z-index: 4;
+  width: min(238px, calc(100vw - 112px));
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(143, 180, 255, 0.82);
+  background:
+    linear-gradient(135deg, rgba(255, 231, 147, 0.18) 0%, transparent 34%),
+    linear-gradient(180deg, rgba(15, 30, 79, 0.93) 0%, rgba(9, 18, 51, 0.96) 100%);
+  color: #f4f8ff;
+  text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 24px rgba(3, 9, 26, 0.36);
+  box-sizing: border-box;
+  transition:
+    transform 0.08s ease,
+    border-color 0.12s ease,
+    filter 0.12s ease;
+}
+
+.home-passport-hero:hover,
+.home-passport-hero:focus-visible {
+  border-color: rgba(255, 224, 126, 0.92);
+  filter: brightness(1.08);
+}
+
+.home-passport-hero:focus-visible {
+  outline: 3px solid rgba(126, 244, 201, 0.84);
+  outline-offset: 3px;
+}
+
+.home-passport-hero:active {
+  transform: translate(1px, 2px);
+}
+
+.home-passport-hero-icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #fff4a8 0%, #efb836 100%);
+  color: #15316d;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    0 4px 0 rgba(3, 9, 26, 0.36);
+}
+
+.home-passport-hero-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+
+.home-passport-hero-copy strong {
+  font-size: 9px;
+  letter-spacing: 0.9px;
+  color: #fff8d7;
+  line-height: 1.15;
+}
+
+.home-passport-hero-copy small {
+  color: rgba(211, 226, 255, 0.82);
+  font-size: 7px;
+  line-height: 1.45;
+  letter-spacing: 0.4px;
 }
 
 .home-hero-back-btn {
@@ -6395,6 +6609,56 @@ body.checkpoint-arrival #hud-scrim::after {
   gap: 16px;
 }
 
+.home-verified-featured {
+  margin: 0 0 16px;
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 224, 118, 0.72);
+  background:
+    linear-gradient(90deg, rgba(255, 224, 118, 0.2) 0%, transparent 38%),
+    linear-gradient(180deg, rgba(18, 34, 64, 0.96) 0%, rgba(10, 22, 48, 0.98) 100%);
+  box-shadow:
+    0 16px 28px rgba(5, 12, 26, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.home-verified-featured p {
+  margin: 0 0 8px;
+  color: #ffe276;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.home-verified-featured h3 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.home-verified-featured span {
+  color: rgba(225, 239, 255, 0.78);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.home-verified-featured strong {
+  max-width: 280px;
+  color: #0d2a44;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fff2a9 0%, #efb836 100%);
+  box-shadow: 0 5px 0 rgba(3, 10, 22, 0.42);
+  padding: 13px 14px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
 .home-integration-note {
   margin-top: 18px;
   border-radius: 14px;
@@ -6452,6 +6716,36 @@ body.checkpoint-arrival #hud-scrim::after {
   font-size: 12px;
 }
 
+.home-social-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.home-social-tabs button {
+  min-height: 30px;
+  min-width: 78px;
+  border-radius: 8px;
+  border: 2px solid rgba(137, 202, 255, 0.42);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(223, 235, 255, 0.78);
+  font-family: inherit;
+  font-size: 7px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+}
+
+.home-social-tabs button.active {
+  border-color: rgba(255, 224, 118, 0.84);
+  background: linear-gradient(180deg, #fff2a9 0%, #efb836 100%);
+  color: #13233d;
+}
+
+.home-social-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .home-text-link {
   border: 0;
   background: transparent;
@@ -6494,6 +6788,11 @@ body.checkpoint-arrival #hud-scrim::after {
   margin: 0 0 5px;
   color: #ffffff;
   font-size: 10px;
+  line-height: 1.55;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .home-social-item span {
@@ -6501,6 +6800,23 @@ body.checkpoint-arrival #hud-scrim::after {
   color: rgba(223, 235, 255, 0.76);
   font-size: 8px;
   line-height: 1.5;
+}
+
+.home-tier-badge {
+  display: inline-flex !important;
+  align-items: center;
+  min-height: 18px;
+  border-radius: 6px;
+  background: #ffe276;
+  color: #14223b !important;
+  padding: 0 6px;
+  font-size: 7px !important;
+  line-height: 1 !important;
+}
+
+.home-social-item .home-access-note {
+  margin-top: 5px;
+  color: #8ff0c1;
 }
 
 .home-social-item strong {
@@ -6783,6 +7099,11 @@ body.checkpoint-arrival #hud-scrim::after {
     width: auto;
     flex-direction: row;
     align-items: center;
+    gap: 8px;
+  }
+
+  .home-nav-actions {
+    gap: 8px;
   }
 
   .home-nav-links {
@@ -6836,6 +7157,29 @@ body.checkpoint-arrival #hud-scrim::after {
     min-width: 0;
   }
 
+  .home-passport-hero {
+    left: 12px;
+    bottom: 12px;
+    width: min(218px, calc(100vw - 86px));
+    min-height: 52px;
+    padding: 9px 10px;
+    gap: 9px;
+  }
+
+  .home-passport-hero-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .home-passport-hero-copy strong {
+    font-size: 8px;
+  }
+
+  .home-passport-hero-copy small {
+    font-size: 6.5px;
+    line-height: 1.35;
+  }
+
   .home-section-about {
     padding-top: 48px;
     padding-bottom: 52px;
@@ -6864,6 +7208,32 @@ body.checkpoint-arrival #hud-scrim::after {
   .home-about-grid {
     width: 100%;
     gap: 20px;
+  }
+
+  .home-verified-featured {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .home-verified-featured strong {
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .home-social-card-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .home-social-tabs {
+    width: 100%;
+  }
+
+  .home-social-tabs button {
+    min-width: 0;
   }
 
   .home-about-media {
@@ -6955,6 +7325,42 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .home-status-pill strong {
     text-align: left;
+  }
+}
+
+@media (max-width: 430px) {
+  .home-nav {
+    padding-inline: 10px;
+  }
+
+  .home-brand {
+    gap: 7px;
+  }
+
+  .home-brand-badge {
+    width: 30px;
+    height: 30px;
+  }
+
+  .home-brand-name {
+    font-size: 9px;
+  }
+
+  .home-passport-hero {
+    width: 46px;
+    min-height: 46px;
+    justify-content: center;
+    padding: 8px;
+    grid-template-columns: 1fr;
+  }
+
+  .home-passport-hero-copy {
+    display: none;
+  }
+
+  .home-nav-login {
+    max-width: 116px;
+    font-size: 8px;
   }
 }
 
@@ -7654,6 +8060,85 @@ body.checkpoint-arrival #hud-scrim::after {
   display: none;
 }
 
+.play-nav-passport-badge {
+  display: none;
+}
+
+.play-desktop-passport-badge {
+  position: relative;
+  order: -1;
+  width: 84px;
+  min-width: 84px;
+  min-height: var(--top-bar-control-height);
+  border-radius: 14px;
+  border: 2px solid #253653;
+  background: linear-gradient(180deg, #263654 0%, #121b2f 100%);
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #9db0c8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease,
+    filter 0.12s ease;
+}
+
+.play-desktop-passport-badge svg {
+  position: absolute;
+  width: 27px;
+  height: 27px;
+  opacity: 0.3;
+  stroke-width: 2.7;
+}
+
+.play-desktop-passport-badge span {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+}
+
+.play-desktop-passport-badge:active:not(:disabled) {
+  transform: translate(2px, 3px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.play-desktop-passport-badge:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.play-desktop-passport-badge-valid,
+.play-desktop-passport-badge-ready {
+  border-color: #1c6f54;
+  background: linear-gradient(180deg, #63e6b5 0%, #1e9d75 100%);
+  box-shadow: 3px 4px 0 rgba(11, 76, 55, 0.78), 0 0 12px rgba(99, 230, 181, 0.28);
+  color: #f5fff9;
+}
+
+.play-desktop-passport-badge-progress {
+  border-color: #8d611a;
+  background: linear-gradient(180deg, #ffe29c 0%, #d59628 100%);
+  box-shadow: 3px 4px 0 rgba(122, 78, 14, 0.78), 0 0 10px rgba(255, 217, 61, 0.18);
+  color: #2f1e08;
+}
+
+.play-desktop-passport-badge-loading {
+  filter: saturate(0.85);
+}
+
+.play-desktop-passport-badge-revoked,
+.play-desktop-passport-badge-offline {
+  border-color: #34425f;
+  color: #90a0b8;
+}
+
 .play-alert-wrap {
   position: relative;
   display: flex;
@@ -7822,22 +8307,29 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-nav-row {
     position: relative;
     display: grid;
-    grid-template-columns: auto auto;
-    justify-content: space-between;
+    grid-template-columns: 44px 44px minmax(128px, 1fr) auto;
+    justify-content: stretch;
     gap: 8px;
     align-items: center;
-    min-height: 48px;
+    min-height: 52px;
     padding: 0 2px;
     pointer-events: auto;
   }
 
+  .play-desktop-passport-badge {
+    display: none;
+  }
+
   .play-nav-balance-chip {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 116px;
-    height: 40px;
-    border-radius: 20px; 
+    position: static;
+    left: auto;
+    transform: none;
+    grid-column: 3;
+    justify-self: stretch;
+    width: 100%;
+    max-width: 172px;
+    height: 46px;
+    border-radius: 23px; 
     border: 2px solid #1a253d; 
     background: #0b111d; 
     box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 1px rgba(255, 255, 255, 0.05); 
@@ -7848,10 +8340,89 @@ body.checkpoint-arrival #hud-scrim::after {
     gap: 1px;
     pointer-events: none;
     z-index: 1;
+    box-sizing: border-box;
+  }
+
+  .play-nav-passport-badge {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    grid-column: 2;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid #253653;
+    background: linear-gradient(180deg, #263654 0%, #121b2f 100%);
+    box-shadow: 0 2px 0 #050914, inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    color: #9db0c8;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    pointer-events: auto;
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+      transform 0.08s ease,
+      box-shadow 0.08s ease,
+      filter 0.12s ease;
+  }
+
+  .play-nav-passport-badge svg {
+    position: absolute;
+    width: 21px;
+    height: 21px;
+    opacity: 0.3;
+    stroke-width: 2.7;
+  }
+
+  .play-nav-passport-badge span {
+    position: relative;
+    z-index: 1;
+    font-size: 8px;
+    letter-spacing: 0;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+  }
+
+  .play-nav-passport-badge:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 #050914, inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .play-nav-passport-badge:disabled {
+    cursor: wait;
+    opacity: 0.72;
+  }
+
+  .play-nav-passport-badge-valid,
+  .play-nav-passport-badge-ready {
+    border-color: #1c6f54;
+    background: linear-gradient(180deg, #63e6b5 0%, #1e9d75 100%);
+    box-shadow: 0 2px 0 #0b4c37, 0 0 12px rgba(99, 230, 181, 0.28);
+    color: #f5fff9;
+  }
+
+  .play-nav-passport-badge-progress {
+    border-color: #8d611a;
+    background: linear-gradient(180deg, #ffe29c 0%, #d59628 100%);
+    box-shadow: 0 2px 0 #7a4e0e, 0 0 10px rgba(255, 217, 61, 0.18);
+    color: #2f1e08;
+  }
+
+  .play-nav-passport-badge-loading {
+    filter: saturate(0.85);
+  }
+
+  .play-nav-passport-badge-revoked,
+  .play-nav-passport-badge-offline {
+    border-color: #34425f;
+    color: #90a0b8;
   }
 
   .play-nav-balance-label {
-    font-size: 6px;
+    font-size: 7px;
     letter-spacing: 1px;
     color: #8a9fb5; 
     line-height: 1;
@@ -7859,7 +8430,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-nav-balance-value {
-    font-size: 14px;
+    font-size: 17px;
     line-height: 1;
     color: #ffd93d; 
     text-shadow: 0 0 8px rgba(255, 217, 61, 0.4); 
@@ -7879,15 +8450,13 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-wallet-trigger {
-    height: 40px;
-    min-height: 40px;
-    border-radius: 20px !important; 
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    padding: 0 16px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    position: relative;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 12px !important; 
+    padding: 0;
     border: 2px solid #32476b !important;
     background: linear-gradient(180deg, #1c2842 0%, #111a2b 100%) !important;
     box-shadow: 0 4px 0 #0a101c, 0 6px 12px rgba(0, 0, 0, 0.4) !important;
@@ -7897,19 +8466,48 @@ body.checkpoint-arrival #hud-scrim::after {
     transition: transform 0.1s, box-shadow 0.1s;
   }
 
+  .play-wallet-trigger.connect {
+    border-color: #8b241f !important;
+    background: linear-gradient(180deg, #ff9b7d 0%, #df463d 100%) !important;
+    box-shadow: 0 4px 0 #7b1c17, 0 0 14px rgba(255, 84, 70, 0.34) !important;
+    color: #fff8ef !important;
+  }
+
+  .play-wallet-trigger.icon-only svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.6;
+  }
+
+  .play-wallet-connect-dot {
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    border: 2px solid #0b111d;
+    background: #ff1f3d;
+    box-shadow: 0 0 10px rgba(255, 31, 61, 0.88);
+  }
+
   .play-wallet-trigger:active {
     transform: translateY(2px);
     box-shadow: 0 2px 0 #0a101c, 0 3px 6px rgba(0, 0, 0, 0.4) !important;
   }
 
   .play-wallet-menu {
-    max-width: min(140px, 40vw);
+    width: 44px;
+    max-width: 44px;
+    grid-column: 1;
   }
 
   .play-nav-actions {
     display: flex;
     gap: 6px;
     z-index: 2;
+    grid-column: 4;
+    justify-self: end;
   }
 
   .play-menu-trigger {
@@ -8372,12 +8970,29 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-nav-balance-chip {
-    width: 102px;
-    height: 36px;
+    max-width: 132px;
+    height: 40px;
+    border-radius: 20px;
+  }
+
+  .play-nav-passport-badge {
+    left: auto;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .play-nav-passport-badge svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .play-nav-passport-badge span {
+    font-size: 7px;
   }
 
   .play-nav-balance-value {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .play-bottom-navbar-v2 {

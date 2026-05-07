@@ -16,6 +16,10 @@ type PassportEligibility = {
   eligible: boolean;
   tier: number;
   reason: string;
+  tierLabel: string;
+  benefits: PassportBenefit[];
+  accessFlags: PassportAccessFlags;
+  tierReward: PassportTierReward | null;
   stats: {
     runsCompleted: number;
     bestHops: number;
@@ -43,7 +47,59 @@ type PassportProgression = {
   progressLabel: string;
   percentToNextTier: number;
   requirements: PassportRequirement[];
+  currentTierReward: PassportTierReward | null;
+  nextTierReward: PassportTierReward | null;
   stats: PassportEligibility["stats"];
+};
+
+type PassportBenefit = {
+  key: string;
+  label: string;
+  description: string;
+  category: "trust" | "access" | "reward";
+  tierRequired: number;
+  unlocked: boolean;
+};
+
+type TierAccessFlags = {
+  canAccessTier1: boolean;
+  canAccessTier2: boolean;
+  canAccessTier3: boolean;
+  canAccessTier4: boolean;
+  partnerRewardAccess: boolean;
+  allowlistAccess: boolean;
+  premiumRewardAccess: boolean;
+  oracleAccess: boolean;
+};
+
+type PassportAccessFlags = TierAccessFlags & {
+  verifiedIdentity: boolean;
+  allowlistEligible: boolean;
+  tournamentAccess: boolean;
+  partnerPerks: boolean;
+  eligibleToClaim: boolean;
+  hasValidPassport: boolean;
+};
+
+type PassportBenefitSummary = {
+  current: string[];
+  next: string[];
+  accessFlags: {
+    verifiedIdentity: boolean;
+    allowlistEligible: boolean;
+    tournamentAccess: boolean;
+    partnerPerks: boolean;
+  };
+};
+
+type PassportTierReward = {
+  tier: number;
+  label: string;
+  checkpoint: number;
+  requiredCashouts: number;
+  unlocked: boolean;
+  benefits: PassportBenefit[];
+  accessFlags: TierAccessFlags;
 };
 
 type TierRule = {
@@ -56,10 +112,10 @@ type TierRule = {
 const CHECKPOINT_ROW_INTERVAL = 40;
 
 const TIER_RULES: TierRule[] = [
-  { tier: 1, label: "Verified Runner", checkpoint: 2, requiredCashouts: 4 },
-  { tier: 2, label: "Disciplined Player", checkpoint: 4, requiredCashouts: 6 },
-  { tier: 3, label: "Elite Survivor", checkpoint: 6, requiredCashouts: 8 },
-  { tier: 4, label: "Egg Oracle", checkpoint: 8, requiredCashouts: 10 },
+  { tier: 1, label: "Verified Runner", checkpoint: 2, requiredCashouts: 3 },
+  { tier: 2, label: "Disciplined Player", checkpoint: 4, requiredCashouts: 4 },
+  { tier: 3, label: "Elite Survivor", checkpoint: 6, requiredCashouts: 4 },
+  { tier: 4, label: "Egg Oracle", checkpoint: 8, requiredCashouts: 3 },
 ];
 
 const TIER_LABELS = new Map<number, string>([
@@ -70,6 +126,186 @@ const TIER_LABELS = new Map<number, string>([
 function toFiniteNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function buildTierAccessFlags(tier: number): TierAccessFlags {
+  return {
+    canAccessTier1: tier >= 1,
+    canAccessTier2: tier >= 2,
+    canAccessTier3: tier >= 3,
+    canAccessTier4: tier >= 4,
+    partnerRewardAccess: tier >= 1,
+    allowlistAccess: tier >= 2,
+    premiumRewardAccess: tier >= 3,
+    oracleAccess: tier >= 4,
+  };
+}
+
+function buildTierBenefits(tier: number, unlocked: boolean): PassportBenefit[] {
+  switch (tier) {
+    case 1:
+      return [
+        {
+          key: "verified_runner_badge",
+          label: "Verified Runner badge",
+          description: "Unlock the baseline on-chain trust badge for partner checks.",
+          category: "trust",
+          tierRequired: 1,
+          unlocked,
+        },
+        {
+          key: "partner_reward_entry",
+          label: "Partner reward entry",
+          description: "Eligible for base partner reward campaigns gated by EggPass.",
+          category: "reward",
+          tierRequired: 1,
+          unlocked,
+        },
+      ];
+    case 2:
+      return [
+        {
+          key: "allowlist_gate",
+          label: "Allowlist gate access",
+          description: "Qualify for allowlist flows that require a stronger checkpoint history.",
+          category: "access",
+          tierRequired: 2,
+          unlocked,
+        },
+        {
+          key: "reward_weight_boost",
+          label: "Reward weight boost",
+          description: "Move into higher-priority partner reward buckets.",
+          category: "reward",
+          tierRequired: 2,
+          unlocked,
+        },
+      ];
+    case 3:
+      return [
+        {
+          key: "premium_campaign_access",
+          label: "Premium campaign access",
+          description: "Unlock premium partner campaign filters that need deeper trust proof.",
+          category: "access",
+          tierRequired: 3,
+          unlocked,
+        },
+        {
+          key: "high_trust_signal",
+          label: "High-trust signal",
+          description: "Surface a stronger trust score for reward and access integrations.",
+          category: "trust",
+          tierRequired: 3,
+          unlocked,
+        },
+      ];
+    case 4:
+      return [
+        {
+          key: "oracle_lane",
+          label: "Oracle lane access",
+          description: "Unlock the highest trust lane for curated partner access decisions.",
+          category: "access",
+          tierRequired: 4,
+          unlocked,
+        },
+        {
+          key: "top_tier_reward_pool",
+          label: "Top-tier reward pool",
+          description: "Qualify for the most selective EggPass reward pool integrations.",
+          category: "reward",
+          tierRequired: 4,
+          unlocked,
+        },
+      ];
+    default:
+      return [];
+  }
+}
+
+function buildBenefits(tier: number): PassportBenefit[] {
+  if (tier <= 0) return [];
+
+  return TIER_RULES.filter((rule) => rule.tier <= tier).flatMap((rule) =>
+    buildTierBenefits(rule.tier, true)
+  );
+}
+
+function buildBenefitSummary(
+  currentTier: number,
+  nextTier: number | null,
+): PassportBenefitSummary {
+  return {
+    current: buildBenefits(currentTier).map((benefit) => benefit.label),
+    next: nextTier
+      ? buildTierBenefits(nextTier, false).map((benefit) => benefit.label)
+      : [],
+    accessFlags: {
+      verifiedIdentity: currentTier >= 1,
+      allowlistEligible: currentTier >= 2,
+      tournamentAccess: currentTier >= 3,
+      partnerPerks: currentTier >= 4,
+    },
+  };
+}
+
+function buildAccessFlags(
+  tier: number,
+  options: {
+    eligibleToClaim: boolean;
+    hasValidPassport: boolean;
+  },
+): PassportAccessFlags {
+  return {
+    ...buildTierAccessFlags(tier),
+    verifiedIdentity: tier >= 1,
+    allowlistEligible: tier >= 2,
+    tournamentAccess: tier >= 3,
+    partnerPerks: tier >= 4,
+    eligibleToClaim: options.eligibleToClaim,
+    hasValidPassport: options.hasValidPassport,
+  };
+}
+
+function buildTierReward(rule: TierRule, unlockedTier: number): PassportTierReward {
+  return {
+    tier: rule.tier,
+    label: rule.label,
+    checkpoint: rule.checkpoint,
+    requiredCashouts: rule.requiredCashouts,
+    unlocked: unlockedTier >= rule.tier,
+    benefits: buildTierBenefits(rule.tier, unlockedTier >= rule.tier),
+    accessFlags: buildTierAccessFlags(rule.tier),
+  };
+}
+
+function buildTierRewards(tier: number): PassportTierReward[] {
+  return TIER_RULES.map((rule) => buildTierReward(rule, tier));
+}
+
+function findTierRule(tier: number) {
+  return TIER_RULES.find((rule) => rule.tier === tier) ?? null;
+}
+
+function enrichEligibility(
+  eligibility: Omit<PassportEligibility, "tierLabel" | "benefits" | "accessFlags" | "tierReward">,
+  options?: {
+    hasValidPassport?: boolean;
+  },
+): PassportEligibility {
+  const tierRule = findTierRule(eligibility.tier);
+
+  return {
+    ...eligibility,
+    tierLabel: TIER_LABELS.get(eligibility.tier) ?? `Tier ${eligibility.tier}`,
+    benefits: buildBenefits(eligibility.tier),
+    accessFlags: buildAccessFlags(eligibility.tier, {
+      eligibleToClaim: eligibility.eligible && eligibility.tier > 0,
+      hasValidPassport: Boolean(options?.hasValidPassport),
+    }),
+    tierReward: tierRule ? buildTierReward(tierRule, eligibility.tier) : null,
+  };
 }
 
 function countCheckpointCashouts(
@@ -123,6 +359,7 @@ function buildProgression(
   currentTier: number,
 ): PassportProgression {
   const nextRule = TIER_RULES.find((rule) => rule.tier > currentTier) ?? null;
+  const currentTierRule = findTierRule(currentTier);
 
   if (!nextRule) {
     return {
@@ -133,6 +370,10 @@ function buildProgression(
       progressLabel: "Top passport tier unlocked.",
       percentToNextTier: 100,
       requirements: [],
+      currentTierReward: currentTierRule
+        ? buildTierReward(currentTierRule, currentTier)
+        : null,
+      nextTierReward: null,
       stats,
     };
   }
@@ -165,6 +406,10 @@ function buildProgression(
         met: progressCurrent >= nextRule.requiredCashouts,
       },
     ],
+    currentTierReward: currentTierRule
+      ? buildTierReward(currentTierRule, currentTier)
+      : null,
+    nextTierReward: buildTierReward(nextRule, currentTier),
     stats,
   };
 }
@@ -219,20 +464,20 @@ async function evaluateEligibility(walletAddress: string): Promise<PassportEligi
       tierOneRule.checkpoint,
     );
 
-    return {
+    return enrichEligibility({
       eligible: false,
       tier: 0,
       reason: `Cash out at checkpoint ${tierOneRule.checkpoint}+ ${tierOneRule.requiredCashouts} times to unlock Tier 1. Current progress: ${tierOneCashouts}/${tierOneRule.requiredCashouts}.`,
       stats,
-    };
+    });
   }
 
-  return {
+  return enrichEligibility({
     eligible: true,
     tier,
     reason: `Eligible to claim EggPass Tier ${tier}.`,
     stats,
-  };
+  });
 }
 
 function isValidPubkey(value: string): boolean {
@@ -306,12 +551,28 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
       ? Math.max(Number(passport.tier ?? 0), eligibility.tier)
       : eligibility.tier;
     const progression = buildProgression(eligibility.stats, effectiveTier);
+    const activeTierRule = findTierRule(effectiveTier);
+    const accessFlags = buildAccessFlags(effectiveTier, {
+      eligibleToClaim: eligibility.eligible && eligibility.tier > 0,
+      hasValidPassport: passport.valid,
+    });
+    const benefits = buildBenefitSummary(effectiveTier, progression.nextTier);
+    const decoratedEligibility = enrichEligibility(eligibility, {
+      hasValidPassport: passport.valid,
+    });
 
     res.json({
       walletAddress,
-      eligibility,
+      eligibility: decoratedEligibility,
       passport,
       progression,
+      benefits,
+      benefitDetails: buildBenefits(effectiveTier),
+      accessFlags,
+      activeTierReward: activeTierRule
+        ? buildTierReward(activeTierRule, effectiveTier)
+        : null,
+      tierRewards: buildTierRewards(effectiveTier),
     });
   } catch (error) {
     console.error("❌ Passport status error:", error);

@@ -3,6 +3,7 @@
 
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   BadgeCheck,
   CheckCircle2,
@@ -112,12 +113,22 @@ export function PlayTopNav() {
   });
   const [isResolvingPlayBlocker, setIsResolvingPlayBlocker] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [desktopTopBarCenter, setDesktopTopBarCenter] =
+    useState<HTMLElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
   const walletMenuRef = useRef<HTMLDivElement | null>(null);
   const alertRootRef = useRef<HTMLDivElement | null>(null);
   const menuRootRef = useRef<HTMLDivElement | null>(null);
   const statusTimeoutRef = useRef<number | null>(null);
   const syncRetryTimerRef = useRef<number | null>(null);
+  const passportDeepLinkHandledRef = useRef(false);
+  const loadPassportStatusRef = useRef<
+    ((
+      openPanel: boolean,
+      announce?: boolean,
+    ) => Promise<ChickenBridgePassportStatus | null>) | null
+  >(null);
+  const passportAutoLoadedWalletRef = useRef("");
 
   const isConnected = Boolean(account);
 
@@ -206,7 +217,7 @@ export function PlayTopNav() {
     return bridge;
   }
 
-  async function loadPassportStatus(openPanel: boolean) {
+  async function loadPassportStatus(openPanel: boolean, announce = true) {
     if (passportBusy) return null;
     setPassportBusy(true);
     try {
@@ -214,36 +225,44 @@ export function PlayTopNav() {
       const status = await bridge.getPassportStatus();
       const message = buildPassportStatusMessage(status);
       setPassportStatus(status);
-      setPassportStatusText(message);
+      if (announce || openPanel) {
+        setPassportStatusText(message);
+      }
       if (openPanel) {
         setIsPassportPanelOpen(true);
         setIsMenuOpen(false);
       }
-      dispatchStatusUpdate({
-        message,
-        tone: status.passport.valid
-          ? "ready"
-          : status.eligibility.eligible
-            ? "warning"
-            : "info",
-        durationMs: 4200,
-      });
+      if (announce) {
+        dispatchStatusUpdate({
+          message,
+          tone: status.passport.valid
+            ? "ready"
+            : status.eligibility.eligible
+              ? "warning"
+              : "info",
+          durationMs: 4200,
+        });
+      }
       return status;
     } catch (error) {
       const message = readActionErrorMessage(
         error,
         "Failed to check passport status.",
       );
-      setPassportStatusText(message);
+      if (announce || openPanel) {
+        setPassportStatusText(message);
+      }
       if (openPanel) {
         setIsPassportPanelOpen(true);
         setIsMenuOpen(false);
       }
-      dispatchStatusUpdate({
-        message,
-        tone: "error",
-        durationMs: 4200,
-      });
+      if (announce) {
+        dispatchStatusUpdate({
+          message,
+          tone: "error",
+          durationMs: 4200,
+        });
+      }
       return null;
     } finally {
       setPassportBusy(false);
@@ -299,6 +318,124 @@ export function PlayTopNav() {
       setPassportBusy(false);
     }
   }
+
+  useEffect(() => {
+    loadPassportStatusRef.current = loadPassportStatus;
+  });
+
+  useEffect(() => {
+    let frameId: number | null = null;
+    let attempts = 0;
+
+    function findDesktopTopBarCenter() {
+      const topBarCenter = document.querySelector<HTMLElement>("#top-bar-center");
+      if (topBarCenter) {
+        setDesktopTopBarCenter(topBarCenter);
+        return;
+      }
+
+      attempts += 1;
+      if (attempts < 8) {
+        frameId = window.requestAnimationFrame(findDesktopTopBarCenter);
+      }
+    }
+
+    frameId = window.requestAnimationFrame(findDesktopTopBarCenter);
+
+    return () => {
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !isConnected ||
+      !isAppChain ||
+      (hasBackendApiConfig && !isBackendAuthenticated)
+    ) {
+      passportAutoLoadedWalletRef.current = "";
+      return;
+    }
+
+    const walletKey = account || "";
+    if (!walletKey || passportAutoLoadedWalletRef.current === walletKey) return;
+
+    let timerId: number | null = null;
+
+    function loadWhenBridgeReady(attempt = 0) {
+      const bridge = window.__CHICKEN_GAME_BRIDGE__;
+      if (bridge && !bridge.backgroundMode) {
+        passportAutoLoadedWalletRef.current = walletKey;
+        void loadPassportStatusRef.current?.(false, false);
+        return;
+      }
+
+      if (attempt < 8) {
+        timerId = window.setTimeout(
+          () => loadWhenBridgeReady(attempt + 1),
+          300,
+        );
+      }
+    }
+
+    timerId = window.setTimeout(() => loadWhenBridgeReady(), 250);
+
+    return () => {
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
+    };
+  }, [
+    account,
+    hasBackendApiConfig,
+    isBackendAuthenticated,
+    isConnected,
+    isAppChain,
+  ]);
+
+  useEffect(() => {
+    if (passportDeepLinkHandledRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("passport") !== "1") return;
+
+    passportDeepLinkHandledRef.current = true;
+    params.delete("passport");
+    const nextSearch = params.toString();
+    const nextUrl = `${window.location.pathname}${
+      nextSearch ? `?${nextSearch}` : ""
+    }${window.location.hash}`;
+    window.history.replaceState({}, "", nextUrl);
+
+    let timerId: number | null = null;
+    let attempts = 0;
+
+    function openPassportWhenReady() {
+      attempts += 1;
+      const bridge = window.__CHICKEN_GAME_BRIDGE__;
+      if (bridge && !bridge.backgroundMode) {
+        void loadPassportStatusRef.current?.(true);
+        return;
+      }
+
+      if (attempts < 8) {
+        timerId = window.setTimeout(openPassportWhenReady, 300);
+        return;
+      }
+
+      void loadPassportStatusRef.current?.(true);
+    }
+
+    timerId = window.setTimeout(openPassportWhenReady, 250);
+
+    return () => {
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
+    };
+  }, []);
 
   async function onClaimPassportClick() {
     if (passportBusy) return;
@@ -801,6 +938,7 @@ export function PlayTopNav() {
   const passportCurrentTierLabel =
     passportProgression?.currentTierLabel ?? "Rookie";
   const passportRequirements = passportProgression?.requirements ?? [];
+  const passportBenefits = passportStatus?.benefits ?? null;
   const passportConfigured = passportStatus?.passport.configured ?? true;
   const passportStatusLabel = !passportStatus
     ? passportBusy
@@ -846,16 +984,50 @@ export function PlayTopNav() {
             : passportStatus.eligibility.eligible
               ? "CLAIM EGGPASS"
               : "LOCKED";
+  const hasPassportBadgeStatus = Boolean(isConnected && passportStatus);
+  const passportBadgeTier = passportStatus?.passport.valid
+    ? passportStatus.passport.tier
+    : passportProgression?.currentTier ?? passportStatus?.eligibility.tier ?? 0;
+  const passportBadgeText = passportBusy
+    ? "..."
+    : hasPassportBadgeStatus
+      ? `T${passportBadgeTier}`
+      : "T?";
+  const passportBadgeLabel = hasPassportBadgeStatus
+    ? `Open passport status, tier ${passportBadgeTier}`
+    : "Check passport tier";
+  const passportBadgeTone = hasPassportBadgeStatus ? passportStatusTone : "offline";
+  const passportBadgeButton = (className: string) => (
+    <button
+      type="button"
+      className={`${className} ${className}-${passportBadgeTone}`}
+      onClick={() => {
+        void onCheckPassportClick();
+      }}
+      disabled={passportBusy}
+      aria-label={passportBadgeLabel}
+      title={passportBadgeLabel}
+    >
+      <BadgeCheck aria-hidden="true" />
+      <span>{passportBadgeText}</span>
+    </button>
+  );
 
   return (
     <>
+      {desktopTopBarCenter
+        ? createPortal(
+            passportBadgeButton("play-desktop-passport-badge"),
+            desktopTopBarCenter,
+          )
+        : null}
       <div className="play-mobile-header-rail" aria-hidden="true" />
       <nav ref={navRef} className="play-nav">
         <div className="play-nav-row">
           <div ref={walletMenuRef} className="play-wallet-menu">
             <button
               type="button"
-              className={`play-wallet-trigger${isConnected ? " connected" : " connect"}`}
+              className={`play-wallet-trigger${isConnected ? " connected" : " connect"}${isMobile ? " icon-only" : ""}`}
               onClick={() => {
                 void onWalletButtonClick();
               }}
@@ -865,15 +1037,23 @@ export function PlayTopNav() {
                   ? account
                   : "Connect Solana wallet"
               }
+              aria-label={isConnected ? "Open wallet menu" : "Connect wallet"}
               aria-expanded={isConnected ? isWalletMenuOpen : false}
             >
-              {isConnecting
-                ? "CONNECTING..."
-                : isConnected
-                  ? shortAddress(account, isMobile)
-                  : isMobile
-                      ? "CONNECT"
-                      : "CONNECT WALLET"}
+              {isMobile ? (
+                <>
+                  <WalletCards aria-hidden="true" />
+                  {!isConnected ? (
+                    <span className="play-wallet-connect-dot" aria-hidden="true" />
+                  ) : null}
+                </>
+              ) : isConnecting ? (
+                "CONNECTING..."
+              ) : isConnected ? (
+                shortAddress(account, false)
+              ) : (
+                "CONNECT WALLET"
+              )}
             </button>
             {isConnected && isWalletMenuOpen ? (
               <section className="play-wallet-popover" aria-label="Wallet menu">
@@ -904,6 +1084,7 @@ export function PlayTopNav() {
               </section>
             ) : null}
           </div>
+          {passportBadgeButton("play-nav-passport-badge")}
           <div className="play-nav-balance-chip" aria-live="polite">
             <span className="play-nav-balance-label">BALANCE</span>
             <strong id="balance-mobile" className="play-nav-balance-value">
@@ -1018,31 +1199,6 @@ export function PlayTopNav() {
                         >
                           LEADERBOARD
                         </button>
-                        <button
-                          type="button"
-                          className="play-menu-modal-item menu-item-passport-check"
-                          onClick={() => {
-                            void onCheckPassportClick();
-                          }}
-                          disabled={passportBusy}
-                        >
-                          CHECK PASSPORT
-                        </button>
-                        <button
-                          type="button"
-                          className="play-menu-modal-item menu-item-passport-claim"
-                          onClick={() => {
-                            void onClaimPassportClick();
-                          }}
-                          disabled={passportBusy}
-                        >
-                          {passportBusy ? "PROCESSING..." : "CLAIM PASSPORT"}
-                        </button>
-                        {passportStatusText ? (
-                          <p className="play-menu-passport-status">
-                            {passportStatusText}
-                          </p>
-                        ) : null}
                         <div className="play-menu-volume">
                           <div className="play-menu-volume-head">
                             <span>SFX VOLUME</span>
@@ -1261,6 +1417,35 @@ export function PlayTopNav() {
               </div>
             </div>
 
+            {passportBenefits ? (
+              <div className="play-passport-benefits">
+                <div>
+                  <span>UNLOCKED ACCESS</span>
+                  <div className="play-passport-benefit-list">
+                    {passportBenefits.current.length > 0 ? (
+                      passportBenefits.current.map((benefit) => (
+                        <strong key={benefit}>{benefit}</strong>
+                      ))
+                    ) : (
+                      <strong>Basic Profile</strong>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span>NEXT UNLOCK</span>
+                  <div className="play-passport-benefit-list">
+                    {passportBenefits.next.length > 0 ? (
+                      passportBenefits.next.map((benefit) => (
+                        <strong key={benefit}>{benefit}</strong>
+                      ))
+                    ) : (
+                      <strong>Max Tier</strong>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             <div className="play-passport-progress-block">
               <div className="play-passport-progress-head">
                 <span>{passportProgression?.nextTierLabel || "TOP TIER"}</span>
@@ -1427,6 +1612,29 @@ export function PlayTopNav() {
           </button>
           <div className="leaderboard-panel-head">
             <h3>TOP PLAYERS</h3>
+            <div
+              className="leaderboard-filter-tabs"
+              role="tablist"
+              aria-label="Leaderboard filter"
+            >
+              <button
+                id="leaderboard-filter-all"
+                className="active"
+                type="button"
+                role="tab"
+                aria-selected="true"
+              >
+                ALL
+              </button>
+              <button
+                id="leaderboard-filter-verified"
+                type="button"
+                role="tab"
+                aria-selected="false"
+              >
+                VERIFIED
+              </button>
+            </div>
           </div>
           <p id="leaderboard-status" className="leaderboard-status">
             Top 10 players by best hops.
