@@ -37,7 +37,7 @@ const miniAppEmbed = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
-  title: `${APP_NAME} | Solana Frontier`,
+  title: `${APP_NAME}`,
   description: APP_DESCRIPTION,
   openGraph: {
     title: APP_NAME,
