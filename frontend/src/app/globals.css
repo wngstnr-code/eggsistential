@@ -7038,6 +7038,12 @@ body.checkpoint-arrival #hud-scrim::after {
   border: 2px solid rgba(143, 170, 255, 0.82);
 }
 
+.dashboard-btn-passport {
+  background: linear-gradient(180deg, #39c5a2 0%, #1d8d73 100%);
+  color: #eafff8;
+  border: 2px solid rgba(116, 237, 205, 0.82);
+}
+
 .dashboard-btn-logout {
   background: linear-gradient(180deg, #ff5b5b 0%, #ff4040 100%);
   color: #fff0f0;
@@ -9301,4 +9307,3 @@ body.checkpoint-arrival #hud-scrim::after {
     min-height: 44px !important;
   }
 }
-

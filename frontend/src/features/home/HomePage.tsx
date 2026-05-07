@@ -207,6 +207,7 @@ export function HomePage() {
   } = useWallet();
   const [showProfilePopover, setShowProfilePopover] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showPassportInfo, setShowPassportInfo] = useState(false);
   const [showHeroConnectPrompt, setShowHeroConnectPrompt] = useState(false);
   const [profileCopyLabel, setProfileCopyLabel] = useState("COPY");
   const [distanceBoard, setDistanceBoard] = useState<
@@ -619,6 +620,12 @@ export function HomePage() {
                   >
                     PLAY NOW
                   </a>
+                  <a
+                    href="/managemoney"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-deposit"
+                  >
+                    MANAGE MONEY
+                  </a>
                   <button
                     type="button"
                     className="flow-btn home-btn-main dashboard-btn dashboard-btn-how"
@@ -626,21 +633,13 @@ export function HomePage() {
                   >
                     HOW TO PLAY
                   </button>
-                  <a
-                    href="/managemoney"
-                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-deposit"
+                  <button
+                    type="button"
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-passport"
+                    onClick={() => setShowPassportInfo(true)}
                   >
-                    MANAGE MONEY
-                  </a>
-                  {canDisconnect ? (
-                    <button
-                      type="button"
-                      className="flow-btn home-btn-main dashboard-btn dashboard-btn-logout"
-                      onClick={onLogout}
-                    >
-                      LOG OUT
-                    </button>
-                  ) : null}
+                    WHAT IS PASSPORT
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -930,27 +929,44 @@ export function HomePage() {
               <div className="help-step">
                 <span className="step-num">1</span>
                 <div>
-                  <p className="step-title">MANAGE MONEY</p>
-                  <p>Deposit USDC into the vault before starting a paid run.</p>
+                  <p className="step-title">FUND YOUR RUN</p>
+                  <p>
+                    Open Manage Money, claim faucet if needed, then deposit
+                    USDC to your vault. Your vault balance is what you use to
+                    start live runs.
+                  </p>
                 </div>
               </div>
               <div className="help-step">
                 <span className="step-num">2</span>
                 <div>
-                  <p className="step-title">RUN & STACK</p>
+                  <p className="step-title">SURVIVE AND STACK</p>
                   <p>
-                    Push forward for more multiplier while avoiding traffic and
-                    bad timing.
+                    In each run, move lane by lane and avoid traffic timing
+                    traps. The farther you go, the more pressure you face, but
+                    your potential multiplier keeps improving.
                   </p>
                 </div>
               </div>
               <div className="help-step">
                 <span className="step-num">3</span>
                 <div>
-                  <p className="step-title">CHECKPOINT CASH OUT</p>
+                  <p className="step-title">CASH OUT SMART</p>
                   <p>
-                    Reach checkpoints, cash out before decay, or risk one more
-                    lane for bigger upside.
+                    Checkpoints are your decision moments: secure profit now or
+                    risk another push for a bigger payout. Discipline matters
+                    more than greed if you want long-term growth.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">4</span>
+                <div>
+                  <p className="step-title">BUILD YOUR PASSPORT</p>
+                  <p>
+                    Consistent checkpoint cashouts improve your Passport tier.
+                    Higher tiers can unlock better events, better access, and
+                    stronger trust perks across partner experiences.
                   </p>
                 </div>
               </div>
@@ -959,6 +975,80 @@ export function HomePage() {
               className="flow-btn secondary info-modal-action"
               type="button"
               onClick={() => setShowHelp(false)}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showPassportInfo && (
+        <div
+          className="home-modal-overlay"
+          onClick={() => setShowPassportInfo(false)}
+        >
+          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="home-modal-close"
+              type="button"
+              onClick={() => setShowPassportInfo(false)}
+            >
+              X
+            </button>
+            <h2>WHAT IS PASSPORT</h2>
+            <div className="home-help-content">
+              <div className="help-step">
+                <span className="step-num">1</span>
+                <div>
+                  <p className="step-title">WHAT IS A PASSPORT?</p>
+                  <p>
+                    A Passport is your reputation card in Eggsistential. It
+                    grows from how you play: how consistently you survive, how
+                    often you cash out with discipline, and how stable your
+                    performance is across runs.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">2</span>
+                <div>
+                  <p className="step-title">WHY DO PLAYERS NEED IT?</p>
+                  <p>
+                    Your Passport makes your progress meaningful beyond a single
+                    score. A higher tier shows that you are a real, active
+                    player with a strong gameplay track record.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">3</span>
+                <div>
+                  <p className="step-title">WHAT YOU GET FROM IT</p>
+                  <p>
+                    Your Passport can unlock tiered benefits: access to
+                    ranked/tournament events, allowlist priority, partner
+                    rewards, and community campaigns that require verified
+                    players.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">4</span>
+                <div>
+                  <p className="step-title">HOW TO LEVEL IT UP</p>
+                  <p>
+                    Play clean and consistent: reach checkpoints, cash out at
+                    the right moments, and repeat that performance over time.
+                    The more disciplined your playstyle is, the faster your
+                    Passport tier increases.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              className="flow-btn secondary info-modal-action"
+              type="button"
+              onClick={() => setShowPassportInfo(false)}
             >
               GOT IT
             </button>
