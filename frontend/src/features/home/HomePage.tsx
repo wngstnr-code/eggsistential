@@ -406,7 +406,6 @@ export function HomePage() {
             <img src="/favicon.png" alt="GM" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </div>
           <div className="home-brand-copy">
-            <p className="home-brand-eyebrow">Solana Arcade Risk Game</p>
             <div className="home-brand-name home-wordmark">
               <span className="home-wordmark-egg">EGG</span>
               <span className="home-wordmark-rest">SISTENTIAL</span>
