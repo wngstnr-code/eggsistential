@@ -522,27 +522,6 @@ export function HomePage() {
                       </div>
                     </div>
                     <div className="home-profile-actions">
-                      <Link
-                        href="/"
-                        className="flow-btn home-profile-action home-profile-action-dashboard"
-                      >
-                        HOME
-                      </Link>
-                      <Link
-                        href="/managemoney"
-                        className="flow-btn home-profile-action home-profile-action-manage"
-                      >
-                        MANAGE MONEY
-                      </Link>
-                      {canDisconnect ? (
-                        <button
-                          className="flow-btn home-profile-action home-profile-action-logout"
-                          type="button"
-                          onClick={onLogout}
-                        >
-                        LOG OUT
-                      </button>
-                    ) : null}
                       <button
                         className="flow-btn home-profile-action home-profile-action-copy"
                         type="button"
@@ -550,6 +529,15 @@ export function HomePage() {
                       >
                         {profileCopyLabel}
                       </button>
+                      {canDisconnect ? (
+                        <button
+                          className="flow-btn home-profile-action home-profile-action-logout"
+                          type="button"
+                          onClick={onLogout}
+                        >
+                          LOG OUT
+                        </button>
+                      ) : null}
                     </div>
                   </section>
                 )}
@@ -1020,4 +1008,3 @@ export function HomePage() {
     </main>
   );
 }
-

@@ -1072,15 +1072,6 @@ export function PlayTopNav() {
                 >
                   {walletCopyLabel}
                 </button>
-                {canDisconnect ? (
-                  <button
-                    type="button"
-                    className="play-wallet-logout"
-                    onClick={onLogoutClick}
-                  >
-                    LOG OUT
-                  </button>
-                ) : null}
               </section>
             ) : null}
           </div>
