@@ -25,6 +25,11 @@ router.get("/status", requireAuth, (req, res) => {
   });
 });
 
+/**
+ * Returns a base64-encoded unsigned transaction the wallet will sign and send.
+ * The cooldown is started immediately to discourage repeat requests; if the
+ * wallet never signs, the player simply waits out the cooldown.
+ */
 router.post("/request", requireAuth, async (req, res) => {
   const walletAddress = req.walletAddress!;
   const status = readFaucetStatus(walletAddress);
@@ -32,7 +37,7 @@ router.post("/request", requireAuth, async (req, res) => {
   if (!status.enabled) {
     res.status(400).json({
       error:
-        "Faucet belum aktif di backend. Isi FAUCET_CONTRACT_ADDRESS agar endpoint ini bisa dipakai.",
+        "Faucet belum aktif di backend. Set PROGRAM_ID dan TOKEN_MINT agar endpoint ini bisa dipakai.",
     });
     return;
   }
@@ -52,7 +57,7 @@ router.post("/request", requireAuth, async (req, res) => {
     const result = await requestFaucetForWallet(walletAddress);
     res.json({
       success: true,
-      txHash: result.txHash,
+      unsignedTx: result.unsignedTx,
       mode: result.mode,
       cooldownSeconds: result.cooldownSeconds,
       nextEligibleAt: result.nextEligibleAt,
@@ -62,7 +67,7 @@ router.post("/request", requireAuth, async (req, res) => {
     res.status(500).json({
       error: normalizeErrorMessage(
         error,
-        "Gagal request faucet dari backend.",
+        "Gagal menyiapkan transaksi faucet.",
       ),
     });
   }

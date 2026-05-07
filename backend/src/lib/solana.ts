@@ -3,8 +3,15 @@ import {
   Keypair,
   PublicKey,
   SystemProgram,
+  Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+  createAssociatedTokenAccountIdempotentInstruction,
+  getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
 import { createHash } from "node:crypto";
 import bs58 from "bs58";
 import { env } from "../config/env.js";
@@ -108,3 +115,52 @@ export function buildSettleSessionIx(params: {
 }
 
 export const SystemProgramId = SystemProgram.programId;
+
+export function playerAssociatedTokenAccount(player: PublicKey): PublicKey {
+  return getAssociatedTokenAddressSync(TOKEN_MINT, player);
+}
+
+export function buildClaimFaucetIx(player: PublicKey): TransactionInstruction {
+  return new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: CONFIG_PDA, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_MINT, isSigner: false, isWritable: true },
+      { pubkey: VAULT_AUTHORITY_PDA, isSigner: false, isWritable: false },
+      { pubkey: VAULT_TOKEN_ACCOUNT, isSigner: false, isWritable: true },
+      { pubkey: player, isSigner: true, isWritable: true },
+      { pubkey: playerAssociatedTokenAccount(player), isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    ],
+    data: anchorDiscriminator("claim_faucet"),
+  });
+}
+
+/**
+ * Builds an unsigned transaction that the player wallet will sign and submit:
+ *   1. Idempotent ATA creation (no-op if already exists)
+ *   2. claim_faucet (mints FAUCET_AMOUNT to player ATA)
+ * Returns base64-serialized transaction ready to be deserialized by a wallet.
+ */
+export async function buildClaimFaucetTransaction(player: PublicKey): Promise<string> {
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({
+    feePayer: player,
+    blockhash,
+    lastValidBlockHeight,
+  });
+  tx.add(
+    createAssociatedTokenAccountIdempotentInstruction(
+      player,
+      playerAssociatedTokenAccount(player),
+      player,
+      TOKEN_MINT,
+    ),
+    buildClaimFaucetIx(player),
+  );
+  return tx
+    .serialize({ requireAllSignatures: false, verifySignatures: false })
+    .toString("base64");
+}
+
+export { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID };

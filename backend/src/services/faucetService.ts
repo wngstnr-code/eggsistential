@@ -1,78 +1,36 @@
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  isAddress,
-  parseAbi,
-  type Address,
-  type Hex,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { PublicKey } from "@solana/web3.js";
 import { env } from "../config/env.js";
-
-const FAUCET_ABI = parseAbi([
-  "function drip()",
-  "function drip(address to)",
-  "function faucet(address to, uint256 amount)",
-  "function mint(address to, uint256 amount)",
-  "function claim(address to, uint256 amount)",
-]);
+import { buildClaimFaucetTransaction } from "../lib/solana.js";
 
 const lastFaucetAtMsByWallet = new Map<string, number>();
 
-// NOTE: legacy EVM faucet client — replaced in Phase 2 of the Solana migration.
-// Lazy-initialized so the rest of the backend can boot with a Solana keypair.
-let _faucetClients: ReturnType<typeof buildFaucetClients> | null = null;
-function buildFaucetClients() {
-  const account = privateKeyToAccount(env.BACKEND_PRIVATE_KEY as Hex);
-  return {
-    account,
-    publicClient: createPublicClient({ transport: http(env.RPC_URL) }),
-    walletClient: createWalletClient({ account, transport: http(env.RPC_URL) }),
-  };
-}
-function getFaucetClients() {
-  if (!_faucetClients) _faucetClients = buildFaucetClients();
-  return _faucetClients;
-}
-
-type FaucetMode =
-  | "drip_to"
-  | "drip_self"
-  | "faucet_to_amount"
-  | "mint_to_amount"
-  | "claim_to_amount";
+type FaucetMode = "claim_faucet";
 
 function readFaucetMode(): FaucetMode {
-  const mode = String(env.FAUCET_MODE || "drip_to").trim().toLowerCase();
-  if (mode === "drip_self") return "drip_self";
-  if (mode === "faucet_to_amount") return "faucet_to_amount";
-  if (mode === "mint_to_amount") return "mint_to_amount";
-  if (mode === "claim_to_amount") return "claim_to_amount";
-  return "drip_to";
-}
-
-function readFaucetAmountUnits() {
-  try {
-    const parsed = BigInt(String(env.FAUCET_AMOUNT_UNITS || "0"));
-    return parsed > 0n ? parsed : 0n;
-  } catch {
-    return 0n;
-  }
+  return "claim_faucet";
 }
 
 function readCooldownMs() {
   return Math.max(0, env.FAUCET_COOLDOWN_SECONDS) * 1000;
 }
 
+function isValidPubkey(value: string): boolean {
+  try {
+    new PublicKey(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function isFaucetConfigured() {
-  return isAddress(env.FAUCET_CONTRACT_ADDRESS);
+  return Boolean(env.PROGRAM_ID) && Boolean(env.TOKEN_MINT) && isValidPubkey(env.PROGRAM_ID);
 }
 
 export function readFaucetStatus(walletAddress?: string) {
   const now = Date.now();
   const cooldownMs = readCooldownMs();
-  const normalizedWallet = String(walletAddress || "").toLowerCase();
+  const normalizedWallet = String(walletAddress || "").trim();
   const lastRequestedAt = normalizedWallet
     ? (lastFaucetAtMsByWallet.get(normalizedWallet) ?? 0)
     : 0;
@@ -95,7 +53,7 @@ export function readFaucetStatus(walletAddress?: string) {
 function ensureFaucetReady() {
   if (!isFaucetConfigured()) {
     throw new Error(
-      "Faucet belum dikonfigurasi di backend. Isi FAUCET_CONTRACT_ADDRESS dulu.",
+      "Faucet belum dikonfigurasi di backend. Set PROGRAM_ID dan TOKEN_MINT terlebih dahulu.",
     );
   }
 }
@@ -109,74 +67,28 @@ export function readFaucetCooldownForWallet(walletAddress: string) {
 }
 
 function markFaucetRequested(walletAddress: string) {
-  lastFaucetAtMsByWallet.set(walletAddress.toLowerCase(), Date.now());
+  lastFaucetAtMsByWallet.set(walletAddress, Date.now());
 }
 
+/**
+ * Builds an unsigned `claim_faucet` transaction for the player to sign with
+ * their wallet. Marks the cooldown timer immediately to prevent abuse.
+ */
 export async function requestFaucetForWallet(walletAddress: string) {
   ensureFaucetReady();
 
-  const faucetAddress = env.FAUCET_CONTRACT_ADDRESS as Address;
-  const targetWallet = walletAddress.toLowerCase() as Address;
-  const mode = readFaucetMode();
-  const amountUnits = readFaucetAmountUnits();
-
-  let txHash: Hex;
-
-  if (mode === "drip_self") {
-    txHash = await getFaucetClients().walletClient.writeContract({
-      chain: null,
-      address: faucetAddress,
-      abi: FAUCET_ABI,
-      functionName: "drip",
-      args: [],
-    });
-  } else if (mode === "faucet_to_amount") {
-    txHash = await getFaucetClients().walletClient.writeContract({
-      chain: null,
-      address: faucetAddress,
-      abi: FAUCET_ABI,
-      functionName: "faucet",
-      args: [targetWallet, amountUnits],
-    });
-  } else if (mode === "mint_to_amount") {
-    txHash = await getFaucetClients().walletClient.writeContract({
-      chain: null,
-      address: faucetAddress,
-      abi: FAUCET_ABI,
-      functionName: "mint",
-      args: [targetWallet, amountUnits],
-    });
-  } else if (mode === "claim_to_amount") {
-    txHash = await getFaucetClients().walletClient.writeContract({
-      chain: null,
-      address: faucetAddress,
-      abi: FAUCET_ABI,
-      functionName: "claim",
-      args: [targetWallet, amountUnits],
-    });
-  } else {
-    txHash = await getFaucetClients().walletClient.writeContract({
-      chain: null,
-      address: faucetAddress,
-      abi: FAUCET_ABI,
-      functionName: "drip",
-      args: [targetWallet],
-    });
+  if (!isValidPubkey(walletAddress)) {
+    throw new Error(`Invalid Solana wallet address: ${walletAddress}`);
   }
 
-  const receipt = await getFaucetClients().publicClient.waitForTransactionReceipt({
-    hash: txHash,
-  });
+  const player = new PublicKey(walletAddress);
+  const unsignedTxBase64 = await buildClaimFaucetTransaction(player);
 
-  if (receipt.status !== "success") {
-    throw new Error("Faucet transaction reverted.");
-  }
-
-  markFaucetRequested(targetWallet);
-  const nextStatus = readFaucetStatus(targetWallet);
+  markFaucetRequested(walletAddress);
+  const nextStatus = readFaucetStatus(walletAddress);
 
   return {
-    txHash,
+    unsignedTx: unsignedTxBase64,
     mode: nextStatus.mode,
     cooldownSeconds: nextStatus.cooldownSeconds,
     nextEligibleAt: nextStatus.nextEligibleAt,
