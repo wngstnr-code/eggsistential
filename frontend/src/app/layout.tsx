@@ -1,8 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Web3Provider } from "~/components/web3/Web3Provider";
-import { WalletProvider } from "~/components/web3/WalletProvider";
+import { AppProviders } from "~/providers/AppProviders";
 
 const APP_URL = "https://eggsistential.vercel.app";
 const APP_NAME = "EGGSISTENTIAL";
@@ -89,9 +88,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body>
-        <Web3Provider>
-          <WalletProvider>{children}</WalletProvider>
-        </Web3Provider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

@@ -10,7 +10,7 @@ import {
   Trophy,
   WalletCards,
 } from "lucide-react";
-import { useWallet } from "~/components/web3/WalletProvider";
+import { useWallet } from "~/features/wallet/WalletProvider";
 
 function shortAddress(address: string, isMobile: boolean = false) {
   if (!address) return "NO WALLET";

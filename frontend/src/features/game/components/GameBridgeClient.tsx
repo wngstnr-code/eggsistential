@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWallet } from "~/components/web3/WalletProvider";
+import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
 
 type GameBridgeClientProps = {

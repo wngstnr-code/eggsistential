@@ -1,5 +1,5 @@
-import { GameCanvas } from "~/components/game/GameCanvas";
-import { PlayTopNav } from "~/components/game/PlayTopNav";
+import { GameCanvas } from "~/features/game/components/GameCanvas";
+import { PlayTopNav } from "~/features/game/components/PlayTopNav";
 
 type PlayPageProps = {
   searchParams?: Promise<{

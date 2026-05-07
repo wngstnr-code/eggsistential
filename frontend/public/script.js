@@ -2567,6 +2567,10 @@ function createPlayerBox(width, height, depth, material, x, y, z) {
   return mesh;
 }
 
+function mixPlayerColor(color, target, amount) {
+  return new THREE.Color(color).lerp(new THREE.Color(target), amount).getHex();
+}
+
 function disposePlayerModel(model) {
   model.traverse((child) => {
     if (!child.isMesh) return;
@@ -2608,6 +2612,25 @@ function createPlayerModel(characterId = "chicken") {
     color: config.legs,
     flatShading: true,
   });
+  const bodyHighlightMat = new THREE.MeshLambertMaterial({
+    color: mixPlayerColor(config.body, 0xffffff, 0.38),
+    flatShading: true,
+  });
+  const bodyShadowMat = new THREE.MeshLambertMaterial({
+    color: mixPlayerColor(config.body, 0x000000, 0.2),
+    flatShading: true,
+  });
+  const accentHighlightMat = new THREE.MeshLambertMaterial({
+    color: mixPlayerColor(config.accent, 0xffffff, 0.22),
+    flatShading: true,
+  });
+  const eyeShineMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+  });
+  const nostrilMat = new THREE.MeshLambertMaterial({
+    color: mixPlayerColor(config.beak, 0x000000, 0.55),
+    flatShading: true,
+  });
 
   const isQuail = config.variant === "quail";
   const isGoose = config.variant === "goose";
@@ -2617,10 +2640,17 @@ function createPlayerModel(characterId = "chicken") {
   const headZ = isGoose ? 20 : isQuail ? 15.5 : 17;
 
   model.add(createPlayerBox(bodyW, bodyH, bodyD, bodyMat, 0, 0, 7));
+  model.add(
+    createPlayerBox(bodyW - 4.5, 1, bodyD - 3, bodyHighlightMat, 0, bodyH / 2 + 0.35, 8),
+  );
+  model.add(
+    createPlayerBox(bodyW - 7, 1, Math.max(3.5, bodyD - 6), bodyShadowMat, 0, -bodyH / 2 - 0.25, 6),
+  );
 
   if (isGoose) {
     model.add(createPlayerBox(5, 5, 9, headMat, 0, 3.5, 14.5));
     model.add(createPlayerBox(7.5, 7, 6.5, headMat, 0, 5, headZ));
+    model.add(createPlayerBox(5.8, 1, 2, accentMat, 0, 6.4, 16));
   } else {
     model.add(
       createPlayerBox(
@@ -2633,6 +2663,7 @@ function createPlayerModel(characterId = "chicken") {
         headZ,
       ),
     );
+    model.add(createPlayerBox(isQuail ? 4.5 : 5.5, 1, 1.2, bodyHighlightMat, 0, isQuail ? 6.9 : 7.5, headZ - 1.8));
   }
 
   const beakWidth = config.variant === "duck" ? 4.5 : 2.5;
@@ -2648,18 +2679,35 @@ function createPlayerModel(characterId = "chicken") {
       isGoose ? 19.5 : isQuail ? 15 : 16.5,
     ),
   );
+  model.add(
+    createPlayerBox(
+      Math.max(1.2, beakWidth - 1.2),
+      0.45,
+      0.45,
+      nostrilMat,
+      0,
+      isGoose ? 10 : 9.5,
+      isGoose ? 19.7 : isQuail ? 15.2 : 16.7,
+    ),
+  );
 
   if (config.variant === "chicken") {
     model.add(createPlayerBox(2, 2, 2, accentMat, -2, 2, 22));
     model.add(createPlayerBox(2, 2, 3, accentMat, 0, 3, 22.5));
     model.add(createPlayerBox(2, 2, 2, accentMat, 2, 4, 22));
     model.add(createPlayerBox(1.5, 1.5, 2, accentMat, 0, 8.5, 14));
+    model.add(createPlayerBox(1.4, 1.2, 1.2, accentHighlightMat, 0, 3.4, 24.2));
+    model.add(createPlayerBox(2.5, 1.2, 4, accentMat, -3.6, -7.2, 14));
+    model.add(createPlayerBox(2.5, 1.2, 4, accentMat, 3.6, -7.2, 14));
   }
 
   if (config.variant === "turkey") {
     model.add(createPlayerBox(2, 1.5, 3, accentMat, 0, 8.2, 13.5));
     model.add(createPlayerBox(11, 1.5, 9, accentMat, 0, -7.8, 14));
     model.add(createPlayerBox(7, 1.2, 11, beakMat, 0, -8.8, 17));
+    model.add(createPlayerBox(3, 1.2, 7, accentHighlightMat, -4, -7.6, 17));
+    model.add(createPlayerBox(3, 1.2, 7, accentHighlightMat, 4, -7.6, 17));
+    model.add(createPlayerBox(7, 1, 2.5, bodyHighlightMat, 0, 6.8, 8.5));
   }
 
   if (config.variant === "quail") {
@@ -2667,6 +2715,8 @@ function createPlayerModel(characterId = "chicken") {
     model.add(createPlayerBox(1.2, 1.2, 6, accentMat, 0, 1.6, 20.8));
     model.add(createPlayerBox(1.2, 1.2, 5, accentMat, 1.8, 1.2, 20));
     model.add(createPlayerBox(8, 1, 2, accentMat, 0, 0, 12));
+    model.add(createPlayerBox(5, 1, 1.2, accentMat, 0, 7, 17.2));
+    model.add(createPlayerBox(3.5, 1, 2, bodyHighlightMat, 0, 6.8, 12.5));
   }
 
   if (config.variant === "peacock") {
@@ -2675,10 +2725,16 @@ function createPlayerModel(characterId = "chicken") {
     model.add(createPlayerBox(1.2, 1.2, 4, accentMat, -2, 2, 22));
     model.add(createPlayerBox(1.2, 1.2, 5, accentMat, 0, 2.5, 22.8));
     model.add(createPlayerBox(1.2, 1.2, 4, accentMat, 2, 2, 22));
+    model.add(createPlayerBox(2, 0.9, 2, beakMat, -4.2, -7.8, 18));
+    model.add(createPlayerBox(2, 0.9, 2, beakMat, 0, -7.9, 20));
+    model.add(createPlayerBox(2, 0.9, 2, beakMat, 4.2, -7.8, 18));
+    model.add(createPlayerBox(4, 1, 2, bodyHighlightMat, 0, 7.5, 17.5));
   }
 
   model.add(createPlayerBox(1, 1, 1, eyeMat, -2.5, 7.5, headZ + 1));
   model.add(createPlayerBox(1, 1, 1, eyeMat, 2.5, 7.5, headZ + 1));
+  model.add(createPlayerBox(0.35, 0.35, 0.35, eyeShineMat, -2.3, 7.75, headZ + 1.25));
+  model.add(createPlayerBox(0.35, 0.35, 0.35, eyeShineMat, 2.7, 7.75, headZ + 1.25));
 
   model.add(
     createPlayerBox(1, 8, isQuail ? 5 : 7, bodyMat, -7, -1, isQuail ? 7 : 8),
@@ -2686,14 +2742,21 @@ function createPlayerModel(characterId = "chicken") {
   model.add(
     createPlayerBox(1, 8, isQuail ? 5 : 7, bodyMat, 7, -1, isQuail ? 7 : 8),
   );
+  model.add(createPlayerBox(0.8, 5.5, 1.2, bodyShadowMat, -7.05, -1.2, isQuail ? 5 : 5.8));
+  model.add(createPlayerBox(0.8, 5.5, 1.2, bodyShadowMat, 7.05, -1.2, isQuail ? 5 : 5.8));
+  model.add(createPlayerBox(0.75, 3.2, 1.1, bodyHighlightMat, -7.05, 1.8, isQuail ? 8.8 : 10.2));
+  model.add(createPlayerBox(0.75, 3.2, 1.1, bodyHighlightMat, 7.05, 1.8, isQuail ? 8.8 : 10.2));
 
   if (!["turkey", "peacock"].includes(config.variant)) {
     model.add(createPlayerBox(5, 2, 6, bodyMat, 0, -7, 13));
     model.add(createPlayerBox(3, 1.5, 4, bodyMat, 0, -8, 17));
+    model.add(createPlayerBox(4, 1, 3, bodyShadowMat, 0, -7.8, 12));
   }
 
   model.add(createPlayerBox(1.5, 1.5, 2, legMat, -3, 0, 0.5));
   model.add(createPlayerBox(1.5, 1.5, 2, legMat, 3, 0, 0.5));
+  model.add(createPlayerBox(3.4, 1.1, 0.8, legMat, -3, 1.5, 0.05));
+  model.add(createPlayerBox(3.4, 1.1, 0.8, legMat, 3, 1.5, 0.05));
 
   return model;
 }
