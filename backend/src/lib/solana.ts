@@ -115,6 +115,30 @@ export function buildSettleSessionIx(params: {
   });
 }
 
+export function buildStartSessionIx(params: {
+  player: PublicKey;
+  sessionId: Buffer;
+  stakeAmount: bigint;
+}): TransactionInstruction {
+  const data = Buffer.alloc(8 + 32 + 8);
+  let off = 0;
+  anchorDiscriminator("start_session").copy(data, off); off += 8;
+  params.sessionId.copy(data, off); off += 32;
+  data.writeBigUInt64LE(params.stakeAmount, off);
+
+  return new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: CONFIG_PDA, isSigner: false, isWritable: true },
+      { pubkey: params.player, isSigner: true, isWritable: true },
+      { pubkey: playerBalancePda(params.player), isSigner: false, isWritable: true },
+      { pubkey: sessionPda(params.sessionId), isSigner: false, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data,
+  });
+}
+
 export const SystemProgramId = SystemProgram.programId;
 
 export function playerAssociatedTokenAccount(player: PublicKey): PublicKey {
@@ -255,6 +279,30 @@ export async function buildWithdrawTransaction(
       TOKEN_MINT,
     ),
     buildWithdrawIx(player, amount),
+  );
+  return tx
+    .serialize({ requireAllSignatures: false, verifySignatures: false })
+    .toString("base64");
+}
+
+export async function buildStartSessionTransaction(
+  player: PublicKey,
+  sessionIdHex: string,
+  stakeAmountUnits: bigint,
+): Promise<string> {
+  const sessionId = normalizeSessionId(sessionIdHex);
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({
+    feePayer: player,
+    blockhash,
+    lastValidBlockHeight,
+  });
+  tx.add(
+    buildStartSessionIx({
+      player,
+      sessionId,
+      stakeAmount: stakeAmountUnits,
+    }),
   );
   return tx
     .serialize({ requireAllSignatures: false, verifySignatures: false })

@@ -211,8 +211,8 @@ export function setupGameGateway(httpServer: HttpServer): SocketServer {
       return;
     }
 
-    socket.on("game:start", async (data: { stake: number }) => {
-      await handleGameStart(socket, walletAddress, data.stake);
+    socket.on("game:start", async (data: { stake: number; onchainSessionId?: string }) => {
+      await handleGameStart(socket, walletAddress, data.stake, data.onchainSessionId);
     });
     socket.on("game:abort_start", async (data: { sessionId?: string; txHash?: string }) => {
       await handleAbortStart(socket, walletAddress, data?.sessionId, data?.txHash);
@@ -236,7 +236,12 @@ export function setupGameGateway(httpServer: HttpServer): SocketServer {
   return io;
 }
 
-async function handleGameStart(socket: Socket, walletAddress: string, stake: number): Promise<void> {
+async function handleGameStart(
+  socket: Socket,
+  walletAddress: string,
+  stake: number,
+  expectedOnchainSessionId?: string,
+): Promise<void> {
   if (!isValidUsdcStakeAmount(stake)) {
     socket.emit("game:error", {
       message: `Invalid stake. Allowed range is ${MIN_STAKE} to ${MAX_STAKE} USDC.`,
@@ -255,61 +260,44 @@ async function handleGameStart(socket: Socket, walletAddress: string, stake: num
     .eq("status", "ACTIVE")
     .maybeSingle();
 
-  let staleSettlementSignature: string | null = null;
-  let staleSettlementDeadline: string | null = null;
-  let staleSettlementTxHash: string | null = null;
-
-  try {
-    const onchainCleanup = await clearActiveOnchainSession(walletAddress);
-    staleSettlementSignature = onchainCleanup?.settlementResult?.signature ?? null;
-    staleSettlementDeadline = onchainCleanup?.settlementResult?.resolution.deadline ?? null;
-    staleSettlementTxHash = onchainCleanup?.settlementTxHash ?? null;
-  } catch (onchainCleanupError) {
-    console.error("❌ Failed to clear previous on-chain session before starting a new run:", onchainCleanupError);
+  if (stale) {
     socket.emit("game:error", {
-      message:
-        "Previous on-chain session could not be resolved. Submit or recover the last settlement first.",
+      message: "Previous ACTIVE session still exists. Resolve settlement first.",
     });
     return;
   }
 
-  if (stale) {
-    console.log(`🧹 Cleaning up stale session: ${stale.session_id}`);
-    await supabase
-      .from("game_sessions")
-      .update({
-        status: "CRASHED",
-        ended_at: new Date().toISOString(),
-        final_multiplier: 0,
-        payout_amount: 0,
-        settlement_signature: staleSettlementSignature,
-        settlement_deadline: staleSettlementDeadline,
-        settlement_tx_hash: staleSettlementTxHash,
-      })
-      .eq("session_id", stale.session_id);
-  }
-
-  const remainingActiveOnchainSession = await readActiveOnchainSession(walletAddress).catch((error) => {
+  const activeOnchainSession = await readActiveOnchainSession(walletAddress).catch((error) => {
     console.error("❌ Failed to verify on-chain session state before starting a new run:", error);
     return null;
   });
 
-  if (remainingActiveOnchainSession) {
+  if (!activeOnchainSession) {
     socket.emit("game:error", {
-      message:
-        "There is still an active on-chain session for this wallet. Resolve the previous run first.",
+      message: "No active on-chain session found. Start session transaction first.",
+    });
+    return;
+  }
+
+  if (
+    expectedOnchainSessionId &&
+    activeOnchainSession.sessionId.toLowerCase() !== expectedOnchainSessionId.toLowerCase()
+  ) {
+    socket.emit("game:error", {
+      message: "On-chain session mismatch. Re-sync and start again.",
     });
     return;
   }
 
   const sessionId = uuidv4();
-  const onchainSessionId = generateOnchainSessionId();
+  const onchainSessionId = activeOnchainSession.sessionId;
+  const onchainStake = Number(activeOnchainSession.stakeAmountUnits) / 1_000_000;
 
   const { error: dbError } = await supabase.from("game_sessions").insert({
     session_id: sessionId,
     onchain_session_id: onchainSessionId,
     wallet_address: walletAddress,
-    stake_amount: stake,
+    stake_amount: onchainStake,
     status: "ACTIVE",
   });
 
@@ -337,16 +325,16 @@ async function handleGameStart(socket: Socket, walletAddress: string, stake: num
       .eq("wallet_address", walletAddress);
   }
 
-  createGameState(sessionId, onchainSessionId, walletAddress, stake, socket.id);
+  createGameState(sessionId, onchainSessionId, walletAddress, onchainStake, socket.id);
 
   const mapSeed = Math.floor(Math.random() * 999999);
-  const stakeAmountUnits = usdcToUint256(stake).toString();
+  const stakeAmountUnits = activeOnchainSession.stakeAmountUnits.toString();
 
-  console.log(`🎮 Game started: ${walletAddress} | Stake: $${stake} | Session: ${sessionId} | Onchain: ${onchainSessionId}`);
+  console.log(`🎮 Game started: ${walletAddress} | Stake: $${onchainStake} | Session: ${sessionId} | Onchain: ${onchainSessionId}`);
   socket.emit("game:started", {
     sessionId,
     onchainSessionId,
-    stake,
+    stake: onchainStake,
     stakeAmountUnits,
     mapSeed,
     serverTime: Date.now(),

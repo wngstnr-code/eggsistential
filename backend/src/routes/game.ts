@@ -1,5 +1,10 @@
 import { Router, type Request, type Response } from "express";
-import { isZeroSessionId, readActiveOnchainSession } from "../lib/solana.js";
+import { PublicKey } from "@solana/web3.js";
+import {
+  buildStartSessionTransaction,
+  isZeroSessionId,
+  readActiveOnchainSession,
+} from "../lib/solana.js";
 import { requireAuth } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
@@ -7,6 +12,7 @@ import { getGameByWallet, hasActiveGame, removeGameState } from "../services/gam
 import { getEffectiveMultiplierBp } from "../services/gameValidator.js";
 import {
   SETTLEMENT_OUTCOME,
+  generateOnchainSessionId,
   signSettlement,
   usdcToUint256,
 } from "../services/signatureService.js";
@@ -799,6 +805,45 @@ async function getPendingSettlements(req: Request, res: Response) {
 router.get("/pending-settlement", requireAuth, getPendingSettlements);
 router.get("/pending-claim", requireAuth, getPendingSettlements);
 router.post("/force-end-active", requireAuth, forceEndActiveSession);
+router.post("/start-session", requireAuth, async (req: Request, res: Response) => {
+  try {
+    const walletAddress = req.walletAddress!;
+    const stakeAmount = Number((req.body as { stake?: number | string }).stake ?? 0);
+
+    if (!Number.isFinite(stakeAmount) || stakeAmount <= 0) {
+      res.status(400).json({ error: "Invalid stake amount." });
+      return;
+    }
+
+    const activeOnchain = await readActiveOnchainSession(walletAddress);
+    if (activeOnchain) {
+      res.json({
+        success: true,
+        onchainSessionId: activeOnchain.sessionId,
+        unsignedTx: null,
+        reusedActiveSession: true,
+      });
+      return;
+    }
+
+    const onchainSessionId = generateOnchainSessionId();
+    const unsignedTx = await buildStartSessionTransaction(
+      new PublicKey(walletAddress),
+      onchainSessionId,
+      usdcToUint256(stakeAmount),
+    );
+
+    res.json({
+      success: true,
+      onchainSessionId,
+      unsignedTx,
+      reusedActiveSession: false,
+    });
+  } catch (error) {
+    console.error("❌ Failed to build start-session transaction:", error);
+    res.status(500).json({ error: "Failed to build start-session transaction." });
+  }
+});
 
 router.get("/history", requireAuth, async (req: Request, res: Response) => {
   const walletAddress = req.walletAddress!;

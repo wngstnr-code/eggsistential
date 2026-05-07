@@ -120,6 +120,7 @@ export function PlayTopNav() {
   const alertRootRef = useRef<HTMLDivElement | null>(null);
   const menuRootRef = useRef<HTMLDivElement | null>(null);
   const statusTimeoutRef = useRef<number | null>(null);
+  const lastNonZeroSfxVolumeRef = useRef(90);
   const syncRetryTimerRef = useRef<number | null>(null);
   const passportDeepLinkHandledRef = useRef(false);
   const loadPassportStatusRef = useRef<
@@ -189,6 +190,9 @@ export function PlayTopNav() {
   function updateSfxVolume(percent: number) {
     const nextPercent = Math.min(100, Math.max(0, Math.round(percent)));
     setSfxVolumePercent(nextPercent);
+    if (nextPercent > 0) {
+      lastNonZeroSfxVolumeRef.current = nextPercent;
+    }
     const normalized = nextPercent / 100;
     try {
       localStorage.setItem(SFX_STORAGE_KEY, String(normalized));
@@ -806,7 +810,11 @@ export function PlayTopNav() {
       const safe = Number.isFinite(initial)
         ? Math.min(1, Math.max(0, initial))
         : 0.9;
-      setSfxVolumePercent(Math.round(safe * 100));
+      const initialPercent = Math.round(safe * 100);
+      setSfxVolumePercent(initialPercent);
+      if (initialPercent > 0) {
+        lastNonZeroSfxVolumeRef.current = initialPercent;
+      }
       window.dispatchEvent(
         new CustomEvent("chicken:set-sfx-volume", {
           detail: { value: safe },
@@ -1210,10 +1218,14 @@ export function PlayTopNav() {
                             type="button"
                             className="play-menu-volume-mute"
                             onClick={() => {
-                              updateSfxVolume(0);
+                              if (sfxVolumePercent <= 0) {
+                                updateSfxVolume(lastNonZeroSfxVolumeRef.current || 90);
+                              } else {
+                                updateSfxVolume(0);
+                              }
                             }}
                           >
-                            MUTE
+                            {sfxVolumePercent <= 0 ? "UNMUTE" : "MUTE"}
                           </button>
                         </div>
                         <div className="play-menu-modal-separator" />
@@ -1671,8 +1683,16 @@ export function PlayTopNav() {
               <strong id="stats-total-losses">0</strong>
             </div>
             <div className="stats-summary-card">
+              <span>WIN RATE</span>
+              <strong id="stats-win-rate">0%</strong>
+            </div>
+            <div className="stats-summary-card">
               <span>NET PNL</span>
               <strong id="stats-total-profit">$0.00</strong>
+            </div>
+            <div className="stats-summary-card">
+              <span>HISTORY</span>
+              <strong id="stats-last-five-runs">-</strong>
             </div>
           </div>
           <p id="stats-joined" className="stats-joined">

@@ -140,22 +140,25 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     if (!canUseBackend || !isBackendAuthenticated) return;
     let cancelled = false;
 
-    void backendFetch<VaultStatusPayload>("/api/vault/status")
-      .then((status) => {
+    const syncVaultSnapshot = async () => {
+      try {
+        const status = await backendFetch<VaultStatusPayload>("/api/vault/status");
         if (cancelled) return;
         setWalletBalanceDisplay(formatMoney2(status.walletBalance));
         setAvailableBalanceDisplay(formatMoney2(status.availableBalance));
         setLockedBalanceDisplay(formatMoney2(status.lockedBalance));
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setWalletBalanceDisplay("-");
-        setAvailableBalanceDisplay("-");
-        setLockedBalanceDisplay("-");
-      });
+      } catch {
+      }
+    };
+
+    void syncVaultSnapshot();
+    const intervalId = window.setInterval(() => {
+      void syncVaultSnapshot();
+    }, 1500);
 
     return () => {
       cancelled = true;
+      window.clearInterval(intervalId);
     };
   }, [canUseBackend, isBackendAuthenticated]);
 

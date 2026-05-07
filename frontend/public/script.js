@@ -22,6 +22,8 @@ let consecutiveRoadRows = 0;
 let consecutiveRiverRows = 0;
 let riverCooldownRows = 0;
 let lastRiverPlatformOffset = null;
+let currentRiverSegmentStartDirection = null;
+let currentRiverSegmentLineIndex = 0;
 let nextTrainRowAtMs = 0;
 let trainCooldownRows = 0;
 
@@ -601,6 +603,16 @@ function setupSfxVolumeSync() {
 setupAudioUnlock();
 setupSfxVolumeSync();
 
+let liveBalanceSyncInterval = null;
+
+function startLiveBalanceSync() {
+  if (liveBalanceSyncInterval) return;
+  liveBalanceSyncInterval = setInterval(() => {
+    if (!hasLiveBridge()) return;
+    void loadBalance();
+  }, 1500);
+}
+
 function getBridge() {
   return window.__CHICKEN_GAME_BRIDGE__;
 }
@@ -618,6 +630,8 @@ async function loadBalance() {
       return;
     } catch (error) {
       console.error("Failed to load live balance:", error);
+      renderBalance();
+      return;
     }
   }
 
@@ -3993,6 +4007,8 @@ function generateRows(amount, startIndex) {
 
 function resetRiverLayoutMemory() {
   lastRiverPlatformOffset = null;
+  currentRiverSegmentStartDirection = null;
+  currentRiverSegmentLineIndex = 0;
 }
 
 function generateRow(rowIndex) {
@@ -4026,6 +4042,7 @@ function generateRow(rowIndex) {
       return generateRiverMetadata({
         bankBack: false,
         bankFront: isLastRiverRow,
+        direction: nextRiverLineDirection(),
       });
     }
   }
@@ -4041,6 +4058,7 @@ function generateRow(rowIndex) {
       return generateRiverMetadata({
         bankBack: true,
         bankFront: segmentLength === 1,
+        direction: nextRiverLineDirection(),
       });
     }
   }
@@ -4128,6 +4146,19 @@ function getRowsUntilCheckpoint(rowIndex) {
   if (rowIndex <= 0) return CP_INTERVAL;
   const checkpointRemainder = rowIndex % CP_INTERVAL;
   return checkpointRemainder === 0 ? CP_INTERVAL : CP_INTERVAL - checkpointRemainder;
+}
+
+function nextRiverLineDirection() {
+  if (currentRiverSegmentStartDirection == null) {
+    currentRiverSegmentStartDirection = Math.random() >= 0.5;
+    currentRiverSegmentLineIndex = 0;
+  }
+  const isEvenLine = currentRiverSegmentLineIndex % 2 === 0;
+  const direction = isEvenLine
+    ? currentRiverSegmentStartDirection
+    : !currentRiverSegmentStartDirection;
+  currentRiverSegmentLineIndex += 1;
+  return direction;
 }
 
 function getRiverSegmentLength(rowIndex) {
@@ -4259,8 +4290,11 @@ function generateCheckpointMetadata() {
   return { type: "forest", trees: [], isCheckpoint: true };
 }
 
-function generateRiverMetadata({ bankBack = true, bankFront = true } = {}) {
-  const direction = randomElement([true, false]);
+function generateRiverMetadata({
+  bankBack = true,
+  bankFront = true,
+  direction = true,
+} = {}) {
   const speed = randomElement([42, 54, 66, 78]);
   const platformPattern = "mixed";
   const platformKinds = shuffleArray(["lily", "log", "stone", "boat"]);
@@ -4779,6 +4813,7 @@ function initializeGame() {
 
 function initBettingUI() {
   void loadBalance();
+  startLiveBalanceSync();
   renderTimer(SEGMENT_TIME_MS, false);
 
   const depositModal = document.getElementById("deposit-modal");
@@ -4813,7 +4848,9 @@ function initBettingUI() {
   const statsTotalGames = document.getElementById("stats-total-games");
   const statsTotalWins = document.getElementById("stats-total-wins");
   const statsTotalLosses = document.getElementById("stats-total-losses");
+  const statsWinRate = document.getElementById("stats-win-rate");
   const statsTotalProfit = document.getElementById("stats-total-profit");
+  const statsLastFiveRuns = document.getElementById("stats-last-five-runs");
   const statsJoined = document.getElementById("stats-joined");
   const statsList = document.getElementById("stats-list");
   const statsTabButtons = document.querySelectorAll("[data-stats-tab]");
@@ -4992,6 +5029,10 @@ function initBettingUI() {
     if (statsTotalGames) statsTotalGames.innerText = String(totalGames);
     if (statsTotalWins) statsTotalWins.innerText = String(totalWins);
     if (statsTotalLosses) statsTotalLosses.innerText = String(totalLosses);
+    if (statsWinRate) {
+      const winRate = totalGames > 0 ? (totalWins / totalGames) * 100 : 0;
+      statsWinRate.innerText = `${Math.round(winRate)}%`;
+    }
     if (statsJoined)
       statsJoined.innerText = formatJoinedText(playerStats?.created_at);
 
@@ -5002,6 +5043,24 @@ function initBettingUI() {
       statsTotalProfit.classList.remove("positive", "negative");
       if (totalProfit > 0) statsTotalProfit.classList.add("positive");
       if (totalProfit < 0) statsTotalProfit.classList.add("negative");
+    }
+
+    if (statsLastFiveRuns) {
+      const recentRuns = Array.isArray(statsCache.sessions)
+        ? statsCache.sessions.slice(0, 5)
+        : [];
+      if (!recentRuns.length) {
+        statsLastFiveRuns.innerHTML = "-";
+      } else {
+        statsLastFiveRuns.innerHTML = recentRuns
+          .map((run) => {
+            const status = String(run?.status || "").toUpperCase();
+            if (status === "CASHED_OUT") return '<span class="run-mark win">W</span>';
+            if (status === "CRASHED") return '<span class="run-mark loss">L</span>';
+            return '<span class="run-mark neutral">-</span>';
+          })
+          .join('<span class="run-mark-sep"> </span>');
+      }
     }
   }
 
@@ -5409,7 +5468,7 @@ function initBettingUI() {
       const [playerStats, historyPayload, transactionPayload] =
         await Promise.all([
           bridge.loadPlayerStats(),
-          bridge.loadGameHistory(3),
+          bridge.loadGameHistory(5),
           bridge.loadPlayerTransactions(3),
         ]);
 
