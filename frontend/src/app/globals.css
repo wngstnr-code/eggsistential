@@ -2991,6 +2991,245 @@ body.checkpoint-arrival #hud-scrim::after {
     0 2px 6px rgba(5, 19, 62, 0.42) !important;
 }
 
+.play-passport-status-box {
+  max-width: 720px;
+  max-height: min(760px, calc(100dvh - 28px));
+  overflow-y: auto;
+}
+
+.play-passport-status-headline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.play-passport-status-headline .play-passport-kicker,
+.play-passport-status-headline .play-passport-title {
+  text-align: left;
+}
+
+.play-passport-state-pill {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f2f7ff;
+  font-size: 9px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.play-passport-state-valid,
+.play-passport-state-ready {
+  border-color: rgba(141, 255, 196, 0.78);
+  background: rgba(31, 198, 122, 0.16);
+  color: #bfffdc;
+}
+
+.play-passport-state-progress,
+.play-passport-state-loading {
+  border-color: rgba(255, 224, 118, 0.82);
+  background: rgba(255, 204, 83, 0.14);
+  color: #fff0aa;
+}
+
+.play-passport-state-offline,
+.play-passport-state-revoked {
+  border-color: rgba(255, 143, 134, 0.86);
+  background: rgba(217, 52, 67, 0.16);
+  color: #ffd2cf;
+}
+
+.play-passport-status-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(220px, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.play-passport-live-card {
+  min-height: 190px;
+}
+
+.play-passport-summary {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.play-passport-summary-row {
+  min-height: 54px;
+  border: 2px solid rgba(143, 180, 255, 0.5);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #dce9ff;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.play-passport-summary-row span,
+.play-passport-progress-head span,
+.play-passport-stats-grid span {
+  color: #a9c6ff;
+  font-size: 8px;
+  line-height: 1.2;
+}
+
+.play-passport-summary-row strong {
+  color: #f8fbff;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.play-passport-progress-block {
+  border: 2px solid rgba(143, 180, 255, 0.45);
+  border-radius: 14px;
+  background: rgba(2, 11, 41, 0.34);
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.play-passport-progress-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.play-passport-progress-head strong {
+  color: #ffe276;
+  font-size: 11px;
+}
+
+.play-passport-progress-track {
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+}
+
+.play-passport-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7dffc4 0%, #ffe276 100%);
+  box-shadow: 0 0 14px rgba(125, 255, 196, 0.34);
+  transition: width 0.24s ease;
+}
+
+.play-passport-progress-block p {
+  margin: 0;
+  color: #dce9ff;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.play-passport-requirements {
+  display: grid;
+  gap: 8px;
+}
+
+.play-passport-requirement {
+  min-height: 48px;
+  border: 2px solid rgba(255, 226, 118, 0.58);
+  border-radius: 12px;
+  background: rgba(255, 226, 118, 0.11);
+  color: #fff5c4;
+  padding: 9px 10px;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.play-passport-requirement.met {
+  border-color: rgba(125, 255, 196, 0.58);
+  background: rgba(31, 198, 122, 0.12);
+  color: #caffdf;
+}
+
+.play-passport-requirement-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-passport-requirement-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.6;
+}
+
+.play-passport-requirement-label {
+  color: #f8fbff;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.play-passport-requirement strong {
+  color: inherit;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.play-passport-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.play-passport-stats-grid div {
+  border: 2px solid rgba(143, 180, 255, 0.42);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  display: grid;
+  gap: 7px;
+}
+
+.play-passport-stats-grid strong {
+  color: #f8fbff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.play-passport-actions {
+  display: grid;
+  grid-template-columns: 0.52fr 1fr;
+  gap: 10px;
+}
+
+.play-passport-secondary {
+  min-height: 46px;
+  border-radius: 12px;
+  border: 3px solid #9bbcff;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e7f0ff;
+  font-family: "Press Start 2P", cursive;
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.play-passport-secondary:disabled,
+.play-passport-modal .play-passport-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none !important;
+}
+
 
 .play-menu-modal-item.logout {
   background: linear-gradient(180deg, #ff8a8a 0%, #dd3d3d 100%);
@@ -3987,6 +4226,113 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-passport-cta {
+    min-height: 36px;
+    border-width: 2px;
+    border-radius: 10px;
+    font-size: 8px;
+  }
+
+  .play-passport-status-box {
+    max-height: calc(100dvh - 18px);
+  }
+
+  .play-passport-status-headline {
+    gap: 10px;
+  }
+
+  .play-passport-state-pill {
+    min-height: 28px;
+    padding: 0 8px;
+    font-size: 7px;
+  }
+
+  .play-passport-status-layout {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .play-passport-live-card {
+    min-height: 154px;
+  }
+
+  .play-passport-summary {
+    gap: 7px;
+  }
+
+  .play-passport-summary-row {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 8px 10px;
+  }
+
+  .play-passport-summary-row span,
+  .play-passport-progress-head span,
+  .play-passport-stats-grid span {
+    font-size: 7px;
+  }
+
+  .play-passport-summary-row strong,
+  .play-passport-progress-head strong {
+    font-size: 9px;
+  }
+
+  .play-passport-progress-block {
+    border-radius: 11px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .play-passport-progress-block p {
+    font-size: 8px;
+  }
+
+  .play-passport-requirement {
+    min-height: 42px;
+    border-radius: 10px;
+    padding: 8px;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+  }
+
+  .play-passport-requirement-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  .play-passport-requirement-icon svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .play-passport-requirement-label,
+  .play-passport-requirement strong {
+    font-size: 7px;
+  }
+
+  .play-passport-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .play-passport-stats-grid div {
+    min-height: 40px;
+    padding: 8px 10px;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .play-passport-stats-grid strong {
+    font-size: 10px;
+  }
+
+  .play-passport-actions {
+    grid-template-columns: 1fr;
+    position: sticky;
+    bottom: -16px;
+    margin: 0 -16px -16px;
+    padding: 10px 16px 16px;
+    background: linear-gradient(180deg, rgba(9, 18, 51, 0) 0%, #091233 28%);
+  }
+
+  .play-passport-secondary {
     min-height: 36px;
     border-width: 2px;
     border-radius: 10px;

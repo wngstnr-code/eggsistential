@@ -5,8 +5,11 @@
 import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
+  CheckCircle2,
   Egg,
+  LockKeyhole,
   Play as PlayIcon,
+  ShieldCheck,
   Trophy,
   WalletCards,
 } from "lucide-react";
@@ -48,6 +51,28 @@ type PassportPopupState = {
   expiry: number;
 };
 
+function formatPassportDate(timestamp: number) {
+  return timestamp ? new Date(timestamp * 1000).toLocaleDateString() : "-";
+}
+
+function clampPercent(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+function buildPassportStatusMessage(status: ChickenBridgePassportStatus) {
+  const passport = status.passport;
+  if (passport.valid) {
+    return `PASSPORT VALID - TIER ${passport.tier} - EXP ${formatPassportDate(passport.expiry)}`;
+  }
+
+  if (status.eligibility.eligible) {
+    return `ELIGIBLE TIER ${status.eligibility.tier} - READY TO CLAIM`;
+  }
+
+  return status.progression?.progressLabel || status.eligibility.reason;
+}
+
 const SFX_STORAGE_KEY = "chickenSfxVolume";
 
 export function PlayTopNav() {
@@ -74,6 +99,9 @@ export function PlayTopNav() {
   const [sfxVolumePercent, setSfxVolumePercent] = useState(90);
   const [passportStatusText, setPassportStatusText] = useState("");
   const [passportBusy, setPassportBusy] = useState(false);
+  const [passportStatus, setPassportStatus] =
+    useState<ChickenBridgePassportStatus | null>(null);
+  const [isPassportPanelOpen, setIsPassportPanelOpen] = useState(false);
   const [passportPopup, setPassportPopup] = useState<PassportPopupState | null>(
     null,
   );
@@ -177,7 +205,54 @@ export function PlayTopNav() {
     return bridge;
   }
 
+  async function loadPassportStatus(openPanel: boolean) {
+    if (passportBusy) return null;
+    setPassportBusy(true);
+    try {
+      const bridge = getBridgeApi();
+      const status = await bridge.getPassportStatus();
+      const message = buildPassportStatusMessage(status);
+      setPassportStatus(status);
+      setPassportStatusText(message);
+      if (openPanel) {
+        setIsPassportPanelOpen(true);
+        setIsMenuOpen(false);
+      }
+      dispatchStatusUpdate({
+        message,
+        tone: status.passport.valid
+          ? "ready"
+          : status.eligibility.eligible
+            ? "warning"
+            : "info",
+        durationMs: 4200,
+      });
+      return status;
+    } catch (error) {
+      const message = readActionErrorMessage(
+        error,
+        "Failed to check passport status.",
+      );
+      setPassportStatusText(message);
+      if (openPanel) {
+        setIsPassportPanelOpen(true);
+        setIsMenuOpen(false);
+      }
+      dispatchStatusUpdate({
+        message,
+        tone: "error",
+        durationMs: 4200,
+      });
+      return null;
+    } finally {
+      setPassportBusy(false);
+    }
+  }
+
   async function onCheckPassportClick() {
+    await loadPassportStatus(true);
+    if (!passportBusy) return;
+
     if (passportBusy) return;
     setPassportBusy(true);
     try {
@@ -229,6 +304,34 @@ export function PlayTopNav() {
     setPassportBusy(true);
     try {
       const bridge = getBridgeApi();
+      const status = passportStatus ?? (await bridge.getPassportStatus());
+
+      if (status.passport.valid) {
+        const message = buildPassportStatusMessage(status);
+        setPassportStatus(status);
+        setPassportStatusText(message);
+        setIsPassportPanelOpen(true);
+        dispatchStatusUpdate({
+          message,
+          tone: "ready",
+          durationMs: 3600,
+        });
+        return;
+      }
+
+      if (!status.eligibility.eligible) {
+        const message = status.eligibility.reason;
+        setPassportStatus(status);
+        setPassportStatusText(message);
+        setIsPassportPanelOpen(true);
+        dispatchStatusUpdate({
+          message,
+          tone: "info",
+          durationMs: 4200,
+        });
+        return;
+      }
+
       const result = await bridge.claimPassport();
       const expiryText = result.expiry
         ? new Date(result.expiry * 1000).toLocaleDateString()
@@ -416,6 +519,7 @@ export function PlayTopNav() {
         setIsWalletMenuOpen(false);
         setIsAlertsOpen(false);
         setIsMenuOpen(false);
+        setIsPassportPanelOpen(false);
         setPassportPopup(null);
       }
     }
@@ -647,6 +751,61 @@ export function PlayTopNav() {
     statusTone === "busy" ||
     Boolean(statusActionLabel) ||
     Boolean(transientStatus?.message);
+  const passportProgression = passportStatus?.progression ?? null;
+  const passportStats =
+    passportProgression?.stats ?? passportStatus?.eligibility.stats ?? null;
+  const passportPercent = clampPercent(
+    passportProgression?.percentToNextTier ?? 0,
+  );
+  const passportCurrentTier = passportProgression?.currentTier ?? 0;
+  const passportCurrentTierLabel =
+    passportProgression?.currentTierLabel ?? "Rookie";
+  const passportRequirements = passportProgression?.requirements ?? [];
+  const passportConfigured = passportStatus?.passport.configured ?? true;
+  const passportStatusLabel = !passportStatus
+    ? passportBusy
+      ? "LOADING"
+      : "UNAVAILABLE"
+    : passportStatus.passport.revoked
+      ? "REVOKED"
+      : !passportStatus.passport.configured
+        ? "OFFLINE"
+        : passportStatus.passport.valid
+          ? "ONCHAIN VALID"
+          : passportStatus.eligibility.eligible
+            ? "READY TO CLAIM"
+            : "IN PROGRESS";
+  const passportStatusTone = !passportStatus
+    ? passportBusy
+      ? "loading"
+      : "offline"
+    : passportStatus.passport.revoked
+      ? "revoked"
+      : !passportStatus.passport.configured
+        ? "offline"
+        : passportStatus.passport.valid
+          ? "valid"
+          : passportStatus.eligibility.eligible
+            ? "ready"
+            : "progress";
+  const canClaimPassport =
+    Boolean(passportStatus?.eligibility.eligible) &&
+    Boolean(passportStatus?.passport.configured) &&
+    !passportStatus?.passport.valid &&
+    !passportStatus?.passport.revoked;
+  const passportCtaLabel = passportBusy
+    ? "PROCESSING..."
+    : !passportStatus
+      ? "LOAD STATUS"
+      : passportStatus.passport.valid
+        ? "ALREADY CLAIMED"
+        : !passportConfigured
+          ? "UNAVAILABLE"
+          : passportStatus.passport.revoked
+            ? "REVOKED"
+            : passportStatus.eligibility.eligible
+              ? "CLAIM EGGPASS"
+              : "LOCKED";
 
   return (
     <>
@@ -948,10 +1107,10 @@ export function PlayTopNav() {
               type="button"
               className="play-bottom-nav-tab play-bottom-nav-tab-passport"
               onClick={() => {
-                void onClaimPassportClick();
+                void onCheckPassportClick();
               }}
               disabled={passportBusy}
-              aria-label="Claim passport"
+              aria-label="Open passport status"
             >
               <BadgeCheck aria-hidden="true" />
               <span>PASSPORT</span>
@@ -979,6 +1138,188 @@ export function PlayTopNav() {
           ) : null}
         </div>
       </nav>
+      {isPassportPanelOpen ? (
+        <div
+          className="modal-bg play-passport-modal play-passport-status-modal"
+          onClick={() => {
+            if (!passportBusy) setIsPassportPanelOpen(false);
+          }}
+        >
+          <div
+            className="modal-box play-passport-box play-passport-status-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="passport-status-title"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close passport status"
+              onClick={() => {
+                if (!passportBusy) setIsPassportPanelOpen(false);
+              }}
+              disabled={passportBusy}
+            >
+              X
+            </button>
+            <div className="play-passport-status-headline">
+              <div>
+                <p className="play-passport-kicker">TRUST PASSPORT</p>
+                <h3 id="passport-status-title" className="play-passport-title">
+                  EGGPASS
+                </h3>
+              </div>
+              <span
+                className={`play-passport-state-pill play-passport-state-${passportStatusTone}`}
+              >
+                {passportStatusLabel}
+              </span>
+            </div>
+
+            <div className="play-passport-status-layout">
+              <div className="play-passport-card play-passport-live-card">
+                <div className="play-passport-base-badge" aria-label="Solana">
+                  <span className="play-passport-base-text">SOLANA</span>
+                  <span
+                    className="play-passport-base-logo"
+                    aria-hidden="true"
+                  />
+                </div>
+                <p className="play-passport-name">
+                  {shortAddress(passportStatus?.walletAddress || account || "")}
+                </p>
+                <p className="play-passport-tier">
+                  TIER {passportCurrentTier}
+                </p>
+                <p className="play-passport-expiry">
+                  {passportStatus?.passport.valid
+                    ? `VALID UNTIL ${formatPassportDate(passportStatus.passport.expiry)}`
+                    : passportCurrentTierLabel}
+                </p>
+              </div>
+
+              <div className="play-passport-summary">
+                <div className="play-passport-summary-row">
+                  <span>CURRENT TIER</span>
+                  <strong>{passportCurrentTierLabel}</strong>
+                </div>
+                <div className="play-passport-summary-row">
+                  <span>NEXT TIER</span>
+                  <strong>
+                    {passportProgression?.nextTierLabel || "MAX TIER"}
+                  </strong>
+                </div>
+                <div className="play-passport-summary-row">
+                  <span>ONCHAIN</span>
+                  <strong>
+                    {passportStatus?.passport.valid ? "VALID" : "NOT ACTIVE"}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="play-passport-progress-block">
+              <div className="play-passport-progress-head">
+                <span>{passportProgression?.nextTierLabel || "TOP TIER"}</span>
+                <strong>{passportPercent}%</strong>
+              </div>
+              <div
+                className="play-passport-progress-track"
+                role="progressbar"
+                aria-label="Passport tier progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={passportPercent}
+              >
+                <span style={{ width: `${passportPercent}%` }} />
+              </div>
+              <p>{passportStatusText || "Load EggPass status to view progress."}</p>
+            </div>
+
+            <div className="play-passport-requirements">
+              {passportRequirements.length > 0 ? (
+                passportRequirements.map((requirement) => (
+                  <div
+                    key={requirement.key}
+                    className={`play-passport-requirement${requirement.met ? " met" : ""}`}
+                  >
+                    <span className="play-passport-requirement-icon">
+                      {requirement.met ? (
+                        <CheckCircle2 aria-hidden="true" />
+                      ) : (
+                        <LockKeyhole aria-hidden="true" />
+                      )}
+                    </span>
+                    <span className="play-passport-requirement-label">
+                      {requirement.label}
+                    </span>
+                    <strong>
+                      {requirement.current}/{requirement.target}
+                    </strong>
+                  </div>
+                ))
+              ) : (
+                <div className="play-passport-requirement met">
+                  <span className="play-passport-requirement-icon">
+                    <ShieldCheck aria-hidden="true" />
+                  </span>
+                  <span className="play-passport-requirement-label">
+                    Top tier progress complete
+                  </span>
+                  <strong>DONE</strong>
+                </div>
+              )}
+            </div>
+
+            {passportStats ? (
+              <div className="play-passport-stats-grid">
+                <div>
+                  <span>CASHOUTS</span>
+                  <strong>{passportStats.successfulCashouts}</strong>
+                </div>
+                <div>
+                  <span>BEST HOPS</span>
+                  <strong>{passportStats.bestHops}</strong>
+                </div>
+                <div>
+                  <span>CONSISTENCY</span>
+                  <strong>{passportStats.consistencyScore}%</strong>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="play-passport-actions">
+              <button
+                type="button"
+                className="play-passport-secondary"
+                onClick={() => {
+                  void loadPassportStatus(false);
+                }}
+                disabled={passportBusy}
+              >
+                REFRESH
+              </button>
+              <button
+                type="button"
+                className="play-passport-cta"
+                onClick={() => {
+                  if (!passportStatus) {
+                    void loadPassportStatus(false);
+                    return;
+                  }
+                  void onClaimPassportClick();
+                }}
+                disabled={passportBusy || Boolean(passportStatus && !canClaimPassport)}
+              >
+                {passportCtaLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {passportPopup ? (
         <div
           className="modal-bg play-passport-modal"

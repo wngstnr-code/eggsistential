@@ -117,15 +117,21 @@ type ChickenBridgePlayBlocker =
       pendingCount?: number;
     };
 
+type ChickenBridgePassportStats = {
+  runsCompleted: number;
+  bestHops: number;
+  averageHops: number;
+  successfulCashouts: number;
+  consistencyScore: number;
+  highestCheckpointCashedOut: number;
+  checkpointCashouts: Record<string, number>;
+};
+
 type ChickenBridgePassportEligibility = {
   eligible: boolean;
   tier: number;
   reason: string;
-  stats: {
-    runsEvaluated: number;
-    bestHops: number;
-    averageHops: number;
-  };
+  stats: ChickenBridgePassportStats;
 };
 
 type ChickenBridgePassportOnchainStatus = {
@@ -137,10 +143,30 @@ type ChickenBridgePassportOnchainStatus = {
   revoked: boolean;
 };
 
+type ChickenBridgePassportRequirement = {
+  key: string;
+  label: string;
+  current: number;
+  target: number;
+  met: boolean;
+};
+
+type ChickenBridgePassportProgression = {
+  currentTier: number;
+  currentTierLabel: string;
+  nextTier: number | null;
+  nextTierLabel: string | null;
+  progressLabel: string;
+  percentToNextTier: number;
+  requirements: ChickenBridgePassportRequirement[];
+  stats: ChickenBridgePassportStats;
+};
+
 type ChickenBridgePassportStatus = {
   walletAddress: string;
   eligibility: ChickenBridgePassportEligibility;
   passport: ChickenBridgePassportOnchainStatus;
+  progression: ChickenBridgePassportProgression;
 };
 
 type ChickenBridgeApi = {
