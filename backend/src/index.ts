@@ -15,36 +15,15 @@ import faucetRoutes from "./routes/faucet.js";
 import { getActiveGameCount } from "./services/gameState.js";
 import { readBackendSignerHealth } from "./services/opsHealth.js";
 
-/**
- * ════════════════════════════════════════════════════════════
- * Eggsistential — Backend Server
- * ════════════════════════════════════════════════════════════
- *
- * Express.js + Socket.io server for the Eggsistential game.
- *
- * Responsibilities:
- *   1. SIWE Authentication (wallet-based login)
- *   2. WebSocket Game Gateway (real-time game validation)
- *   3. Anti-cheat (speed hack detection, server-authoritative timer)
- *   4. Cryptographic payout signature (EIP-712)
- *   5. Blockchain event listener (deposit/withdraw tracking)
- *   6. REST API (leaderboard, game history, player stats)
- */
-
-// ── Express App ──────────────────────────────────────────────
-
 const app = express();
-app.set("trust proxy", 1); // Trust first proxy (Railway)
+app.set("trust proxy", 1);
 
-// Security middleware
 app.use(
   helmet({
-    // Allow Socket.io connections
     contentSecurityPolicy: false,
   })
 );
 
-// CORS — allow frontend origin with credentials (cookies)
 app.use(
   cors({
     origin: env.FRONTEND_URL,
@@ -52,16 +31,9 @@ app.use(
   })
 );
 
-// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// Cookie parser
 app.use(cookieParser());
-
-// ── Routes ───────────────────────────────────────────────────
-
-// Health check
 app.get("/health", async (_req, res) => {
   try {
     const backendSigner = await readBackendSignerHealth();
@@ -82,37 +54,18 @@ app.get("/health", async (_req, res) => {
   }
 });
 
-// Auth routes (SIWE)
 app.use("/auth", authRoutes);
-
-// Game REST routes
 app.use("/api/game", gameRoutes);
-
-// Leaderboard (public)
 app.use("/api/leaderboard", leaderboardRoutes);
-
-// Player stats
 app.use("/api/player", playerRoutes);
-
-// Trust passport
 app.use("/api/passport", passportRoutes);
-
-// Testnet faucet
 app.use("/api/faucet", faucetRoutes);
-
-// 404 fallback
 app.use((_req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
-// ── HTTP Server + Socket.io ──────────────────────────────────
-
 const httpServer = createServer(app);
-
-// Setup WebSocket game gateway on the same HTTP server
 const io = setupGameGateway(httpServer);
-
-// ── Start ────────────────────────────────────────────────────
 
 httpServer.listen(env.PORT, "0.0.0.0", () => {
   console.log("");
@@ -126,7 +79,6 @@ httpServer.listen(env.PORT, "0.0.0.0", () => {
   console.log("════════════════════════════════════════════════════");
   console.log("");
 
-  // Start blockchain event listener (non-blocking)
   startBlockchainListener().catch((err: unknown) => {
     console.error("⚠️  Blockchain listener failed to start:", err);
     console.log("   Backend continues without blockchain events.");
@@ -148,8 +100,6 @@ httpServer.listen(env.PORT, "0.0.0.0", () => {
       console.error("⚠️  Failed to read backend signer health:", error);
     });
 });
-
-// ── Graceful Shutdown ────────────────────────────────────────
 
 process.on("SIGINT", () => {
   console.log("\n🛑 Shutting down gracefully...");
