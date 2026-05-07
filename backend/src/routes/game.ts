@@ -121,12 +121,10 @@ function extractSelectorPayload(error: unknown, selector: string) {
   return "";
 }
 
-// Custom error selectors from GameSettlement.sol that mean "session is no longer
-// settleable on-chain" — i.e. the settlement should be treated as already final.
 const ALREADY_SETTLED_LIKE_SELECTORS = new Set([
-  "0xfa9b370d", // SessionNotFound(bytes32)
-  "0x2f2c01cb", // SessionAlreadySettled(bytes32)
-  "0x15e292d2", // SessionNotActive(bytes32)
+  "0xfa9b370d",
+  "0x2f2c01cb",
+  "0x15e292d2",
 ]);
 
 function collectErrorTexts(error: unknown): string[] {
@@ -957,7 +955,6 @@ async function submitSettlement(req: Request, res: Response) {
     console.error(`❌ Failed to submit settlement ${sessionId}:`, submitError);
 
     if (isAlreadySettledLikeError(submitError)) {
-      // If chain state already closed, don't keep blocking new runs.
       await supabase
         .from("game_sessions")
         .update({ settlement_tx_hash: "already-settled-onchain" })

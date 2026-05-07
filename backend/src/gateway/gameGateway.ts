@@ -391,7 +391,6 @@ async function handleGameStart(socket: Socket, walletAddress: string, stake: num
 
 async function canAbortStartSession(txHash?: string): Promise<{ canAbort: boolean; message?: string }> {
   if (!txHash) {
-    // Pre-broadcast failure (e.g. user rejected signing). Safe to abort directly.
     return { canAbort: true };
   }
 
@@ -703,7 +702,6 @@ async function handleGameCashout(socket: Socket, walletAddress: string): Promise
       signature: settlementResult.signature,
     });
   } catch (submitError) {
-    // Keep game flow successful and let frontend/API retry settlement submission.
     console.error("⚠️ Cashout settlement submit failed (will remain pending):", submitError);
   }
 
@@ -863,7 +861,6 @@ async function handleAutoCashout(walletAddress: string): Promise<void> {
       signature: settlementResult.signature,
     });
   } catch (submitError) {
-    // Preserve cashout outcome in DB and resolve settlement later.
     console.error("⚠️ Auto cashout settlement submit failed (will remain pending):", submitError);
   }
 
