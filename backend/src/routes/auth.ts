@@ -50,21 +50,11 @@ function createAuthenticatedSession(
   persistSessionCookie(res)(token);
 }
 
-/**
- * GET /auth/nonce
- * Generate a random nonce for SIWE message.
- */
 router.get("/nonce", (_req, res) => {
   const nonce = generateNonce();
   res.json({ nonce });
 });
 
-/**
- * POST /auth/verify
- * Verify a SIWE signature and create an authenticated session.
- *
- * Body: { message: string, signature: string }
- */
 router.post("/verify", async (req, res) => {
   try {
     const { message, signature } = req.body;
@@ -74,7 +64,6 @@ router.post("/verify", async (req, res) => {
       return;
     }
 
-    // Parse and verify the SIWE message
     const siweMessage = new SiweMessage(message);
     const result = await siweMessage.verify({ signature });
 
@@ -83,7 +72,6 @@ router.post("/verify", async (req, res) => {
       return;
     }
 
-    // Validate nonce
     const nonceValid = consumeNonce(result.data.nonce);
     if (!nonceValid) {
       res.status(401).json({ error: "Invalid or expired nonce." });
@@ -106,12 +94,6 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-/**
- * POST /auth/minipay
- * Create a session for an injected MiniPay wallet without message signing.
- *
- * Body: { address: string, chainId?: number, walletProvider?: string }
- */
 router.post("/minipay", async (req, res) => {
   try {
     if (!env.MINIPAY_UNVERIFIED_AUTH_ENABLED) {
@@ -158,10 +140,6 @@ router.post("/minipay", async (req, res) => {
   }
 });
 
-/**
- * POST /auth/logout
- * Clear the session cookie and delete server-side session.
- */
 router.post("/logout", (req, res) => {
   const token = req.cookies?.[SESSION_COOKIE];
   if (token) {
@@ -177,10 +155,6 @@ router.post("/logout", (req, res) => {
   res.json({ success: true });
 });
 
-/**
- * GET /auth/me
- * Check current session status.
- */
 router.get("/me", requireAuth, (req, res) => {
   res.json({
     authenticated: true,
