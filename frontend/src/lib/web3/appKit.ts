@@ -12,6 +12,7 @@ import { SOLANA_CLUSTER } from "~/lib/web3/solana";
 
 export const SOLANA_NAMESPACE = "solana" as const;
 export const REOWN_PROJECT_ID = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID || "";
+const REOWN_PROJECT_ID_FALLBACK = "reown-project-id-missing";
 
 export function hasReownProjectId() {
   return Boolean(REOWN_PROJECT_ID);
@@ -36,27 +37,25 @@ export const SOLANA_APPKIT_NETWORKS: [AppKitNetwork, ...AppKitNetwork[]] = [
   SOLANA_APPKIT_NETWORK,
 ];
 
-export const appKit = hasReownProjectId()
-  ? createAppKit({
-      adapters: [new SolanaAdapter()],
-      networks: SOLANA_APPKIT_NETWORKS,
-      defaultNetwork: SOLANA_APPKIT_NETWORK,
-      projectId: REOWN_PROJECT_ID,
-      metadata: {
-        name: "EGGSISTENTIAL",
-        description:
-          "A competitive onchain chicken-crossing game on Solana.",
-        url: readAppUrl(),
-        icons: [`${readAppUrl()}/favicon.png`],
-      },
-      themeMode: "dark",
-      features: {
-        analytics: false,
-        email: false,
-        socials: false,
-        swaps: false,
-        onramp: false,
-        history: false,
-      },
-    })
-  : null;
+export const appKit = createAppKit({
+  adapters: [new SolanaAdapter()],
+  networks: SOLANA_APPKIT_NETWORKS,
+  defaultNetwork: SOLANA_APPKIT_NETWORK,
+  projectId: REOWN_PROJECT_ID || REOWN_PROJECT_ID_FALLBACK,
+  metadata: {
+    name: "EGGSISTENTIAL",
+    description:
+      "A competitive onchain chicken-crossing game on Solana.",
+    url: readAppUrl(),
+    icons: [`${readAppUrl()}/favicon.png`],
+  },
+  themeMode: "dark",
+  features: {
+    analytics: false,
+    email: false,
+    socials: false,
+    swaps: false,
+    onramp: false,
+    history: false,
+  },
+});
