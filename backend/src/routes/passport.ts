@@ -1,20 +1,16 @@
 import { Router, type Request, type Response } from "express";
-import { createPublicClient, http, parseAbi, isAddress, type Address } from "viem";
+import { PublicKey } from "@solana/web3.js";
+import { randomBytes } from "node:crypto";
 import { requireAuth } from "../middleware/auth.js";
 import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
-import { signPassportClaim } from "../services/signatureService.js";
+import {
+  buildClaimEggPassTransaction,
+  readEggPass,
+  type EggPassClaim,
+} from "../lib/solana.js";
 
 const router = Router();
-
-const passportPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
-
-const TRUST_PASSPORT_READ_ABI = parseAbi([
-  "function getPassport(address player) view returns (uint8 tier, uint64 issuedAt, uint64 expiry, bool revoked)",
-  "function isPassportValid(address player) view returns (bool)",
-]);
 
 type PassportEligibility = {
   eligible: boolean;
@@ -239,8 +235,17 @@ async function evaluateEligibility(walletAddress: string): Promise<PassportEligi
   };
 }
 
+function isValidPubkey(value: string): boolean {
+  try {
+    new PublicKey(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function readPassportOnchain(walletAddress: string) {
-  if (!isAddress(env.TRUST_PASSPORT_ADDRESS)) {
+  if (!env.PROGRAM_ID || !isValidPubkey(walletAddress)) {
     return {
       configured: false,
       valid: false,
@@ -252,31 +257,33 @@ async function readPassportOnchain(walletAddress: string) {
   }
 
   try {
-    const [passport, valid] = await Promise.all([
-      passportPublicClient.readContract({
-        address: env.TRUST_PASSPORT_ADDRESS as Address,
-        abi: TRUST_PASSPORT_READ_ABI,
-        functionName: "getPassport",
-        args: [walletAddress as Address],
-      }),
-      passportPublicClient.readContract({
-        address: env.TRUST_PASSPORT_ADDRESS as Address,
-        abi: TRUST_PASSPORT_READ_ABI,
-        functionName: "isPassportValid",
-        args: [walletAddress as Address],
-      }),
-    ]);
+    const player = new PublicKey(walletAddress);
+    const eggPass = await readEggPass(player);
+
+    if (!eggPass) {
+      return {
+        configured: true,
+        valid: false,
+        tier: 0,
+        issuedAt: 0,
+        expiry: 0,
+        revoked: false,
+      };
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const valid = !eggPass.revoked && eggPass.expiry > now && eggPass.tier > 0;
 
     return {
       configured: true,
-      valid: Boolean(valid),
-      tier: Number(passport[0] ?? 0),
-      issuedAt: Number(passport[1] ?? 0),
-      expiry: Number(passport[2] ?? 0),
-      revoked: Boolean(passport[3]),
+      valid,
+      tier: eggPass.tier,
+      issuedAt: eggPass.issuedAt,
+      expiry: eggPass.expiry,
+      revoked: eggPass.revoked,
     };
   } catch (error) {
-    console.error("❌ Failed to read passport onchain:", error);
+    console.error("❌ Failed to read EggPass on-chain:", error);
     return {
       configured: true,
       valid: false,
@@ -312,14 +319,23 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Returns a backend-signed `claim_egg_pass` transaction (base64) for the
+ * player's wallet to co-sign and submit. The backend signer attests to the
+ * eligibility numbers; the player wallet authorizes the on-chain claim.
+ */
 router.post("/issue-signature", requireAuth, async (req: Request, res: Response) => {
   try {
     const walletAddress = req.walletAddress!;
 
-    if (!isAddress(env.TRUST_PASSPORT_ADDRESS)) {
+    if (!env.PROGRAM_ID) {
       res.status(400).json({
-        error: "TRUST_PASSPORT_ADDRESS belum valid di backend env.",
+        error: "PROGRAM_ID belum dikonfigurasi di backend env.",
       });
+      return;
+    }
+    if (!isValidPubkey(walletAddress)) {
+      res.status(400).json({ error: "Invalid Solana wallet address." });
       return;
     }
 
@@ -333,31 +349,57 @@ router.post("/issue-signature", requireAuth, async (req: Request, res: Response)
     }
 
     const now = Math.floor(Date.now() / 1000);
-    const signatureExpiry = now + env.PASSPORT_SIGNATURE_TTL_SECONDS;
     const passportExpiry = now + env.PASSPORT_VALIDITY_SECONDS;
+    const signatureExpiry = now + env.PASSPORT_SIGNATURE_TTL_SECONDS;
 
-    const signed = await signPassportClaim({
-      playerAddress: walletAddress,
+    const stats = eligibility.stats.checkpointCashouts;
+    const cp2 = countCashoutsAtOrAbove(stats, 2);
+    const cp4 = countCashoutsAtOrAbove(stats, 4);
+    const cp6 = countCashoutsAtOrAbove(stats, 6);
+    const cp8 = countCashoutsAtOrAbove(stats, 8);
+
+    const claim: EggPassClaim = {
       tier: eligibility.tier,
-      issuedAt: now,
-      expiry: passportExpiry,
-    });
+      highestCheckpoint: eligibility.stats.highestCheckpointCashedOut,
+      cp2Cashouts: Math.min(65535, cp2),
+      cp4Cashouts: Math.min(65535, cp4),
+      cp6Cashouts: Math.min(65535, cp6),
+      cp8Cashouts: Math.min(65535, cp8),
+      reputationScore: Math.max(1, Math.min(65535, eligibility.stats.successfulCashouts * 100 + eligibility.stats.consistencyScore)),
+      issuedAt: BigInt(now),
+      expiry: BigInt(passportExpiry),
+      nonce: randomBytes(32),
+    };
+
+    const player = new PublicKey(walletAddress);
+    const unsignedTx = await buildClaimEggPassTransaction(player, claim);
 
     res.json({
       success: true,
-      claim: signed.claim,
-      signature: signed.signature,
-      signerAddress: signed.signerAddress,
+      unsignedTx,
+      claim: {
+        player: walletAddress,
+        tier: claim.tier,
+        highestCheckpoint: claim.highestCheckpoint,
+        cp2Cashouts: claim.cp2Cashouts,
+        cp4Cashouts: claim.cp4Cashouts,
+        cp6Cashouts: claim.cp6Cashouts,
+        cp8Cashouts: claim.cp8Cashouts,
+        reputationScore: claim.reputationScore,
+        issuedAt: claim.issuedAt.toString(),
+        expiry: claim.expiry.toString(),
+        nonce: claim.nonce.toString("hex"),
+      },
       signingDomain: {
         cluster: env.SOLANA_CLUSTER,
-        program: env.TRUST_PASSPORT_ADDRESS,
+        program: env.PROGRAM_ID,
       },
       signatureExpiry,
       eligibility,
     });
   } catch (error) {
-    console.error("❌ Passport signature issue error:", error);
-    res.status(500).json({ error: "Failed to issue passport signature." });
+    console.error("❌ Passport claim issue error:", error);
+    res.status(500).json({ error: "Failed to issue passport claim." });
   }
 });
 

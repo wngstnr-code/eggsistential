@@ -164,3 +164,144 @@ export async function buildClaimFaucetTransaction(player: PublicKey): Promise<st
 }
 
 export { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID };
+
+// ───── EggPass ────────────────────────────────────────────────────────
+
+export function eggPassPda(player: PublicKey): PublicKey {
+  const [pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("egg-pass"), player.toBuffer()],
+    PROGRAM_ID,
+  );
+  return pda;
+}
+
+export function usedNoncePda(nonce: Buffer): PublicKey {
+  const [pda] = PublicKey.findProgramAddressSync(
+    [Buffer.from("egg-pass-nonce"), nonce],
+    PROGRAM_ID,
+  );
+  return pda;
+}
+
+export interface EggPassClaim {
+  tier: number;
+  highestCheckpoint: number;
+  cp2Cashouts: number;
+  cp4Cashouts: number;
+  cp6Cashouts: number;
+  cp8Cashouts: number;
+  reputationScore: number;
+  issuedAt: bigint;
+  expiry: bigint;
+  nonce: Buffer; // 32 bytes
+}
+
+export interface EggPassAccount {
+  player: string;
+  tier: number;
+  highestCheckpoint: number;
+  cp2Cashouts: number;
+  cp4Cashouts: number;
+  cp6Cashouts: number;
+  cp8Cashouts: number;
+  reputationScore: number;
+  issuedAt: number;
+  expiry: number;
+  revoked: boolean;
+}
+
+/**
+ * Reads and deserializes a player's EggPass account from chain.
+ * Returns null if the account doesn't exist yet.
+ */
+export async function readEggPass(player: PublicKey): Promise<EggPassAccount | null> {
+  const pda = eggPassPda(player);
+  const acc = await connection.getAccountInfo(pda);
+  if (!acc) return null;
+
+  // Skip 8-byte Anchor discriminator
+  const data = acc.data;
+  let o = 8;
+  const playerKey = new PublicKey(data.subarray(o, o + 32)); o += 32;
+  const tier = data.readUInt8(o); o += 1;
+  const highestCheckpoint = data.readUInt8(o); o += 1;
+  const cp2Cashouts = data.readUInt16LE(o); o += 2;
+  const cp4Cashouts = data.readUInt16LE(o); o += 2;
+  const cp6Cashouts = data.readUInt16LE(o); o += 2;
+  const cp8Cashouts = data.readUInt16LE(o); o += 2;
+  const reputationScore = data.readUInt16LE(o); o += 2;
+  const issuedAt = Number(data.readBigInt64LE(o)); o += 8;
+  const expiry = Number(data.readBigInt64LE(o)); o += 8;
+  const revoked = data.readUInt8(o) !== 0;
+
+  return {
+    player: playerKey.toBase58(),
+    tier,
+    highestCheckpoint,
+    cp2Cashouts,
+    cp4Cashouts,
+    cp6Cashouts,
+    cp8Cashouts,
+    reputationScore,
+    issuedAt,
+    expiry,
+    revoked,
+  };
+}
+
+export function buildClaimEggPassIx(
+  player: PublicKey,
+  claim: EggPassClaim,
+): TransactionInstruction {
+  if (claim.nonce.length !== 32) {
+    throw new Error(`EggPass nonce must be 32 bytes, got ${claim.nonce.length}`);
+  }
+  const data = Buffer.alloc(8 + 1 + 1 + 2 + 2 + 2 + 2 + 2 + 8 + 8 + 32);
+  let o = 0;
+  anchorDiscriminator("claim_egg_pass").copy(data, o); o += 8;
+  data.writeUInt8(claim.tier, o); o += 1;
+  data.writeUInt8(claim.highestCheckpoint, o); o += 1;
+  data.writeUInt16LE(claim.cp2Cashouts, o); o += 2;
+  data.writeUInt16LE(claim.cp4Cashouts, o); o += 2;
+  data.writeUInt16LE(claim.cp6Cashouts, o); o += 2;
+  data.writeUInt16LE(claim.cp8Cashouts, o); o += 2;
+  data.writeUInt16LE(claim.reputationScore, o); o += 2;
+  data.writeBigInt64LE(claim.issuedAt, o); o += 8;
+  data.writeBigInt64LE(claim.expiry, o); o += 8;
+  claim.nonce.copy(data, o);
+
+  return new TransactionInstruction({
+    programId: PROGRAM_ID,
+    keys: [
+      { pubkey: CONFIG_PDA, isSigner: false, isWritable: false },
+      { pubkey: backendSignerKeypair.publicKey, isSigner: true, isWritable: false },
+      { pubkey: player, isSigner: true, isWritable: true },
+      { pubkey: eggPassPda(player), isSigner: false, isWritable: true },
+      { pubkey: usedNoncePda(claim.nonce), isSigner: false, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    data,
+  });
+}
+
+/**
+ * Builds a `claim_egg_pass` transaction signed by the backend authority and
+ * serialized for the player's wallet to add their signature and submit.
+ * Returns base64-encoded transaction.
+ */
+export async function buildClaimEggPassTransaction(
+  player: PublicKey,
+  claim: EggPassClaim,
+): Promise<string> {
+  const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+  const tx = new Transaction({
+    feePayer: player,
+    blockhash,
+    lastValidBlockHeight,
+  });
+  tx.add(buildClaimEggPassIx(player, claim));
+  tx.partialSign(backendSignerKeypair);
+  return tx
+    .serialize({ requireAllSignatures: false, verifySignatures: false })
+    .toString("base64");
+}
