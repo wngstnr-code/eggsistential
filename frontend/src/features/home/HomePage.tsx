@@ -518,7 +518,7 @@ export function HomePage() {
                               : "home-profile-value-warning"
                           }`}
                         >
-                          {isAppChain ? "SOLANA READY" : "CHECK SOLANA RPC"}
+                          SOLANA
                         </span>
                       </div>
                     </div>

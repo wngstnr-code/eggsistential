@@ -317,7 +317,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
   }
 
-  const refreshBackendSessionEvent = useEffectEvent(refreshBackendSession);
+  const ensureBackendSessionEvent = useEffectEvent(ensureBackendSession);
 
   useEffect(() => {
     if (accountRef.current && accountRef.current !== account) {
@@ -346,7 +346,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
       return;
     }
 
-    void refreshBackendSessionEvent();
+    void ensureBackendSessionEvent();
   }, [account, hasBackendConfig, isConnected]);
 
   const value: WalletContextValue = {
