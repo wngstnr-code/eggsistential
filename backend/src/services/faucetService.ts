@@ -20,15 +20,21 @@ const FAUCET_ABI = parseAbi([
 
 const lastFaucetAtMsByWallet = new Map<string, number>();
 
-const faucetPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
-
-const faucetAccount = privateKeyToAccount(env.BACKEND_PRIVATE_KEY as Hex);
-const faucetWalletClient = createWalletClient({
-  account: faucetAccount,
-  transport: http(env.RPC_URL),
-});
+// NOTE: legacy EVM faucet client — replaced in Phase 2 of the Solana migration.
+// Lazy-initialized so the rest of the backend can boot with a Solana keypair.
+let _faucetClients: ReturnType<typeof buildFaucetClients> | null = null;
+function buildFaucetClients() {
+  const account = privateKeyToAccount(env.BACKEND_PRIVATE_KEY as Hex);
+  return {
+    account,
+    publicClient: createPublicClient({ transport: http(env.RPC_URL) }),
+    walletClient: createWalletClient({ account, transport: http(env.RPC_URL) }),
+  };
+}
+function getFaucetClients() {
+  if (!_faucetClients) _faucetClients = buildFaucetClients();
+  return _faucetClients;
+}
 
 type FaucetMode =
   | "drip_to"
@@ -117,7 +123,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
   let txHash: Hex;
 
   if (mode === "drip_self") {
-    txHash = await faucetWalletClient.writeContract({
+    txHash = await getFaucetClients().walletClient.writeContract({
       chain: null,
       address: faucetAddress,
       abi: FAUCET_ABI,
@@ -125,7 +131,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
       args: [],
     });
   } else if (mode === "faucet_to_amount") {
-    txHash = await faucetWalletClient.writeContract({
+    txHash = await getFaucetClients().walletClient.writeContract({
       chain: null,
       address: faucetAddress,
       abi: FAUCET_ABI,
@@ -133,7 +139,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
       args: [targetWallet, amountUnits],
     });
   } else if (mode === "mint_to_amount") {
-    txHash = await faucetWalletClient.writeContract({
+    txHash = await getFaucetClients().walletClient.writeContract({
       chain: null,
       address: faucetAddress,
       abi: FAUCET_ABI,
@@ -141,7 +147,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
       args: [targetWallet, amountUnits],
     });
   } else if (mode === "claim_to_amount") {
-    txHash = await faucetWalletClient.writeContract({
+    txHash = await getFaucetClients().walletClient.writeContract({
       chain: null,
       address: faucetAddress,
       abi: FAUCET_ABI,
@@ -149,7 +155,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
       args: [targetWallet, amountUnits],
     });
   } else {
-    txHash = await faucetWalletClient.writeContract({
+    txHash = await getFaucetClients().walletClient.writeContract({
       chain: null,
       address: faucetAddress,
       abi: FAUCET_ABI,
@@ -158,7 +164,7 @@ export async function requestFaucetForWallet(walletAddress: string) {
     });
   }
 
-  const receipt = await faucetPublicClient.waitForTransactionReceipt({
+  const receipt = await getFaucetClients().publicClient.waitForTransactionReceipt({
     hash: txHash,
   });
 

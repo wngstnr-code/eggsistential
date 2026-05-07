@@ -1,21 +1,14 @@
 import {
-  createPublicClient,
-  createWalletClient,
-  encodeFunctionData,
-  http,
-  isHex,
-  parseAbi,
-  type Address,
-  type Hex,
-} from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { env } from "../config/env.js";
-
-const GAME_SETTLEMENT_WRITE_ABI = parseAbi([
-  "function settleWithSignature((bytes32 sessionId,address player,uint256 stakeAmount,uint256 payoutAmount,uint256 finalMultiplierBp,uint8 outcome,uint64 deadline) resolution, bytes signature)",
-]);
-const SETTLEMENT_GAS_BUFFER = 35_000n;
-const SETTLEMENT_MIN_GAS_LIMIT = 420_000n;
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+  backendSignerKeypair,
+  buildSettleSessionIx,
+  connection,
+  normalizeSessionId,
+} from "../lib/solana.js";
 
 type SettlementResolutionInput = {
   sessionId: string;
@@ -27,21 +20,8 @@ type SettlementResolutionInput = {
   deadline: string | number | bigint;
 };
 
-const account = privateKeyToAccount(env.BACKEND_PRIVATE_KEY as Hex);
-const settlementWalletClient = createWalletClient({
-  account,
-  transport: http(env.RPC_URL),
-});
-const settlementPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
-
-export function getSettlementRelayerAddress(): Address {
-  return account.address;
-}
-
-function toHexString(value: string) {
-  return String(value || "").trim().toLowerCase();
+export function getSettlementRelayerAddress(): string {
+  return backendSignerKeypair.publicKey.toBase58();
 }
 
 function toBigIntValue(value: string | number | bigint) {
@@ -51,8 +31,8 @@ function toBigIntValue(value: string | number | bigint) {
 
 function readRpcErrorMessage(error: unknown) {
   return String(
-    (error as { shortMessage?: string; message?: string })?.shortMessage ||
-      (error as { message?: string })?.message ||
+    (error as { message?: string })?.message ||
+      (error as { toString?: () => string })?.toString?.() ||
       "",
   ).toLowerCase();
 }
@@ -60,7 +40,6 @@ function readRpcErrorMessage(error: unknown) {
 function isTransientRpcError(error: unknown) {
   const message = readRpcErrorMessage(error);
   return (
-    message.includes("requests limited to 15/sec") ||
     message.includes("too many requests") ||
     message.includes("rate limit") ||
     message.includes("429") ||
@@ -69,14 +48,13 @@ function isTransientRpcError(error: unknown) {
     message.includes("network") ||
     message.includes("timeout") ||
     message.includes("timed out") ||
-    message.includes("socket")
+    message.includes("socket") ||
+    message.includes("blockhash not found")
   );
 }
 
 function sleep(ms: number) {
-  return new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 async function withRpcRetry<T>(
@@ -91,109 +69,51 @@ async function withRpcRetry<T>(
     try {
       return await fn();
     } catch (error) {
-      if (!isTransientRpcError(error) || attempt >= retries) {
-        throw error;
-      }
-
+      if (!isTransientRpcError(error) || attempt >= retries) throw error;
       const jitter = Math.floor(Math.random() * 140);
-      const backoffMs = baseDelayMs * Math.pow(2, attempt) + jitter;
+      await sleep(baseDelayMs * Math.pow(2, attempt) + jitter);
       attempt += 1;
-      await sleep(backoffMs);
     }
   }
 }
 
-function normalizeResolution(
-  resolution: SettlementResolutionInput,
-): {
-  sessionId: Hex;
-  player: Address;
-  stakeAmount: bigint;
-  payoutAmount: bigint;
-  finalMultiplierBp: bigint;
-  outcome: number;
-  deadline: bigint;
-} {
-  const sessionId = toHexString(resolution.sessionId);
-  const player = toHexString(resolution.player);
-
-  if (!isHex(sessionId, { strict: true }) || sessionId.length !== 66) {
-    throw new Error("Invalid resolution.sessionId");
+function normalizeResolution(resolution: SettlementResolutionInput) {
+  const sessionIdBytes = normalizeSessionId(resolution.sessionId);
+  const player = new PublicKey(String(resolution.player).trim());
+  const outcomeNum = Number(resolution.outcome);
+  if (outcomeNum !== 1 && outcomeNum !== 2) {
+    throw new Error(`Invalid resolution.outcome: ${resolution.outcome}`);
   }
-
-  if (!isHex(player, { strict: true }) || player.length !== 42) {
-    throw new Error("Invalid resolution.player");
-  }
-
   return {
-    sessionId: sessionId as Hex,
-    player: player as Address,
+    sessionId: sessionIdBytes,
+    player,
     stakeAmount: toBigIntValue(resolution.stakeAmount),
     payoutAmount: toBigIntValue(resolution.payoutAmount),
     finalMultiplierBp: toBigIntValue(resolution.finalMultiplierBp),
-    outcome: Number(resolution.outcome),
+    outcome: outcomeNum,
     deadline: toBigIntValue(resolution.deadline),
   };
 }
 
+/**
+ * Submits a settle_session instruction to the Anchor program.
+ * The `signature` param is accepted for API compatibility with the legacy EVM
+ * flow but is ignored — the backend signer signs the Solana transaction directly.
+ */
 export async function submitSettlementOnchain(params: {
   resolution: SettlementResolutionInput;
-  signature: string;
+  signature?: string;
 }): Promise<string> {
-  const signature = toHexString(params.signature);
-  if (!isHex(signature, { strict: true })) {
-    throw new Error("Invalid settlement signature");
-  }
+  const normalized = normalizeResolution(params.resolution);
 
-  const normalizedResolution = normalizeResolution(params.resolution);
-  const args = [normalizedResolution, signature as Hex] as const;
+  const ix = buildSettleSessionIx(normalized);
+  const tx = new Transaction().add(ix);
 
-  await withRpcRetry(() =>
-    settlementPublicClient.call({
-      account: account.address,
-      to: env.GAME_SETTLEMENT_ADDRESS as Address,
-      data: encodeFunctionData({
-        abi: GAME_SETTLEMENT_WRITE_ABI,
-        functionName: "settleWithSignature",
-        args,
-      }),
-    }),
-  );
-
-  const estimatedGas = await withRpcRetry(() =>
-    settlementPublicClient.estimateContractGas({
-      account,
-      address: env.GAME_SETTLEMENT_ADDRESS as Address,
-      abi: GAME_SETTLEMENT_WRITE_ABI,
-      functionName: "settleWithSignature",
-      args,
-    }),
-  );
-  const gasLimit =
-    estimatedGas + SETTLEMENT_GAS_BUFFER > SETTLEMENT_MIN_GAS_LIMIT
-      ? estimatedGas + SETTLEMENT_GAS_BUFFER
-      : SETTLEMENT_MIN_GAS_LIMIT;
-
-  const txHash = await settlementWalletClient.writeContract({
-    chain: null,
-    address: env.GAME_SETTLEMENT_ADDRESS as Address,
-    abi: GAME_SETTLEMENT_WRITE_ABI,
-    functionName: "settleWithSignature",
-    args,
-    gas: gasLimit,
-  });
-
-  const receipt = await withRpcRetry(
+  return withRpcRetry(
     () =>
-      settlementPublicClient.waitForTransactionReceipt({
-        hash: txHash,
+      sendAndConfirmTransaction(connection, tx, [backendSignerKeypair], {
+        commitment: "confirmed",
       }),
-    { retries: 4, baseDelayMs: 500 },
+    { retries: 3, baseDelayMs: 400 },
   );
-
-  if (receipt.status !== "success") {
-    throw new Error("Settlement tx reverted");
-  }
-
-  return txHash;
 }

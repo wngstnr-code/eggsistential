@@ -1,21 +1,15 @@
-import { createPublicClient, formatEther, http } from "viem";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { env } from "../config/env.js";
-import { getSettlementRelayerAddress } from "./settlementExecutor.js";
-
-const opsPublicClient = createPublicClient({
-  transport: http(env.RPC_URL),
-});
+import { backendSignerKeypair, connection } from "../lib/solana.js";
 
 export async function readBackendSignerHealth() {
-  const relayerAddress = getSettlementRelayerAddress();
-  const balanceWei = await opsPublicClient.getBalance({
-    address: relayerAddress,
-  });
-  const balanceNative = Number(formatEther(balanceWei));
+  const relayerAddress = backendSignerKeypair.publicKey.toBase58();
+  const lamports = await connection.getBalance(backendSignerKeypair.publicKey);
+  const balanceNative = lamports / LAMPORTS_PER_SOL;
 
   return {
     relayerAddress,
-    balanceWei: balanceWei.toString(),
+    balanceWei: lamports.toString(),
     balanceNative,
     nativeSymbol: env.NATIVE_TOKEN_SYMBOL,
     healthy: balanceNative >= env.MIN_RECOMMENDED_NATIVE_BALANCE,
