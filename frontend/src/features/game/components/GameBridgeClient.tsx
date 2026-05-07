@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWallet } from "~/components/web3/WalletProvider";
+import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
 
 type GameBridgeClientProps = {
@@ -172,9 +172,13 @@ export function GameBridgeClient({
             tier: 0,
             reason: "Background mode.",
             stats: {
-              runsEvaluated: 0,
+              runsCompleted: 0,
               bestHops: 0,
               averageHops: 0,
+              successfulCashouts: 0,
+              consistencyScore: 0,
+              highestCheckpointCashedOut: 0,
+              checkpointCashouts: {},
             },
           },
           passport: {
@@ -184,6 +188,24 @@ export function GameBridgeClient({
             issuedAt: 0,
             expiry: 0,
             revoked: false,
+          },
+          progression: {
+            currentTier: 0,
+            currentTierLabel: "Rookie",
+            nextTier: 1,
+            nextTierLabel: "Verified Runner",
+            progressLabel: "Passport status is unavailable in background mode.",
+            percentToNextTier: 0,
+            requirements: [],
+            stats: {
+              runsCompleted: 0,
+              bestHops: 0,
+              averageHops: 0,
+              successfulCashouts: 0,
+              consistencyScore: 0,
+              highestCheckpointCashedOut: 0,
+              checkpointCashouts: {},
+            },
           },
         }),
         claimPassport: async () => {

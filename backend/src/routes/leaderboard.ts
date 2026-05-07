@@ -3,14 +3,8 @@ import { supabase } from "../config/supabase.js";
 
 const router = Router();
 
-/**
- * GET /api/leaderboard
- * Public endpoint — no auth required.
- * Returns top 100 players by distance (from Supabase view).
- */
 router.get("/", async (_req, res) => {
   try {
-    // Query the leaderboard_distance view
     const { data, error } = await supabase
       .from("leaderboard_distance")
       .select("*")
@@ -19,7 +13,6 @@ router.get("/", async (_req, res) => {
     if (error) {
       console.error("❌ Leaderboard query error:", error);
 
-      // Fallback: query game_sessions directly
       const { data: fallbackData, error: fallbackError } = await supabase
         .from("game_sessions")
         .select("wallet_address, max_row_reached, final_multiplier")
@@ -32,7 +25,6 @@ router.get("/", async (_req, res) => {
         return;
       }
 
-      // Aggregate manually
       const walletMap = new Map<string, { best_score: number; games_played: number; best_multiplier: number }>();
       for (const row of fallbackData ?? []) {
         const existing = walletMap.get(row.wallet_address);
@@ -69,10 +61,6 @@ router.get("/", async (_req, res) => {
   }
 });
 
-/**
- * GET /api/leaderboard/profit
- * Public endpoint — top 100 by profit.
- */
 router.get("/profit", async (_req, res) => {
   try {
     const { data, error } = await supabase
@@ -81,7 +69,6 @@ router.get("/profit", async (_req, res) => {
       .limit(100);
 
     if (error) {
-      // Fallback query
       const { data: fallbackData } = await supabase
         .from("players")
         .select("wallet_address, total_games, total_wins, total_losses, total_profit")

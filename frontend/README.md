@@ -4,7 +4,7 @@ The EGGSISTENTIAL frontend is a Next.js application for the Solana hackathon bui
 
 Current frontend responsibilities:
 
-- Solana wallet connection through injected wallets such as Phantom or Solflare
+- Solana wallet connection through Reown AppKit with the Solana adapter
 - backend session bootstrap with the connected Solana public key
 - gameplay UI and Socket.io bridge
 - manage-money UX shell while Solana deposit/withdraw endpoints are being wired
@@ -18,10 +18,10 @@ Current frontend responsibilities:
 
 - Next.js
 - React
-- Solana injected wallet provider
+- Reown AppKit + Solana adapter
 - Socket.io client
 
-The frontend package now boots without Reown, Wagmi, Viem, or EVM wallet adapters.
+The frontend uses Reown AppKit only for Solana wallet UX. Wagmi, Viem, and EVM wallet adapters are not part of the frontend flow.
 
 ## Commands
 
@@ -37,6 +37,7 @@ On Windows PowerShell, use `npm.cmd` if `npm.ps1` is blocked by execution policy
 ## Required Environment
 
 ```bash
+NEXT_PUBLIC_REOWN_PROJECT_ID=
 NEXT_PUBLIC_SOLANA_CLUSTER=testnet
 NEXT_PUBLIC_SOLANA_RPC_URL=https://api.testnet.solana.com
 
@@ -61,7 +62,7 @@ NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8000
 
 Done:
 
-- Solana wallet connect uses the injected `window.solana` provider.
+- Solana wallet connect uses Reown AppKit with `@reown/appkit-adapter-solana`.
 - UI/environment copy now targets Solana.
 - manage-money is switched to backend mode.
 - EVM wallet providers, contract helpers, and onchain deposit hooks have been removed from the frontend source.
@@ -79,8 +80,10 @@ Still to migrate:
 
 Check:
 
-- Phantom, Solflare, or another injected Solana wallet is installed
-- the wallet extension is unlocked
+- `NEXT_PUBLIC_REOWN_PROJECT_ID` is set
+- the Reown project domain matches the current app origin
+- Phantom, Solflare, or another Solana wallet supported by Reown is available
+- the selected wallet is unlocked
 - the frontend was restarted after `.env` changes
 
 ### Backend auth fails

@@ -1,10 +1,5 @@
 import "dotenv/config";
 
-/**
- * Validated environment configuration.
- * Fails fast at startup if required variables are missing.
- */
-
 function requireEnv(key: string, fallback?: string): string {
   const value = process.env[key] ?? fallback;
   if (!value) {
@@ -20,19 +15,15 @@ function optionalEnv(key: string, fallback: string): string {
 }
 
 export const env = {
-  // Server
   PORT: parseInt(optionalEnv("PORT", "3001"), 10),
   FRONTEND_URL: optionalEnv("FRONTEND_URL", "http://localhost:3000"),
   NODE_ENV: optionalEnv("NODE_ENV", "development"),
 
-  // Session
   SESSION_SECRET: requireEnv("SESSION_SECRET", "dev-secret-change-me-in-production-please-32chars"),
 
-  // Supabase
   SUPABASE_URL: requireEnv("SUPABASE_URL", "https://placeholder.supabase.co"),
   SUPABASE_SERVICE_ROLE_KEY: requireEnv("SUPABASE_SERVICE_ROLE_KEY", "placeholder-key"),
 
-  // Blockchain
   NETWORK_NAME: optionalEnv("NETWORK_NAME", "solana-testnet"),
   RPC_URL: optionalEnv("RPC_URL", "https://api.testnet.solana.com"),
   SOLANA_CLUSTER: optionalEnv("SOLANA_CLUSTER", "testnet"),
@@ -40,7 +31,6 @@ export const env = {
   NATIVE_TOKEN_SYMBOL: optionalEnv("NATIVE_TOKEN_SYMBOL", "SOL"),
   MIN_RECOMMENDED_NATIVE_BALANCE: Number.parseFloat(optionalEnv("MIN_RECOMMENDED_NATIVE_BALANCE", "0.05")),
 
-  // Solana programs/accounts
   GAME_VAULT_ADDRESS: optionalEnv("GAME_VAULT_ADDRESS", ""),
   GAME_SETTLEMENT_ADDRESS: optionalEnv("GAME_SETTLEMENT_ADDRESS", ""),
   TRUST_PASSPORT_ADDRESS: optionalEnv("TRUST_PASSPORT_ADDRESS", ""),
@@ -49,20 +39,16 @@ export const env = {
   FAUCET_AMOUNT_UNITS: optionalEnv("FAUCET_AMOUNT_UNITS", "1000000"),
   FAUCET_COOLDOWN_SECONDS: parseInt(optionalEnv("FAUCET_COOLDOWN_SECONDS", "300"), 10),
 
-  // Backend Signer
   BACKEND_PRIVATE_KEY: optionalEnv("BACKEND_PRIVATE_KEY", ""),
 
-  // Settlement
   SETTLEMENT_SIGNATURE_TTL_SECONDS: parseInt(optionalEnv("SETTLEMENT_SIGNATURE_TTL_SECONDS", "86400"), 10),
   PASSPORT_SIGNATURE_TTL_SECONDS: parseInt(optionalEnv("PASSPORT_SIGNATURE_TTL_SECONDS", "900"), 10),
   PASSPORT_VALIDITY_SECONDS: parseInt(optionalEnv("PASSPORT_VALIDITY_SECONDS", "2592000"), 10),
 
-  // MiniPay auth
   MINIPAY_UNVERIFIED_AUTH_ENABLED:
     optionalEnv("MINIPAY_UNVERIFIED_AUTH_ENABLED", "true").toLowerCase() === "true",
 } as const;
 
-// Log config status on import (non-sensitive)
 console.log(`🔧 Config loaded:`);
 console.log(`   Port: ${env.PORT}`);
 console.log(`   Frontend: ${env.FRONTEND_URL}`);

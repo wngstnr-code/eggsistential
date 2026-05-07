@@ -48,8 +48,6 @@ export function ManageMoneyPage() {
     const body = document.body;
     const previousHtmlTouchAction = html.style.touchAction;
     const previousBodyTouchAction = body.style.touchAction;
-
-    // The game shell disables touch gestures globally, so re-enable vertical scrolling here.
     html.style.touchAction = "pan-y";
     body.style.touchAction = "pan-y";
 
@@ -123,7 +121,6 @@ export function ManageMoneyPage() {
     try {
       await flow.onDeposit();
     } catch {
-      // Error sudah ditangani oleh flow.
     }
   }
 
@@ -131,7 +128,6 @@ export function ManageMoneyPage() {
     try {
       await flow.onWithdraw();
     } catch {
-      // Error sudah ditangani oleh flow.
     }
   }
 
@@ -139,7 +135,6 @@ export function ManageMoneyPage() {
     try {
       await flow.onRequestFaucet();
     } catch {
-      // Error sudah ditangani oleh flow.
     }
   }
 
