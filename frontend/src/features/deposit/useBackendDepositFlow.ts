@@ -55,6 +55,17 @@ function parseAmount(value: string) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function parseDisplayAmount(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatMoney2(value: string | number | null | undefined) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return "-";
+  return parsed.toFixed(2);
+}
+
 function base64ToBytes(base64: string) {
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -62,6 +73,17 @@ function base64ToBytes(base64: string) {
     bytes[i] = binary.charCodeAt(i);
   }
   return bytes;
+}
+
+function toFriendlyTxError(error: unknown, fallback: string) {
+  const raw = normalizeError(error, fallback);
+  const lower = raw.toLowerCase();
+
+  if (lower.includes("insufficient funds")) {
+    return "Insufficient USDC balance in wallet. Claim faucet dulu atau kurangi amount deposit.";
+  }
+
+  return raw;
 }
 
 export function useBackendDepositFlow(): DepositFlowViewModel {
@@ -121,9 +143,9 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     void backendFetch<VaultStatusPayload>("/api/vault/status")
       .then((status) => {
         if (cancelled) return;
-        setWalletBalanceDisplay(String(status.walletBalance || "-"));
-        setAvailableBalanceDisplay(String(status.availableBalance || "-"));
-        setLockedBalanceDisplay(String(status.lockedBalance || "-"));
+        setWalletBalanceDisplay(formatMoney2(status.walletBalance));
+        setAvailableBalanceDisplay(formatMoney2(status.availableBalance));
+        setLockedBalanceDisplay(formatMoney2(status.lockedBalance));
       })
       .catch(() => {
         if (cancelled) return;
@@ -150,7 +172,7 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     if (!isBackendAuthenticated) {
       return "Wallet connected. Backend session will sync before requests.";
     }
-    return "Solana backend mode aktif. Deposit/withdraw menunggu endpoint program dari backend.";
+    return "";
   }, [hasBackendConfig, isAppChain, isBackendAuthenticated, isConnected]);
 
   async function ensureReady() {
@@ -198,9 +220,9 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
 
   async function refreshVaultStatus() {
     const status = await backendFetch<VaultStatusPayload>("/api/vault/status");
-    setWalletBalanceDisplay(String(status.walletBalance || "-"));
-    setAvailableBalanceDisplay(String(status.availableBalance || "-"));
-    setLockedBalanceDisplay(String(status.lockedBalance || "-"));
+    setWalletBalanceDisplay(formatMoney2(status.walletBalance));
+    setAvailableBalanceDisplay(formatMoney2(status.availableBalance));
+    setLockedBalanceDisplay(formatMoney2(status.lockedBalance));
   }
 
   async function onDeposit() {
@@ -211,6 +233,13 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       if (!ready) return;
       if (!parsedAmount) {
         setErrorMessage("Masukkan amount USDC yang valid.");
+        return;
+      }
+      const walletBalance = parseDisplayAmount(walletBalanceDisplay);
+      if (walletBalance < parsedAmount) {
+        setErrorMessage(
+          `Saldo wallet tidak cukup. Balance ${walletBalance.toFixed(6)} USDC, butuh ${parsedAmount.toFixed(6)} USDC.`,
+        );
         return;
       }
       setStatusMessage("Preparing deposit transaction...");
@@ -228,7 +257,7 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       setAmount("10");
       setErrorMessage("");
     } catch (error) {
-      setErrorMessage(normalizeError(error, "Deposit failed."));
+      setErrorMessage(toFriendlyTxError(error, "Deposit failed."));
     } finally {
       setIsDepositBusy(false);
     }
@@ -259,7 +288,7 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       setAmount("10");
       setErrorMessage("");
     } catch (error) {
-      setErrorMessage(normalizeError(error, "Withdraw failed."));
+      setErrorMessage(toFriendlyTxError(error, "Withdraw failed."));
     } finally {
       setIsWithdrawBusy(false);
     }
