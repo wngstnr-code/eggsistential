@@ -21,25 +21,156 @@ type PassportEligibility = {
   tier: number;
   reason: string;
   stats: {
-    runsEvaluated: number;
+    runsCompleted: number;
     bestHops: number;
     averageHops: number;
+    successfulCashouts: number;
+    consistencyScore: number;
+    highestCheckpointCashedOut: number;
+    checkpointCashouts: Record<string, number>;
   };
 };
 
-const MIN_RUNS_FOR_PASSPORT = 3;
-const MIN_HOPS_FOR_TIER_1 = 25;
+type PassportRequirement = {
+  key: string;
+  label: string;
+  current: number;
+  target: number;
+  met: boolean;
+};
+
+type PassportProgression = {
+  currentTier: number;
+  currentTierLabel: string;
+  nextTier: number | null;
+  nextTierLabel: string | null;
+  progressLabel: string;
+  percentToNextTier: number;
+  requirements: PassportRequirement[];
+  stats: PassportEligibility["stats"];
+};
+
+type TierRule = {
+  tier: number;
+  label: string;
+  checkpoint: number;
+  requiredCashouts: number;
+};
+
+const CHECKPOINT_ROW_INTERVAL = 40;
+
+const TIER_RULES: TierRule[] = [
+  { tier: 1, label: "Verified Runner", checkpoint: 2, requiredCashouts: 4 },
+  { tier: 2, label: "Disciplined Player", checkpoint: 4, requiredCashouts: 6 },
+  { tier: 3, label: "Elite Survivor", checkpoint: 6, requiredCashouts: 8 },
+  { tier: 4, label: "Egg Oracle", checkpoint: 8, requiredCashouts: 10 },
+];
+
+const TIER_LABELS = new Map<number, string>([
+  [0, "Rookie"],
+  ...TIER_RULES.map((rule) => [rule.tier, rule.label] as const),
+]);
 
 function toFiniteNumber(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function computeTier(bestHops: number) {
-  if (bestHops >= 100) return 3;
-  if (bestHops >= 60) return 2;
-  if (bestHops >= MIN_HOPS_FOR_TIER_1) return 1;
-  return 0;
+function countCheckpointCashouts(
+  rows: Array<{ max_row_reached: unknown; status: unknown }>,
+) {
+  const counts: Record<string, number> = {};
+
+  for (const row of rows) {
+    if (String(row.status ?? "") !== "CASHED_OUT") continue;
+
+    const hops = toFiniteNumber(row.max_row_reached);
+    const checkpoint = Math.floor(hops / CHECKPOINT_ROW_INTERVAL);
+    if (checkpoint <= 0) continue;
+
+    counts[String(checkpoint)] = (counts[String(checkpoint)] ?? 0) + 1;
+  }
+
+  return counts;
+}
+
+function countCashoutsAtOrAbove(
+  checkpointCashouts: Record<string, number>,
+  checkpoint: number,
+) {
+  return Object.entries(checkpointCashouts).reduce((sum, [cp, count]) => {
+    return Number(cp) >= checkpoint ? sum + count : sum;
+  }, 0);
+}
+
+function computeTierFromCheckpointCashouts(
+  checkpointCashouts: Record<string, number>,
+) {
+  let tier = 0;
+
+  for (const rule of TIER_RULES) {
+    const qualifiedCashouts = countCashoutsAtOrAbove(
+      checkpointCashouts,
+      rule.checkpoint,
+    );
+
+    if (qualifiedCashouts >= rule.requiredCashouts) {
+      tier = rule.tier;
+    }
+  }
+
+  return tier;
+}
+
+function buildProgression(
+  stats: PassportEligibility["stats"],
+  currentTier: number,
+): PassportProgression {
+  const nextRule = TIER_RULES.find((rule) => rule.tier > currentTier) ?? null;
+
+  if (!nextRule) {
+    return {
+      currentTier,
+      currentTierLabel: TIER_LABELS.get(currentTier) ?? `Tier ${currentTier}`,
+      nextTier: null,
+      nextTierLabel: null,
+      progressLabel: "Top passport tier unlocked.",
+      percentToNextTier: 100,
+      requirements: [],
+      stats,
+    };
+  }
+
+  const qualifiedCashouts = countCashoutsAtOrAbove(
+    stats.checkpointCashouts,
+    nextRule.checkpoint,
+  );
+  const progressCurrent = Math.min(
+    qualifiedCashouts,
+    nextRule.requiredCashouts,
+  );
+  const percentToNextTier = Math.round(
+    (progressCurrent / nextRule.requiredCashouts) * 100,
+  );
+
+  return {
+    currentTier,
+    currentTierLabel: TIER_LABELS.get(currentTier) ?? `Tier ${currentTier}`,
+    nextTier: nextRule.tier,
+    nextTierLabel: nextRule.label,
+    progressLabel: `${progressCurrent}/${nextRule.requiredCashouts} cashouts at checkpoint ${nextRule.checkpoint}+ to unlock Tier ${nextRule.tier}.`,
+    percentToNextTier,
+    requirements: [
+      {
+        key: `cashout_cp_${nextRule.checkpoint}`,
+        label: `Cash out at checkpoint ${nextRule.checkpoint}+ ${nextRule.requiredCashouts} times`,
+        current: progressCurrent,
+        target: nextRule.requiredCashouts,
+        met: progressCurrent >= nextRule.requiredCashouts,
+      },
+    ],
+    stats,
+  };
 }
 
 async function evaluateEligibility(walletAddress: string): Promise<PassportEligibility> {
@@ -56,38 +187,55 @@ async function evaluateEligibility(walletAddress: string): Promise<PassportEligi
   }
 
   const rows = Array.isArray(data) ? data : [];
-  const runsEvaluated = rows.length;
+  const runsCompleted = rows.length;
   const hops = rows.map((row) => toFiniteNumber(row.max_row_reached));
   const bestHops = hops.length ? Math.max(...hops) : 0;
   const averageHops =
     hops.length > 0
       ? hops.reduce((acc, value) => acc + value, 0) / hops.length
       : 0;
+  const successfulCashouts = rows.filter(
+    (row) => String(row.status ?? "") === "CASHED_OUT",
+  ).length;
+  const qualifiedRuns = hops.filter((hop) => hop >= CHECKPOINT_ROW_INTERVAL)
+    .length;
+  const consistencyScore =
+    runsCompleted > 0 ? Math.round((qualifiedRuns / runsCompleted) * 100) : 0;
+  const checkpointCashouts = countCheckpointCashouts(rows);
+  const highestCheckpointCashedOut = Object.keys(checkpointCashouts).length
+    ? Math.max(...Object.keys(checkpointCashouts).map((value) => Number(value)))
+    : 0;
+  const tier = computeTierFromCheckpointCashouts(checkpointCashouts);
+  const stats = {
+    runsCompleted,
+    bestHops,
+    averageHops,
+    successfulCashouts,
+    consistencyScore,
+    highestCheckpointCashedOut,
+    checkpointCashouts,
+  };
 
-  if (runsEvaluated < MIN_RUNS_FOR_PASSPORT) {
-    return {
-      eligible: false,
-      tier: 0,
-      reason: `Butuh minimal ${MIN_RUNS_FOR_PASSPORT} run selesai untuk verifikasi.`,
-      stats: { runsEvaluated, bestHops, averageHops },
-    };
-  }
-
-  const tier = computeTier(bestHops);
   if (tier === 0) {
+    const tierOneRule = TIER_RULES[0];
+    const tierOneCashouts = countCashoutsAtOrAbove(
+      checkpointCashouts,
+      tierOneRule.checkpoint,
+    );
+
     return {
       eligible: false,
       tier: 0,
-      reason: `Best hops kamu ${bestHops}. Capai minimal ${MIN_HOPS_FOR_TIER_1} hops untuk Tier 1.`,
-      stats: { runsEvaluated, bestHops, averageHops },
+      reason: `Cash out at checkpoint ${tierOneRule.checkpoint}+ ${tierOneRule.requiredCashouts} times to unlock Tier 1. Current progress: ${tierOneCashouts}/${tierOneRule.requiredCashouts}.`,
+      stats,
     };
   }
 
   return {
     eligible: true,
     tier,
-    reason: `Eligible untuk Trust Passport Tier ${tier}.`,
-    stats: { runsEvaluated, bestHops, averageHops },
+    reason: `Eligible to claim EggPass Tier ${tier}.`,
+    stats,
   };
 }
 
@@ -147,11 +295,16 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
       evaluateEligibility(walletAddress),
       readPassportOnchain(walletAddress),
     ]);
+    const effectiveTier = passport.valid
+      ? Math.max(Number(passport.tier ?? 0), eligibility.tier)
+      : eligibility.tier;
+    const progression = buildProgression(eligibility.stats, effectiveTier);
 
     res.json({
       walletAddress,
       eligibility,
       passport,
+      progression,
     });
   } catch (error) {
     console.error("❌ Passport status error:", error);
