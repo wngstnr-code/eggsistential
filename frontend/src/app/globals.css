@@ -3389,19 +3389,21 @@ body.checkpoint-arrival #hud-scrim::after {
   position: relative;
   max-width: 460px;
   width: calc(100% - 28px);
-  border: 3px solid #2c56b3;
+  border: 4px solid #31466b;
   border-radius: 24px;
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(0, 82, 255, 0.3) 0%, transparent 48%),
-    linear-gradient(180deg, #0f1e4f 0%, #0a173f 58%, #091233 100%);
+    radial-gradient(120% 80% at 50% -18%, rgba(255, 184, 103, 0.2), transparent 54%),
+    linear-gradient(180deg, #213452 0%, #182842 54%, #101b2f 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(152, 187, 255, 0.25),
-    0 16px 44px rgba(2, 8, 24, 0.58),
-    9px 10px 0 rgba(0, 0, 0, 0.28);
+    inset 0 2px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -10px 0 rgba(0, 0, 0, 0.16),
+    0 14px 30px rgba(0, 0, 0, 0.42),
+    8px 9px 0 rgba(0, 0, 0, 0.34);
   padding: 32px 24px 24px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  color: #fff4dd;
 }
 
 .play-passport-kicker {
@@ -3433,14 +3435,15 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .play-passport-modal .modal-box.play-passport-box {
-  border: 3px solid #2c56b3 !important;
+  border: 4px solid #31466b !important;
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(0, 82, 255, 0.3) 0%, transparent 48%),
-    linear-gradient(180deg, #0f1e4f 0%, #0a173f 58%, #091233 100%) !important;
+    radial-gradient(120% 80% at 50% -18%, rgba(255, 184, 103, 0.2), transparent 54%),
+    linear-gradient(180deg, #213452 0%, #182842 54%, #101b2f 100%) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(152, 187, 255, 0.25),
-    0 16px 44px rgba(2, 8, 24, 0.58),
-    9px 10px 0 rgba(0, 0, 0, 0.28) !important;
+    inset 0 2px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -10px 0 rgba(0, 0, 0, 0.16),
+    0 14px 30px rgba(0, 0, 0, 0.42),
+    8px 9px 0 rgba(0, 0, 0, 0.34) !important;
 }
 
 .play-passport-modal .play-passport-kicker {
