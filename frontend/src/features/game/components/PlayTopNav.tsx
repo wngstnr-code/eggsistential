@@ -14,6 +14,7 @@ import {
   Trophy,
   WalletCards,
 } from "lucide-react";
+import { ManageMoneyVaultCard } from "~/features/deposit/ManageMoneyPage";
 import { useWallet } from "~/features/wallet/WalletProvider";
 
 function shortAddress(address: string, isMobile: boolean = false) {
@@ -103,6 +104,7 @@ export function PlayTopNav() {
   const [passportStatus, setPassportStatus] =
     useState<ChickenBridgePassportStatus | null>(null);
   const [isPassportPanelOpen, setIsPassportPanelOpen] = useState(false);
+  const [isMoneyPanelOpen, setIsMoneyPanelOpen] = useState(false);
   const [passportPopup, setPassportPopup] = useState<PassportPopupState | null>(
     null,
   );
@@ -134,7 +136,10 @@ export function PlayTopNav() {
   const isConnected = Boolean(account);
 
   function onManageMoneyClick() {
-    window.location.href = "/managemoney";
+    setIsMoneyPanelOpen(true);
+    setIsMenuOpen(false);
+    setIsAlertsOpen(false);
+    setIsWalletMenuOpen(false);
   }
 
   function dispatchStatusUpdate(detail: {
@@ -703,6 +708,7 @@ export function PlayTopNav() {
         setIsAlertsOpen(false);
         setIsMenuOpen(false);
         setIsPassportPanelOpen(false);
+        setIsMoneyPanelOpen(false);
         setPassportPopup(null);
       }
     }
@@ -782,6 +788,20 @@ export function PlayTopNav() {
         "chicken:play-status",
         onPlayStatus as EventListener,
       );
+    };
+  }, []);
+
+  useEffect(() => {
+    function onOpenMoneyPanel() {
+      setIsMoneyPanelOpen(true);
+      setIsMenuOpen(false);
+      setIsAlertsOpen(false);
+      setIsWalletMenuOpen(false);
+    }
+
+    window.addEventListener("chicken:open-money-panel", onOpenMoneyPanel);
+    return () => {
+      window.removeEventListener("chicken:open-money-panel", onOpenMoneyPanel);
     };
   }, []);
 
@@ -1274,13 +1294,10 @@ export function PlayTopNav() {
           <div className={`play-bottom-navbar-v2${isMenuOpen ? " hidden" : ""}`}>
             <button
               type="button"
-              className="play-bottom-nav-tab"
+              className="play-bottom-nav-tab play-bottom-nav-tab-char"
               onClick={() => {
-                dispatchStatusUpdate({
-                  message: "CHARACTER MENU COMING SOON",
-                  tone: "info",
-                  durationMs: 2600,
-                });
+                setIsAlertsOpen(false);
+                window.dispatchEvent(new CustomEvent("chicken:open-character-menu"));
               }}
               aria-label="Open character menu"
             >
@@ -1289,7 +1306,7 @@ export function PlayTopNav() {
             </button>
             <button
               type="button"
-              className="play-bottom-nav-tab"
+              className="play-bottom-nav-tab play-bottom-nav-tab-money"
               onClick={onManageMoneyClick}
               aria-label="Manage money"
             >
@@ -1312,12 +1329,12 @@ export function PlayTopNav() {
             </div>
             <button
               type="button"
-              className="play-bottom-nav-tab"
+              className="play-bottom-nav-tab play-bottom-nav-tab-rank"
               onClick={onLeaderboardMenuClick}
               aria-label="Open leaderboard"
             >
               <Trophy aria-hidden="true" />
-              <span>LEADERS</span>
+              <span>RANK</span>
             </button>
             <button
               type="button"
@@ -1329,7 +1346,7 @@ export function PlayTopNav() {
               aria-label="Open passport status"
             >
               <BadgeCheck aria-hidden="true" />
-              <span>PASSPORT</span>
+              <span>PASS</span>
             </button>
           </div>
         ) : null}
@@ -1354,6 +1371,31 @@ export function PlayTopNav() {
           ) : null}
         </div>
       </nav>
+      {isMoneyPanelOpen ? (
+        <div
+          className="modal-bg play-money-modal"
+          onClick={() => {
+            setIsMoneyPanelOpen(false);
+          }}
+        >
+          <div
+            className="play-money-modal-shell"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Manage vault"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <ManageMoneyVaultCard
+              className="money-card-play-modal"
+              onClose={() => {
+                setIsMoneyPanelOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       {isPassportPanelOpen ? (
         <div
           className="modal-bg play-passport-modal play-passport-status-modal"

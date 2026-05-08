@@ -539,19 +539,19 @@ canvas.game {
   gap: 10px;
 }
 
-.modal-actions a.manage {
+.modal-actions .manage {
   background: linear-gradient(180deg, #ffe39f 0%, #f0bc58 100%);
   color: #3e2a08;
   border: 3px solid #8e641d;
   box-shadow: 3px 5px 0 rgba(0, 0, 0, 0.35);
 }
 
-.modal-actions a.manage:active {
+.modal-actions .manage:active {
   transform: translate(2px, 3px);
   box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.35);
 }
 
-.modal-actions a.manage[aria-disabled="true"] {
+.modal-actions .manage[aria-disabled="true"] {
   opacity: 0.5;
   filter: grayscale(0.45) saturate(0.7);
   cursor: not-allowed;
@@ -4438,25 +4438,27 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .play-passport-box {
     border-width: 3px;
-    border-radius: 18px;
-    padding: 24px 16px 16px;
-    gap: 10px;
+    border-radius: 16px;
+    padding: 16px 10px 10px;
+    gap: 6px;
   }
 
   .play-passport-kicker {
-    font-size: 8px;
+    font-size: 7px;
+    letter-spacing: 0.8px;
   }
 
   .play-passport-title {
-    font-size: 15px;
+    font-size: 13px;
+    letter-spacing: 0.6px;
   }
 
   .play-passport-card {
-    min-height: 176px;
+    min-height: 112px;
     border-width: 2px;
     border-radius: 12px;
-    padding: 26px 12px 14px;
-    gap: 8px;
+    padding: 24px 10px 10px;
+    gap: 5px;
   }
 
   .play-passport-card .play-passport-base-badge {
@@ -4477,15 +4479,15 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-passport-name {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .play-passport-tier {
-    font-size: 13px;
+    font-size: 11px;
   }
 
   .play-passport-expiry {
-    font-size: 8px;
+    font-size: 7px;
   }
 
   .play-passport-cta {
@@ -4496,125 +4498,164 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-passport-status-box {
-    max-height: calc(100dvh - 18px);
+    width: calc(100% - 18px);
+    max-height: calc(100dvh - 10px);
   }
 
   .play-passport-status-headline {
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
   }
 
   .play-passport-state-pill {
-    min-height: 28px;
-    padding: 0 8px;
-    font-size: 7px;
+    min-height: 24px;
+    padding: 0 7px;
+    border-width: 2px;
+    font-size: 6px;
   }
 
   .play-passport-status-layout {
     grid-template-columns: 1fr;
-    gap: 10px;
+    gap: 6px;
   }
 
   .play-passport-live-card {
-    min-height: 154px;
+    min-height: 112px;
   }
 
   .play-passport-summary {
-    gap: 7px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .play-passport-summary-row {
-    min-height: 42px;
-    border-radius: 10px;
-    padding: 8px 10px;
+    min-height: 36px;
+    border-radius: 8px;
+    padding: 6px;
+    gap: 4px;
   }
 
   .play-passport-summary-row span,
   .play-passport-progress-head span,
   .play-passport-stats-grid span {
-    font-size: 7px;
+    font-size: 6px;
   }
 
   .play-passport-summary-row strong,
   .play-passport-progress-head strong {
-    font-size: 9px;
+    font-size: 7px;
   }
 
   .play-passport-benefits {
-    grid-template-columns: 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .play-passport-benefits > div {
-    border-radius: 10px;
-    padding: 9px;
+    border-radius: 9px;
+    padding: 6px;
+    gap: 5px;
   }
 
   .play-passport-benefits span,
   .play-passport-benefit-list strong {
-    font-size: 7px;
+    font-size: 6px;
+    line-height: 1.25;
+  }
+
+  .play-passport-benefit-list {
+    gap: 4px;
+  }
+
+  .play-passport-benefit-list strong {
+    min-height: 19px;
+    border-radius: 5px;
+    padding: 4px 5px;
   }
 
   .play-passport-progress-block {
-    border-radius: 11px;
-    padding: 10px;
-    gap: 8px;
+    border-radius: 9px;
+    padding: 7px;
+    gap: 5px;
+  }
+
+  .play-passport-progress-track {
+    height: 9px;
   }
 
   .play-passport-progress-block p {
-    font-size: 8px;
+    font-size: 7px;
+    line-height: 1.3;
+  }
+
+  .play-passport-requirements {
+    gap: 5px;
   }
 
   .play-passport-requirement {
-    min-height: 42px;
-    border-radius: 10px;
-    padding: 8px;
-    grid-template-columns: 22px minmax(0, 1fr) auto;
+    min-height: 34px;
+    border-radius: 9px;
+    padding: 6px;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    gap: 6px;
   }
 
   .play-passport-requirement-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   .play-passport-requirement-icon svg {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
   }
 
   .play-passport-requirement-label,
   .play-passport-requirement strong {
-    font-size: 7px;
+    font-size: 6px;
   }
 
   .play-passport-stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .play-passport-stats-grid div {
-    min-height: 40px;
-    padding: 8px 10px;
-    grid-template-columns: 1fr auto;
-    align-items: center;
+    min-height: 34px;
+    border-radius: 8px;
+    padding: 6px;
+    gap: 4px;
   }
 
   .play-passport-stats-grid strong {
-    font-size: 10px;
+    font-size: 8px;
   }
 
   .play-passport-actions {
-    grid-template-columns: 1fr;
-    position: sticky;
-    bottom: -16px;
-    margin: 0 -16px -16px;
-    padding: 10px 16px 16px;
-    background: linear-gradient(180deg, rgba(9, 18, 51, 0) 0%, #091233 28%);
+    grid-template-columns: 0.58fr 1fr;
+    gap: 6px;
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
   }
 
   .play-passport-secondary {
-    min-height: 36px;
+    min-height: 34px;
     border-width: 2px;
-    border-radius: 10px;
-    font-size: 8px;
+    border-radius: 9px;
+    font-size: 7px;
+  }
+
+  .play-passport-modal .play-passport-cta,
+  .play-passport-modal .modal-box.play-passport-box .play-passport-cta {
+    min-height: 34px;
+    border-width: 2px !important;
+    border-radius: 9px;
+    font-size: 7px;
+    box-shadow:
+      0 3px 0 #0038b5,
+      0 6px 10px rgba(5, 19, 62, 0.38) !important;
   }
 
   #result-container #result {
@@ -4899,13 +4940,67 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-card {
   position: relative;
   z-index: 2;
-  width: min(860px, 100%);
+  width: min(964px, 100%);
   margin: 0 auto;
-  padding: 22px 20px;
+  padding: 26px 20px 24px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   overflow: visible;
+  border-color: rgba(232, 181, 70, 0.72);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(19, 27, 49, 0.97) 0%, rgba(19, 26, 47, 0.97) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 48px rgba(0, 0, 0, 0.46);
+}
+
+.play-money-modal.modal-bg {
+  z-index: 1820;
+  padding: 18px;
+  background: rgba(3, 9, 26, 0.72) !important;
+  backdrop-filter: blur(10px) !important;
+  overflow-y: auto;
+}
+
+.play-money-modal-shell {
+  width: min(964px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  border-radius: 14px;
+}
+
+.money-card.money-card-play-modal {
+  width: 100%;
+  margin: 0;
+  animation: none;
+  padding-top: 28px;
+}
+
+.money-card-close {
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  border-color: #7891b3;
+  background: linear-gradient(180deg, #f3f8ff 0%, #dbe8ff 100%);
+  color: #20324a;
+}
+
+.money-card-play-modal .money-head-top {
+  align-items: flex-start;
+  padding-right: 48px;
+}
+
+.money-card-play-modal .money-head-badges {
+  justify-content: flex-start;
+  max-width: 100%;
+}
+
+.money-card-play-modal .money-head-badge {
+  min-height: 26px;
+  padding: 0 11px;
+  white-space: nowrap;
 }
 
 .money-header {
@@ -4925,7 +5020,9 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-head-top .flow-eyebrow {
   margin: 0;
   font-size: 10px;
-  letter-spacing: 2.4px;
+  letter-spacing: 2.6px;
+  color: #f0ce58;
+  opacity: 1;
 }
 
 .money-head-badges {
@@ -4939,7 +5036,8 @@ body.checkpoint-arrival #hud-scrim::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 9px;
+  min-height: 24px;
+  padding: 0 12px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
@@ -4963,21 +5061,23 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .money-title {
   margin: 0;
-  font-size: clamp(34px, 5.2vw, 56px);
-  line-height: 0.92;
+  font-size: clamp(28px, 4.4vw, 34px);
+  line-height: 0.95;
+  letter-spacing: 1px;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.22);
 }
 
 .money-subtitle {
   margin: 0;
-  color: rgba(230, 240, 255, 0.82);
+  color: rgba(231, 239, 255, 0.86);
   font-size: 9px;
   line-height: 1.7;
 }
 
 .money-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 12px;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+  gap: 13px;
   align-items: stretch;
 }
 
@@ -4985,18 +5085,21 @@ body.checkpoint-arrival #hud-scrim::after {
   margin-bottom: 0;
   height: auto;
   min-height: 0;
-  padding: 14px;
+  padding: 16px;
   display: flex;
   align-items: stretch;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
+  border-color: rgba(124, 137, 167, 0.38);
+  border-radius: 12px;
+  background: rgba(39, 46, 72, 0.84);
 }
 
 .money-section-label {
   margin: 0;
-  color: #ffe082;
-  font-size: 8px;
-  letter-spacing: 1.1px;
+  color: #f2f5ff;
+  font-size: 10px;
+  letter-spacing: 1.4px;
   line-height: 1.3;
 }
 
@@ -5005,25 +5108,25 @@ body.checkpoint-arrival #hud-scrim::after {
   flex: 1 1 auto;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: 10px;
 }
 
 .money-status-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
+  gap: 10px;
   min-height: 0;
-  padding: 12px 14px;
+  padding: 17px 14px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(72, 81, 111, 0.4);
+  border: 1px solid rgba(139, 151, 184, 0.25);
 }
 
 .money-status-row span {
-  color: rgba(221, 232, 255, 0.8);
+  color: rgba(203, 211, 232, 0.78);
   font-size: 8px;
-  letter-spacing: 1px;
+  letter-spacing: 1.15px;
 }
 
 .money-status-row strong {
@@ -5037,12 +5140,51 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-action-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   min-height: 0;
-  padding: 14px;
+  padding: 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(39, 46, 72, 0.84);
+  border: 1px solid rgba(124, 137, 167, 0.38);
+}
+
+.money-action-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, max-content);
+  align-items: end;
+  gap: 4px;
+  border-bottom: 1px solid rgba(145, 156, 188, 0.26);
+  padding: 11px 0 0;
+}
+
+.money-action-tab {
+  min-width: 98px;
+  min-height: 30px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 5px 5px 0 0;
+  background: transparent;
+  color: rgba(196, 203, 223, 0.62);
+  font-family: inherit;
+  font-size: 8px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.money-action-tab:hover,
+.money-action-tab:focus-visible {
+  color: #f7fbff;
+  outline: none;
+}
+
+.money-action-tab.active {
+  border-color: rgba(246, 211, 102, 0.28);
+  background: rgba(255, 224, 102, 0.13);
+  color: #ffe066;
 }
 
 .money-message-stack {
@@ -5059,28 +5201,33 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-amount-block {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .money-amount-block .money-input {
   margin-bottom: 0;
-  font-size: 16px;
-  padding: 9px 12px;
+  min-height: 50px;
+  border-radius: 10px;
+  border-color: rgba(143, 151, 184, 0.48);
+  background: rgba(21, 24, 42, 0.86);
+  font-size: 22px;
+  padding: 10px 16px;
 }
 
 .money-quick-picks {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .money-quick-pick {
   font-family: inherit;
   font-size: 7px;
-  padding: 6px 8px;
+  min-height: 26px;
+  padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(180, 191, 220, 0.28);
+  background: rgba(104, 116, 151, 0.44);
   color: #f4f8ff;
   cursor: pointer;
   transition:
@@ -5100,14 +5247,17 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: center;
   width: 100%;
   justify-content: center;
-  padding: 11px 14px;
+  min-height: 47px;
+  padding: 12px 14px;
+  border-radius: 10px;
   font-size: 12px;
-  background: linear-gradient(180deg, #f7df82 0%, #e3be4d 100%);
+  background: linear-gradient(180deg, #ffe889 0%, #eabf3c 100%);
   color: #2a1b53;
-  border: 2px solid rgba(73, 50, 133, 0.42);
+  border: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.24),
-    0 10px 20px rgba(0, 0, 0, 0.22);
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    0 4px 0 rgba(130, 84, 14, 0.76),
+    0 12px 18px rgba(0, 0, 0, 0.2);
 }
 
 .money-secondary-actions {
@@ -5143,8 +5293,8 @@ body.checkpoint-arrival #hud-scrim::after {
   flex-direction: column;
   width: 100%;
   gap: 6px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  border-top: 1px solid rgba(145, 156, 188, 0.26);
 }
 
 .money-activity {
@@ -5185,7 +5335,7 @@ body.checkpoint-arrival #hud-scrim::after {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   width: 100%;
-  gap: 8px;
+  gap: 10px;
 }
 
 .money-panel-nav-btn {
@@ -5197,15 +5347,19 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .money-footer-actions .money-panel-nav-btn.money-nav-home-btn {
-  background: linear-gradient(180deg, #3f4f68 0%, #29384f 100%) !important;
-  border: 2px solid #6c7f9b !important;
+  min-height: 50px;
+  background: linear-gradient(180deg, #43566f 0%, #304157 100%) !important;
+  border: 2px solid #7891b3 !important;
   color: #e8f1ff !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12) !important;
 }
 
 .money-footer-actions .money-panel-nav-btn.money-nav-play-btn {
+  min-height: 50px;
   background: linear-gradient(180deg, #3c8dff 0%, #0052ff 100%) !important;
   border: 2px solid #9bbcff !important;
   color: #f5f9ff !important;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.18) !important;
 }
 
 .money-footer-actions .money-panel-nav-btn.money-nav-home-btn:hover,
@@ -5218,30 +5372,76 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 @media (max-width: 768px) {
+  .play-money-modal.modal-bg {
+    align-items: flex-start;
+    padding: 10px 8px;
+  }
+
+  .play-money-modal-shell {
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 20px);
+  }
+
   .money-page {
-    padding: 18px 14px;
+    padding: 14px 10px;
   }
 
   .money-card {
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
+    padding: 14px 12px;
+    border-radius: 13px;
+  }
+
+  .money-card.money-card-play-modal {
+    padding: 22px 10px 12px;
+  }
+
+  .money-card-play-modal .money-head-top {
+    padding-right: 40px;
+  }
+
+  .money-card-play-modal .money-head-badge {
+    min-height: 24px;
+    padding: 0 9px;
+    font-size: 6px;
+    letter-spacing: 0.55px;
   }
 
   .money-grid,
   .money-status-grid,
-  .money-secondary-actions,
   .money-activity-list,
   .money-footer-actions {
     grid-template-columns: 1fr;
   }
 
+  .money-grid {
+    gap: 10px;
+  }
+
+  .money-title {
+    font-size: 28px;
+  }
+
+  .money-subtitle {
+    font-size: 8px;
+    line-height: 1.55;
+  }
+
+  .flow-status.money-status-panel,
+  .money-action-panel {
+    padding: 12px;
+    gap: 10px;
+  }
+
   .money-status-row {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
+    min-height: 46px;
+    padding: 10px;
   }
 
   .money-status-row strong {
-    text-align: left;
+    text-align: right;
   }
 
   .money-head-top {
@@ -5252,7 +5452,31 @@ body.checkpoint-arrival #hud-scrim::after {
     justify-content: flex-start;
   }
 
-  .money-status-row strong,
+  .money-action-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    padding-top: 4px;
+  }
+
+  .money-action-tab {
+    min-width: 0;
+    min-height: 32px;
+    font-size: 6.6px;
+    letter-spacing: 0.45px;
+  }
+
+  .money-amount-block .money-input {
+    min-height: 46px;
+    font-size: 18px;
+  }
+
+  .money-primary-btn,
+  .money-footer-actions .money-panel-nav-btn.money-nav-home-btn,
+  .money-footer-actions .money-panel-nav-btn.money-nav-play-btn {
+    min-height: 44px;
+    font-size: 9px;
+  }
+
   .money-activity-item a,
   .money-activity-item .mono {
     text-align: left;
@@ -8739,17 +8963,23 @@ body.checkpoint-arrival #hud-scrim::after {
     transform: none !important;
     bottom: 0 !important;
     width: 100vw;
-    height: calc(78px + var(--play-safe-bottom));
-    padding: 8px 10px calc(8px + var(--play-safe-bottom));
-    background: #151f33; 
-    border-top: 1px solid rgba(184, 212, 255, 0.15);
+    height: calc(72px + var(--play-safe-bottom));
+    padding: 6px 9px calc(7px + var(--play-safe-bottom));
+    background:
+      linear-gradient(180deg, rgba(86, 115, 148, 0.16) 0%, rgba(86, 115, 148, 0) 18%),
+      linear-gradient(180deg, rgba(45, 62, 92, 0.96) 0%, rgba(14, 23, 41, 0.99) 100%);
+    border-top: 2px solid rgba(114, 153, 193, 0.34);
     border-radius: 0 !important; 
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 -3px 0 rgba(7, 12, 22, 0.86),
+      0 -14px 24px rgba(6, 12, 24, 0.32),
+      inset 0 2px 0 rgba(255, 255, 255, 0.09),
+      inset 0 -8px 14px rgba(3, 9, 20, 0.22);
     box-sizing: border-box;
     display: grid !important;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: end;
-    column-gap: 2px;
+    column-gap: 4px;
     z-index: 33;
     pointer-events: auto;
     overflow: visible;
@@ -8764,9 +8994,9 @@ body.checkpoint-arrival #hud-scrim::after {
     content: "";
     position: absolute;
     left: 50%;
-    top: -5px;
-    width: min(128px, 36vw);
-    height: 6px;
+    top: -4px;
+    width: min(112px, 34vw);
+    height: 5px;
     border-radius: 999px;
     background: linear-gradient(90deg,
         rgba(126, 244, 201, 0) 0%,
@@ -8790,23 +9020,28 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-bottom-nav-tab {
+    --play-tab-top: rgba(88, 121, 157, 0.88);
+    --play-tab-bottom: rgba(25, 43, 68, 0.84);
+    --play-tab-border: rgba(119, 159, 203, 0.18);
+    --play-tab-shadow: rgba(5, 13, 27, 0.62);
+    --play-tab-ink: #c6d7eb;
     position: relative;
     min-width: 0;
-    min-height: 58px;
+    min-height: 54px;
     background: transparent;
     border: none;
-    color: #8a9fb5; 
+    color: var(--play-tab-ink);
     font-family: inherit;
-    font-size: 6px;
-    letter-spacing: 0.55px;
+    font-size: 6.8px;
+    letter-spacing: 0.35px;
     line-height: 1;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    padding: 0 2px;
+    gap: 3px;
+    padding: 1px 2px 0;
     text-align: center;
     transition:
       color 0.2s ease,
@@ -8815,38 +9050,112 @@ body.checkpoint-arrival #hud-scrim::after {
       filter 0.1s ease;
   }
 
+  .play-bottom-nav-tab::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 2px;
+    width: min(46px, calc(100% - 7px));
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid var(--play-tab-border);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 34%),
+      linear-gradient(180deg, var(--play-tab-top) 0%, var(--play-tab-bottom) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 3px 0 var(--play-tab-shadow);
+    opacity: 0.86;
+    transform: translateX(-50%);
+    transition:
+      opacity 0.16s ease,
+      transform 0.16s ease;
+    pointer-events: none;
+  }
+
   .play-bottom-nav-tab svg {
-    width: 22px;
-    height: 22px;
+    position: relative;
+    width: 23px;
+    height: 23px;
     stroke-width: 2.5;
     flex: none;
+    margin-top: -2px;
+    filter: drop-shadow(0 2px 0 rgba(2, 8, 18, 0.46));
   }
 
   .play-bottom-nav-tab span {
+    position: relative;
     white-space: nowrap;
     overflow: hidden;
     max-width: 100%;
     text-overflow: clip;
+    text-shadow: 0 2px 0 rgba(2, 8, 18, 0.48);
+  }
+
+  .play-bottom-nav-tab-char {
+    --play-tab-top: rgba(134, 205, 113, 0.9);
+    --play-tab-bottom: rgba(44, 105, 63, 0.88);
+    --play-tab-border: rgba(184, 243, 151, 0.34);
+    --play-tab-shadow: rgba(16, 57, 35, 0.74);
+    --play-tab-ink: #d9f4c8;
+  }
+
+  .play-bottom-nav-tab-money {
+    --play-tab-top: rgba(93, 204, 229, 0.9);
+    --play-tab-bottom: rgba(22, 99, 132, 0.88);
+    --play-tab-border: rgba(156, 232, 255, 0.34);
+    --play-tab-shadow: rgba(8, 55, 79, 0.74);
+    --play-tab-ink: #d6f5ff;
+  }
+
+  .play-bottom-nav-tab-rank {
+    --play-tab-top: rgba(255, 197, 82, 0.9);
+    --play-tab-bottom: rgba(163, 91, 20, 0.9);
+    --play-tab-border: rgba(255, 225, 132, 0.36);
+    --play-tab-shadow: rgba(93, 47, 8, 0.78);
+    --play-tab-ink: #ffedbc;
+  }
+
+  .play-bottom-nav-tab-passport {
+    --play-tab-top: rgba(158, 179, 255, 0.9);
+    --play-tab-bottom: rgba(68, 83, 157, 0.9);
+    --play-tab-border: rgba(204, 214, 255, 0.34);
+    --play-tab-shadow: rgba(35, 43, 98, 0.76);
+    --play-tab-ink: #e5eaff;
   }
 
   .play-bottom-nav-tab-passport svg {
-    width: 26px;
-    height: 26px;
+    width: 25px;
+    height: 25px;
   }
 
   .play-bottom-nav-tab-passport span {
-    font-size: 7px;
+    font-size: 6.8px;
   }
 
   .play-bottom-nav-tab:active {
-    color: #fff;
+    color: #f7fbff;
     transform: scale(0.95);
+  }
+
+  .play-bottom-nav-tab:active::before {
+    opacity: 0.92;
+    transform: translateX(-50%) translateY(2px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 1px 0 var(--play-tab-shadow);
   }
 
   .play-bottom-nav-tab:disabled {
     cursor: wait;
     opacity: 0.56;
     filter: grayscale(0.2);
+  }
+
+  .play-bottom-nav-tab:focus-visible,
+  .play-bottom-nav-play-circle:focus-visible {
+    outline: 3px solid rgba(125, 245, 190, 0.9);
+    outline-offset: 3px;
   }
 
   .play-bottom-nav-center {
@@ -8857,11 +9166,12 @@ body.checkpoint-arrival #hud-scrim::after {
     align-items: center;
     justify-content: flex-end;
     height: 100%;
-    padding-bottom: 4px;
-    font-size: 8px;
-    letter-spacing: 0.8px;
-    color: #fff;
+    padding-bottom: 3px;
+    font-size: 7px;
+    letter-spacing: 0.45px;
+    color: #fff7ce;
     line-height: 1;
+    text-shadow: 0 2px 0 rgba(61, 37, 2, 0.42);
     transition:
       opacity 0.18s ease,
       transform 0.18s ease;
@@ -8871,52 +9181,60 @@ body.checkpoint-arrival #hud-scrim::after {
     content: "";
     position: absolute;
     right: -1px;
-    top: 14px;
-    bottom: 12px;
+    top: 18px;
+    bottom: 16px;
     width: 1px;
     border-radius: 999px;
     background: linear-gradient(
       180deg,
-      rgba(80, 227, 194, 0) 0%,
-      rgba(80, 227, 194, 0.5) 24%,
-      rgba(80, 227, 194, 0.68) 50%,
-      rgba(80, 227, 194, 0.5) 76%,
-      rgba(80, 227, 194, 0) 100%
+      rgba(127, 164, 210, 0) 0%,
+      rgba(127, 164, 210, 0.18) 24%,
+      rgba(127, 164, 210, 0.3) 50%,
+      rgba(127, 164, 210, 0.18) 76%,
+      rgba(127, 164, 210, 0) 100%
     );
-    box-shadow: 0 0 8px rgba(80, 227, 194, 0.28);
+    box-shadow: none;
     pointer-events: none;
   }
 
   .play-bottom-nav-play-circle {
     position: absolute;
-    top: -28px;
-    width: 60px;
-    height: 60px;
+    top: -26px;
+    width: 58px;
+    height: 58px;
     border-radius: 50%;
-    border: none; 
-    background: linear-gradient(180deg, #ffe066 0%, #e7a303 100%);
+    border: 2px solid #8f5f08;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 34%),
+      linear-gradient(180deg, #ffe77a 0%, #ffc928 52%, #e89a0a 100%);
     color: #2c1810;
-    box-shadow: 0 4px 16px rgba(231, 163, 3, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+    box-shadow:
+      0 5px 0 rgba(105, 63, 3, 0.86),
+      0 10px 18px rgba(231, 163, 3, 0.36),
+      inset 0 2px 0 rgba(255, 255, 255, 0.42),
+      inset 0 -4px 0 rgba(166, 94, 4, 0.38);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    animation: play-button-pulse 1.45s ease-in-out infinite;
+    animation: play-button-pulse 1.65s ease-in-out infinite;
     transition: transform 0.1s ease, box-shadow 0.1s ease;
     will-change: transform, box-shadow;
   }
 
   .play-bottom-nav-play-circle svg {
     margin-left: 3px; 
-    width: 28px;
-    height: 28px;
+    width: 27px;
+    height: 27px;
     stroke-width: 2.5;
   }
 
   .play-bottom-nav-play-circle:active {
     animation: none;
     transform: translateY(2px) scale(0.95);
-    box-shadow: 0 2px 6px rgba(231, 163, 3, 0.4);
+    box-shadow:
+      0 2px 0 rgba(105, 63, 3, 0.86),
+      0 5px 10px rgba(231, 163, 3, 0.28);
   }
 
   body.chicken-bet-live .play-bottom-navbar-v2:not(.hidden) {
@@ -8949,12 +9267,20 @@ body.checkpoint-arrival #hud-scrim::after {
   @keyframes play-button-pulse {
     0%, 100% {
       transform: translateY(0) scale(1);
-      box-shadow: 0 4px 16px rgba(231, 163, 3, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+      box-shadow:
+        0 5px 0 rgba(105, 63, 3, 0.86),
+        0 10px 18px rgba(231, 163, 3, 0.36),
+        inset 0 2px 0 rgba(255, 255, 255, 0.42),
+        inset 0 -4px 0 rgba(166, 94, 4, 0.38);
     }
 
     50% {
-      transform: translateY(-2px) scale(1.07);
-      box-shadow: 0 8px 26px rgba(255, 214, 66, 0.72), inset 0 2px 5px rgba(255,255,255,0.5);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow:
+        0 5px 0 rgba(105, 63, 3, 0.86),
+        0 13px 24px rgba(255, 214, 66, 0.58),
+        inset 0 2px 0 rgba(255, 255, 255, 0.48),
+        inset 0 -4px 0 rgba(166, 94, 4, 0.34);
     }
   }
 
@@ -9213,21 +9539,28 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-bottom-navbar-v2 {
-    height: calc(74px + var(--play-safe-bottom));
-    padding-inline: 6px;
+    height: calc(70px + var(--play-safe-bottom));
+    padding: 6px 6px calc(6px + var(--play-safe-bottom));
   }
 
   .play-bottom-nav-tab {
-    min-height: 54px;
-    font-size: 5.5px;
+    min-height: 52px;
+    font-size: 6.2px;
     letter-spacing: 0.25px;
-    gap: 4px;
+    gap: 3px;
     padding: 0 1px;
   }
 
+  .play-bottom-nav-tab::before {
+    width: min(40px, calc(100% - 6px));
+    height: 32px;
+    top: 3px;
+    border-radius: 10px;
+  }
+
   .play-bottom-nav-tab svg {
-    width: 20px;
-    height: 20px;
+    width: 21px;
+    height: 21px;
   }
 
   .play-bottom-nav-tab-passport svg {
@@ -9236,19 +9569,19 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-bottom-nav-tab-passport span {
-    font-size: 6.25px;
+    font-size: 6.2px;
   }
 
   .play-bottom-nav-center {
-    font-size: 6px;
-    letter-spacing: 0.45px;
-    padding-bottom: 4px;
+    font-size: 6.4px;
+    letter-spacing: 0.35px;
+    padding-bottom: 3px;
   }
 
   .play-bottom-nav-play-circle {
-    width: 54px;
-    height: 54px;
-    top: -24px;
+    width: 52px;
+    height: 52px;
+    top: -23px;
   }
 
   .play-bottom-nav-play-circle svg {

@@ -1,7 +1,6 @@
 "use client";
 
 import { GameBridgeClient } from "./GameBridgeClient";
-import Link from "next/link";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 
@@ -371,13 +370,16 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
             <button id="deposit-confirm" className="primary">
               DEPOSIT NOW
             </button>
-            <Link
+            <button
               id="deposit-manage-funds"
               className="manage"
-              href="/managemoney"
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("chicken:open-money-panel"));
+              }}
             >
               MANAGE MONEY
-            </Link>
+            </button>
           </div>
         </div>
       </div>

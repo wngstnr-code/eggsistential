@@ -5523,11 +5523,13 @@ function initBettingUI() {
   }
 
   function closeStatsModal() {
-    if (!statsModal) return;
-    statsModal.style.display = "none";
-    statsModal.setAttribute("aria-hidden", "true");
-    statsBtn?.classList.remove("open");
-    statsBtn?.setAttribute("aria-expanded", "false");
+    const el = document.getElementById("stats-modal") || statsModal;
+    if (!el) return;
+    const trigger = document.getElementById("stats-btn") || statsBtn;
+    el.style.display = "none";
+    el.setAttribute("aria-hidden", "true");
+    trigger?.classList.remove("open");
+    trigger?.setAttribute("aria-expanded", "false");
     playPanelCloseSfx();
   }
 
@@ -5704,12 +5706,14 @@ function initBettingUI() {
       closeLeaderboardModal();
     }
 
+    const statsModalEl = document.getElementById("stats-modal") || statsModal;
+    const statsBtnEl = document.getElementById("stats-btn") || statsBtn;
     const statsVisible =
-      statsModal && statsBtn && statsModal.style.display !== "none";
+      statsModalEl && statsBtnEl && statsModalEl.style.display !== "none";
     if (
       statsVisible &&
-      !statsModal.contains(target) &&
-      !statsBtn.contains(target)
+      !statsModalEl.contains(target) &&
+      !statsBtnEl.contains(target)
     ) {
       closeStatsModal();
     }
@@ -6187,8 +6191,11 @@ function initBettingUI() {
       closeLeaderboardModal();
     });
 
-  document.getElementById("stats-close-btn")?.addEventListener("click", () => {
-    closeStatsModal();
+  document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target instanceof Element && target.closest("#stats-close-btn")) {
+      closeStatsModal();
+    }
   });
 
   document
