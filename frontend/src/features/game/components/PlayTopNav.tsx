@@ -101,6 +101,7 @@ export function PlayTopNav() {
   const [sfxVolumePercent, setSfxVolumePercent] = useState(90);
   const [passportStatusText, setPassportStatusText] = useState("");
   const [passportBusy, setPassportBusy] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [passportStatus, setPassportStatus] =
     useState<ChickenBridgePassportStatus | null>(null);
   const [isPassportPanelOpen, setIsPassportPanelOpen] = useState(false);
@@ -134,6 +135,11 @@ export function PlayTopNav() {
   const passportAutoLoadedWalletRef = useRef("");
 
   const isConnected = Boolean(account);
+  const isConnectingUi = isHydrated ? isConnecting : false;
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   function onManageMoneyClick() {
     setIsMoneyPanelOpen(true);
@@ -897,7 +903,7 @@ export function PlayTopNav() {
   if (transientStatus?.message) {
     statusTone = transientStatus.tone;
     statusMessage = transientStatus.message;
-  } else if (isConnecting) {
+  } else if (isConnectingUi) {
     statusTone = "busy";
     statusMessage = "CONNECTING WALLET...";
   } else if (!isConnected && error) {
@@ -942,7 +948,7 @@ export function PlayTopNav() {
     statusMessage === "SYNC DATA" &&
     statusActionLabel === "SYNC NOW";
   const isStatusActionAvailable =
-    !isConnecting &&
+    !isConnectingUi &&
     !isBackendAuthLoading &&
     !isResolvingPlayBlocker &&
     (Boolean(statusActionLabel) ||
@@ -1059,7 +1065,7 @@ export function PlayTopNav() {
               onClick={() => {
                 void onWalletButtonClick();
               }}
-              disabled={isConnecting}
+              disabled={isConnectingUi}
               title={
                 isConnected
                   ? account
@@ -1075,7 +1081,7 @@ export function PlayTopNav() {
                     <span className="play-wallet-connect-dot" aria-hidden="true" />
                   ) : null}
                 </>
-              ) : isConnecting ? (
+              ) : isConnectingUi ? (
                 <>
                   <span className="play-wallet-profile-icon" aria-hidden="true">
                     <WalletCards />
