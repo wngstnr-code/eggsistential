@@ -3,7 +3,7 @@
 
 
 import Link from "next/link";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
@@ -142,6 +142,52 @@ const PASSPORT_FEATURES = [
   },
 ];
 
+const GAME_GUIDE_SLIDES = [
+  {
+    title: "CROSS THE ROAD",
+    copy: "Move lane by lane, dodge traffic, and survive as far as you can.",
+    imageSrc: "/images/onboarding-cross-road.png",
+    imageAlt: "Chicken waiting to cross busy arcade lanes",
+    tone: "road",
+  },
+  {
+    title: "STACK MULTIPLIER",
+    copy: "Each forward step adds multiplier. Every 40 hops opens a checkpoint.",
+    imageSrc: "/images/onboarding-multiplier.png",
+    imageAlt: "Chicken hopping forward with multiplier trail",
+    tone: "multiplier",
+  },
+  {
+    title: "CASH OUT SMART",
+    copy: "Cash out only at checkpoints. Push farther for more, but a crash loses your stake.",
+    imageSrc: "/images/onboarding-cashout.png",
+    imageAlt: "Chicken standing inside a glowing checkpoint cashout zone",
+    tone: "cashout",
+  },
+  {
+    title: "BEAT THE TIMER",
+    copy: "You have 60 seconds between checkpoints. Overtime slowly cuts your multiplier.",
+    imageSrc: "/images/onboarding-timer.png",
+    imageAlt: "Chicken racing toward a checkpoint with a countdown aura",
+    tone: "timer",
+  },
+  {
+    title: "TRUST PASSPORT",
+    copy: "Passport is your on-chain reputation, built from clean runs and disciplined checkpoint cashouts.",
+    imageSrc: "/images/onboarding-passport.png",
+    imageAlt: "Chicken beside a floating on-chain reputation passport",
+    tone: "passport",
+  },
+  {
+    title: "LEVEL YOUR PASSPORT",
+    copy: "Higher tiers unlock trust perks, allowlist access, tournaments, and partner rewards.",
+    note: "Tier 1 starts after 3 cashouts at checkpoint 2+.",
+    imageSrc: "/images/onboarding-passport-tiers.png",
+    imageAlt: "Four floating passport tier cards with eggs and checkpoint stamps",
+    tone: "tiers",
+  },
+];
+
 const INTEGRATION_STEPS = [
   "Read passport status from backend API for quick integration in web app flows.",
   "Verify wallet passport eligibility from Solana program data for trustless checks.",
@@ -206,8 +252,11 @@ export function HomePage() {
     disconnectWallet,
   } = useWallet();
   const [showProfilePopover, setShowProfilePopover] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
-  const [showPassportInfo, setShowPassportInfo] = useState(false);
+  const [showGameGuide, setShowGameGuide] = useState(false);
+  const [activeGuideSlide, setActiveGuideSlide] = useState(0);
+  const [failedGuideImages, setFailedGuideImages] = useState<
+    Record<string, boolean>
+  >({});
   const [showHeroConnectPrompt, setShowHeroConnectPrompt] = useState(false);
   const [profileCopyLabel, setProfileCopyLabel] = useState("COPY");
   const [distanceBoard, setDistanceBoard] = useState<
@@ -222,6 +271,31 @@ export function HomePage() {
 
   const isConnected = Boolean(account);
   const walletUsdcDisplay = "-";
+  const activeGuide = GAME_GUIDE_SLIDES[activeGuideSlide];
+  const isLastGuideSlide = activeGuideSlide === GAME_GUIDE_SLIDES.length - 1;
+
+  function openGameGuide() {
+    setActiveGuideSlide(0);
+    setShowGameGuide(true);
+  }
+
+  function closeGameGuide() {
+    setShowGameGuide(false);
+  }
+
+  function goToPreviousGuideSlide() {
+    setActiveGuideSlide((current) => Math.max(0, current - 1));
+  }
+
+  function goToNextGuideSlide() {
+    setActiveGuideSlide((current) =>
+      Math.min(GAME_GUIDE_SLIDES.length - 1, current + 1),
+    );
+  }
+
+  function markGuideImageFailed(imageSrc: string) {
+    setFailedGuideImages((current) => ({ ...current, [imageSrc]: true }));
+  }
 
   useEffect(() => {
     if (!showProfilePopover) return;
@@ -251,6 +325,29 @@ export function HomePage() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [showProfilePopover]);
+
+  useEffect(() => {
+    if (!showGameGuide) return;
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closeGameGuide();
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        goToPreviousGuideSlide();
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        goToNextGuideSlide();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showGameGuide]);
 
   useEffect(() => {
     if (!hasBackendApiConfig()) {
@@ -628,17 +725,10 @@ export function HomePage() {
                   </a>
                   <button
                     type="button"
-                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-how"
-                    onClick={() => setShowHelp(true)}
+                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-guide"
+                    onClick={openGameGuide}
                   >
-                    HOW TO PLAY
-                  </button>
-                  <button
-                    type="button"
-                    className="flow-btn home-btn-main dashboard-btn dashboard-btn-passport"
-                    onClick={() => setShowPassportInfo(true)}
-                  >
-                    WHAT IS PASSPORT
+                    GAME GUIDE
                   </button>
                 </div>
               ) : null}
@@ -907,154 +997,138 @@ export function HomePage() {
           <div className="home-footer-links">
             <Link href="/play">PLAY</Link>
             <Link href="/managemoney">MANAGE MONEY</Link>
-            <button type="button" onClick={() => setShowHelp(true)}>
-              HOW TO PLAY
+            <button type="button" onClick={openGameGuide}>
+              GAME GUIDE
             </button>
           </div>
         </div>
       </footer>
 
-      {showHelp && (
-        <div className="home-modal-overlay" onClick={() => setShowHelp(false)}>
-          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="home-modal-close"
-              type="button"
-              onClick={() => setShowHelp(false)}
-            >
-              X
-            </button>
-            <h2>HOW TO PLAY</h2>
-            <div className="home-help-content">
-              <div className="help-step">
-                <span className="step-num">1</span>
-                <div>
-                  <p className="step-title">FUND YOUR RUN</p>
-                  <p>
-                    Open Manage Money, claim faucet if needed, then deposit
-                    USDC to your vault. Your vault balance is what you use to
-                    start live runs.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">2</span>
-                <div>
-                  <p className="step-title">SURVIVE AND STACK</p>
-                  <p>
-                    In each run, move lane by lane and avoid traffic timing
-                    traps. The farther you go, the more pressure you face, but
-                    your potential multiplier keeps improving.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">3</span>
-                <div>
-                  <p className="step-title">CASH OUT SMART</p>
-                  <p>
-                    Checkpoints are your decision moments: secure profit now or
-                    risk another push for a bigger payout. Discipline matters
-                    more than greed if you want long-term growth.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">4</span>
-                <div>
-                  <p className="step-title">BUILD YOUR PASSPORT</p>
-                  <p>
-                    Consistent checkpoint cashouts improve your Passport tier.
-                    Higher tiers can unlock better events, better access, and
-                    stronger trust perks across partner experiences.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <button
-              className="flow-btn secondary info-modal-action"
-              type="button"
-              onClick={() => setShowHelp(false)}
-            >
-              GOT IT
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showPassportInfo && (
+      {showGameGuide && activeGuide ? (
         <div
           className="home-modal-overlay"
-          onClick={() => setShowPassportInfo(false)}
+          onClick={closeGameGuide}
+          role="presentation"
         >
-          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="home-modal-box home-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="home-guide-title"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               className="home-modal-close"
               type="button"
-              onClick={() => setShowPassportInfo(false)}
+              onClick={closeGameGuide}
+              aria-label="Close game guide"
             >
-              X
+              <X size={16} strokeWidth={3} aria-hidden="true" />
             </button>
-            <h2>WHAT IS PASSPORT</h2>
-            <div className="home-help-content">
-              <div className="help-step">
-                <span className="step-num">1</span>
-                <div>
-                  <p className="step-title">WHAT IS A PASSPORT?</p>
-                  <p>
-                    A Passport is your reputation card in Eggsistential. It
-                    grows from how you play: how consistently you survive, how
-                    often you cash out with discipline, and how stable your
-                    performance is across runs.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">2</span>
-                <div>
-                  <p className="step-title">WHY DO PLAYERS NEED IT?</p>
-                  <p>
-                    Your Passport makes your progress meaningful beyond a single
-                    score. A higher tier shows that you are a real, active
-                    player with a strong gameplay track record.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">3</span>
-                <div>
-                  <p className="step-title">WHAT YOU GET FROM IT</p>
-                  <p>
-                    Your Passport can unlock tiered benefits: access to
-                    ranked/tournament events, allowlist priority, partner
-                    rewards, and community campaigns that require verified
-                    players.
-                  </p>
-                </div>
-              </div>
-              <div className="help-step">
-                <span className="step-num">4</span>
-                <div>
-                  <p className="step-title">HOW TO LEVEL IT UP</p>
-                  <p>
-                    Play clean and consistent: reach checkpoints, cash out at
-                    the right moments, and repeat that performance over time.
-                    The more disciplined your playstyle is, the faster your
-                    Passport tier increases.
-                  </p>
-                </div>
-              </div>
+            <div className="home-guide-kicker">
+              {activeGuideSlide + 1} / {GAME_GUIDE_SLIDES.length}
             </div>
-            <button
-              className="flow-btn secondary info-modal-action"
-              type="button"
-              onClick={() => setShowPassportInfo(false)}
-            >
-              GOT IT
-            </button>
+            <div className={`home-guide-art home-guide-art-${activeGuide.tone}`}>
+              {!failedGuideImages[activeGuide.imageSrc] ? (
+                <img
+                  src={activeGuide.imageSrc}
+                  alt={activeGuide.imageAlt}
+                  onError={() => markGuideImageFailed(activeGuide.imageSrc)}
+                />
+              ) : null}
+              <div className="home-guide-fallback" aria-hidden="true">
+                <span className="home-guide-track" />
+                <span className="home-guide-checkpoint" />
+                <span className="home-guide-egg home-guide-egg-one" />
+                <span className="home-guide-egg home-guide-egg-two" />
+                <span className="home-guide-egg home-guide-egg-three" />
+                <span className="home-guide-pass-card home-guide-pass-one" />
+                <span className="home-guide-pass-card home-guide-pass-two" />
+                <span className="home-guide-pass-card home-guide-pass-three" />
+                <span className="home-guide-chicken" />
+              </div>
+              {activeGuideSlide > 0 ? (
+                <button
+                  className="home-guide-nav-btn home-guide-nav-btn-prev"
+                  type="button"
+                  onClick={goToPreviousGuideSlide}
+                  aria-label="Previous guide slide"
+                >
+                  <ChevronLeft size={18} strokeWidth={3} aria-hidden="true" />
+                </button>
+              ) : null}
+              {!isLastGuideSlide ? (
+                <button
+                  className="home-guide-nav-btn home-guide-nav-btn-next"
+                  type="button"
+                  onClick={goToNextGuideSlide}
+                  aria-label="Next guide slide"
+                >
+                  <ChevronRight size={18} strokeWidth={3} aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            <h2 id="home-guide-title">{activeGuide.title}</h2>
+            <p className="home-guide-copy">{activeGuide.copy}</p>
+            {activeGuide.note ? (
+              <p className="home-guide-note">{activeGuide.note}</p>
+            ) : null}
+            <div className="home-guide-dots" aria-label="Game guide slides">
+              {GAME_GUIDE_SLIDES.map((slide, index) => (
+                <button
+                  key={slide.title}
+                  type="button"
+                  className={index === activeGuideSlide ? "active" : ""}
+                  onClick={() => setActiveGuideSlide(index)}
+                  aria-label={`Open ${slide.title}`}
+                  aria-current={index === activeGuideSlide ? "step" : undefined}
+                />
+              ))}
+            </div>
+            <div className="home-guide-actions">
+              {isLastGuideSlide ? (
+                isConnected ? (
+                  <Link
+                    href="/play"
+                    className="flow-btn secondary info-modal-action home-guide-cta"
+                    onClick={closeGameGuide}
+                  >
+                    START PLAYING
+                  </Link>
+                ) : (
+                  <button
+                    className="flow-btn secondary info-modal-action home-guide-cta"
+                    type="button"
+                    onClick={() => {
+                      closeGameGuide();
+                      void connectWallet();
+                    }}
+                  >
+                    CONNECT WALLET
+                  </button>
+                )
+              ) : (
+                <button
+                  className="flow-btn secondary info-modal-action home-guide-cta"
+                  type="button"
+                  onClick={goToNextGuideSlide}
+                >
+                  NEXT
+                </button>
+              )}
+            </div>
+            {isLastGuideSlide ? (
+              <Link
+                href="/play?passport=1"
+                className="home-guide-passport-link"
+                onClick={closeGameGuide}
+              >
+                VIEW PASSPORT
+              </Link>
+            ) : null}
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="home-help-stack" aria-label="Quick help links">
         <a

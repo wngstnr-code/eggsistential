@@ -996,6 +996,23 @@ canvas.game {
   padding: 24px 22px 16px;
 }
 
+.home-guide-modal {
+  width: min(620px, calc(100vw - 28px));
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 80% 0%, rgba(83, 236, 202, 0.18), transparent 34%),
+    linear-gradient(180deg, #172740 0%, #0e1a2f 100%);
+  border-color: #314765;
+  box-shadow:
+    8px 10px 0 rgba(0, 0, 0, 0.42),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.home-guide-modal h2 {
+  color: #f8fbff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.28);
+}
+
 .home-modal-box h2,
 .info-modal-box h2 {
   margin: 0 0 12px;
@@ -1020,6 +1037,316 @@ canvas.game {
   font-size: 14px;
   cursor: pointer;
   box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.home-modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-guide-kicker {
+  width: fit-content;
+  margin: 0 auto 12px;
+  padding: 5px 12px;
+  border: 2px solid rgba(130, 221, 218, 0.58);
+  border-radius: 999px;
+  background: rgba(11, 25, 45, 0.86);
+  color: #e7fbff;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, 0.14);
+}
+
+.home-guide-art {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 8.4;
+  margin-bottom: 16px;
+  border: 3px solid #2c3e50;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 74% 14%, rgba(89, 233, 205, 0.28), transparent 26%),
+    linear-gradient(180deg, #15263f 0%, #0f1d34 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.12),
+    4px 5px 0 rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+
+.home-guide-art img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-guide-fallback {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.home-guide-track {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg,
+      transparent 0 8%,
+      rgba(255, 255, 255, 0.1) 8% 8.4%,
+      transparent 8.4% 16%,
+      rgba(255, 255, 255, 0.12) 16% 16.4%,
+      transparent 16.4% 25%,
+      rgba(255, 255, 255, 0.12) 25% 25.4%,
+      transparent 25.4% 100%),
+    repeating-linear-gradient(90deg,
+      rgba(255, 255, 255, 0.06) 0,
+      rgba(255, 255, 255, 0.06) 2px,
+      transparent 2px,
+      transparent 56px);
+}
+
+.home-guide-checkpoint {
+  position: absolute;
+  right: 14%;
+  top: 16%;
+  width: 72px;
+  height: 68%;
+  border: 3px solid rgba(83, 236, 202, 0.55);
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  box-shadow:
+    0 0 28px rgba(83, 236, 202, 0.28),
+    inset 0 0 18px rgba(83, 236, 202, 0.16);
+  opacity: 0.28;
+}
+
+.home-guide-chicken {
+  position: absolute;
+  left: 50%;
+  bottom: 21%;
+  width: 74px;
+  height: 88px;
+  transform: translateX(-50%);
+  border-radius: 48% 48% 42% 42%;
+  background:
+    radial-gradient(circle at 34% 27%, #1b2638 0 5px, transparent 6px),
+    radial-gradient(circle at 66% 27%, #1b2638 0 5px, transparent 6px),
+    linear-gradient(180deg, #fff8e7 0%, #ffd866 100%);
+  border: 3px solid rgba(37, 47, 64, 0.82);
+  box-shadow:
+    -28px 26px 0 -14px #f0a42f,
+    28px 26px 0 -14px #f0a42f,
+    0 12px 22px rgba(0, 0, 0, 0.3);
+}
+
+.home-guide-egg,
+.home-guide-pass-card {
+  position: absolute;
+  border: 2px solid rgba(44, 62, 80, 0.65);
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.22);
+}
+
+.home-guide-egg {
+  width: 18px;
+  height: 23px;
+  border-radius: 50% 50% 44% 44%;
+  background: linear-gradient(180deg, #fff1a6 0%, #f0af2f 100%);
+  opacity: 0.78;
+}
+
+.home-guide-egg-one {
+  left: 34%;
+  bottom: 24%;
+}
+
+.home-guide-egg-two {
+  left: 29%;
+  bottom: 38%;
+}
+
+.home-guide-egg-three {
+  left: 24%;
+  bottom: 52%;
+}
+
+.home-guide-pass-card {
+  width: 54px;
+  height: 70px;
+  right: 25%;
+  bottom: 20%;
+  border-radius: 10px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16), transparent 46%),
+    linear-gradient(180deg, #57dcc4 0%, #2b8f86 100%);
+  opacity: 0;
+}
+
+.home-guide-pass-two {
+  transform: translate(14px, -12px) rotate(7deg);
+}
+
+.home-guide-pass-three {
+  transform: translate(28px, -24px) rotate(12deg);
+}
+
+.home-guide-art-road {
+  background:
+    radial-gradient(circle at 78% 16%, rgba(83, 236, 202, 0.22), transparent 24%),
+    linear-gradient(180deg, #192943 0%, #101d34 100%);
+}
+
+.home-guide-art-multiplier {
+  background:
+    radial-gradient(circle at 27% 48%, rgba(255, 224, 102, 0.22), transparent 18%),
+    linear-gradient(180deg, #182846 0%, #0f1d34 100%);
+}
+
+.home-guide-art-cashout,
+.home-guide-art-passport {
+  background:
+    radial-gradient(circle at 74% 18%, rgba(83, 236, 202, 0.34), transparent 28%),
+    linear-gradient(180deg, #103d46 0%, #102234 100%);
+}
+
+.home-guide-art-timer {
+  background:
+    conic-gradient(from 24deg at 50% 44%, rgba(255, 224, 102, 0.35), transparent 34%, rgba(83, 236, 202, 0.18), transparent 70%),
+    linear-gradient(180deg, #1f2a44 0%, #101d34 100%);
+}
+
+.home-guide-art-tiers {
+  background:
+    radial-gradient(circle at 72% 30%, rgba(255, 224, 102, 0.22), transparent 22%),
+    linear-gradient(180deg, #19344a 0%, #102234 100%);
+}
+
+.home-guide-art-passport .home-guide-pass-card,
+.home-guide-art-tiers .home-guide-pass-card {
+  opacity: 0.86;
+}
+
+.home-guide-art-tiers .home-guide-pass-one {
+  right: 36%;
+  bottom: 17%;
+}
+
+.home-guide-art-tiers .home-guide-pass-two {
+  right: 28%;
+  bottom: 26%;
+}
+
+.home-guide-art-tiers .home-guide-pass-three {
+  right: 20%;
+  bottom: 35%;
+}
+
+.home-guide-copy {
+  max-width: 500px;
+  margin: 0 auto;
+  color: #dbe8f7;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.home-guide-note {
+  max-width: 430px;
+  margin: 8px auto 0;
+  padding: 7px 10px;
+  border: 1px dashed rgba(130, 221, 218, 0.38);
+  border-radius: 10px;
+  background: rgba(255, 224, 102, 0.1);
+  color: #ffe8a0;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.home-guide-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin: 12px 0 14px;
+}
+
+.home-guide-dots button {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 2px solid rgba(207, 230, 255, 0.74);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+}
+
+.home-guide-dots button.active {
+  width: 24px;
+  background: linear-gradient(180deg, #ffe27a 0%, #e5a72e 100%);
+}
+
+.home-guide-actions {
+  display: block;
+  margin-top: 2px;
+}
+
+.home-guide-nav-btn {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(207, 230, 255, 0.74);
+  border-radius: 999px;
+  background: rgba(10, 22, 39, 0.72);
+  color: #eef7ff;
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.18),
+    3px 4px 0 rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.home-guide-nav-btn:hover {
+  background: rgba(21, 43, 72, 0.96);
+  transform: translateY(calc(-50% - 1px));
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.18),
+    4px 5px 0 rgba(0, 0, 0, 0.28);
+}
+
+.home-guide-nav-btn-prev {
+  left: 12px;
+}
+
+.home-guide-nav-btn-next {
+  right: 12px;
+}
+
+.home-guide-cta {
+  min-height: 42px;
+  margin-top: 0;
+}
+
+.home-guide-passport-link {
+  display: block;
+  width: fit-content;
+  margin: 12px auto 0;
+  color: #8eeedf;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .home-help-content {
@@ -1298,6 +1625,55 @@ canvas.game {
   .home-modal-box,
   .info-modal-box {
     padding: 18px 14px 12px;
+  }
+
+  .home-guide-modal {
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .home-guide-art {
+    aspect-ratio: 4 / 3;
+    margin-bottom: 12px;
+  }
+
+  .home-guide-chicken {
+    width: 52px;
+    height: 64px;
+    box-shadow:
+      -21px 19px 0 -11px #f0a42f,
+      21px 19px 0 -11px #f0a42f,
+      0 12px 22px rgba(0, 0, 0, 0.3);
+  }
+
+  .home-guide-checkpoint {
+    width: 50px;
+  }
+
+  .home-guide-pass-card {
+    width: 42px;
+    height: 54px;
+  }
+
+  .home-guide-copy {
+    font-size: 10px;
+  }
+
+  .home-guide-actions {
+    margin-top: 2px;
+  }
+
+  .home-guide-nav-btn {
+    width: 36px;
+    height: 38px;
+  }
+
+  .home-guide-nav-btn-prev {
+    left: 8px;
+  }
+
+  .home-guide-nav-btn-next {
+    right: 8px;
   }
 
   .help-step {
@@ -7411,7 +7787,8 @@ body.checkpoint-arrival #hud-scrim::after {
   border: 2px solid rgba(164, 132, 255, 0.76);
 }
 
-.dashboard-btn-how {
+.dashboard-btn-how,
+.dashboard-btn-guide {
   background: linear-gradient(180deg, #5279e8 0%, #2f4bb5 100%);
   color: #eef3ff;
   border: 2px solid rgba(143, 170, 255, 0.82);
