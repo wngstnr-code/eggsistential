@@ -28,6 +28,8 @@ export type DepositFlowViewModel = {
   withdrawTxUrl: string;
   faucetTxHash: string;
   faucetTxUrl: string;
+  faucetAmountDisplay: string;
+  faucetAmountUnits: string;
   isApproveBusy: boolean;
   isDepositBusy: boolean;
   isWithdrawBusy: boolean;

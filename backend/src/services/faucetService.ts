@@ -14,6 +14,20 @@ function readCooldownMs() {
   return Math.max(0, env.FAUCET_COOLDOWN_SECONDS) * 1000;
 }
 
+function formatTokenAmount(unitsValue: string) {
+  const units = BigInt(unitsValue || "0");
+  const decimals = Math.max(0, env.TOKEN_DECIMALS);
+  const divisor = 10n ** BigInt(decimals);
+  const whole = units / divisor;
+  const frac = units % divisor;
+
+  if (decimals === 0) {
+    return whole.toString();
+  }
+
+  return `${whole.toString()}.${frac.toString().padStart(decimals, "0")}`;
+}
+
 function isValidPubkey(value: string): boolean {
   try {
     new PublicKey(value);
@@ -43,6 +57,8 @@ export function readFaucetStatus(walletAddress?: string) {
   return {
     enabled: isFaucetConfigured(),
     mode: readFaucetMode(),
+    amount: formatTokenAmount(env.FAUCET_AMOUNT_UNITS),
+    amountUnits: env.FAUCET_AMOUNT_UNITS,
     cooldownSeconds: Math.floor(cooldownMs / 1000),
     remainingSeconds: Math.ceil(remainingMs / 1000),
     nextEligibleAt:

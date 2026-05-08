@@ -1008,11 +1008,6 @@ canvas.game {
     inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.home-guide-modal h2 {
-  color: #f8fbff;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.28);
-}
-
 .home-modal-box h2,
 .info-modal-box h2 {
   margin: 0 0 12px;
@@ -1020,6 +1015,17 @@ canvas.game {
   color: #243a57;
   font-size: 1.1em;
   letter-spacing: 2px;
+}
+
+.home-guide-modal #home-guide-title {
+  margin: 2px auto 10px;
+  color: #f7c95a;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: 2.8px;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.42),
+    0 0 18px rgba(247, 201, 90, 0.18);
 }
 
 .home-modal-close,
@@ -1062,7 +1068,7 @@ canvas.game {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 8.4;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   border: 3px solid #2c3e50;
   border-radius: 14px;
   background:
@@ -1250,45 +1256,55 @@ canvas.game {
   text-align: center;
   font-size: 11px;
   line-height: 1.6;
+  text-wrap: balance;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.24);
 }
 
 .home-guide-note {
-  max-width: 430px;
-  margin: 8px auto 0;
-  padding: 7px 10px;
-  border: 1px dashed rgba(130, 221, 218, 0.38);
-  border-radius: 10px;
-  background: rgba(255, 224, 102, 0.1);
+  max-width: 520px;
+  margin: 12px auto 0;
+  padding: 10px 14px;
+  border: 1px solid rgba(130, 221, 218, 0.34);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 224, 102, 0.12), rgba(83, 236, 202, 0.08));
   color: #ffe8a0;
   text-align: center;
   font-size: 9px;
   line-height: 1.45;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 .home-guide-dots {
   display: flex;
   justify-content: center;
-  gap: 7px;
-  margin: 12px 0 14px;
+  gap: 8px;
+  margin: 14px 0 16px;
 }
 
 .home-guide-dots button {
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   padding: 0;
   border: 2px solid rgba(207, 230, 255, 0.74);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   cursor: pointer;
+  transition:
+    width 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .home-guide-dots button.active {
-  width: 24px;
+  width: 28px;
+  border-color: rgba(255, 232, 160, 0.95);
   background: linear-gradient(180deg, #ffe27a 0%, #e5a72e 100%);
 }
 
 .home-guide-actions {
-  display: block;
+  display: flex;
+  justify-content: center;
   margin-top: 2px;
 }
 
@@ -1334,19 +1350,31 @@ canvas.game {
 }
 
 .home-guide-cta {
+  width: min(300px, 100%);
   min-height: 42px;
   margin-top: 0;
+  margin-inline: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .home-guide-passport-link {
   display: block;
   width: fit-content;
-  margin: 12px auto 0;
+  margin: 14px auto 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #8eeedf;
+  font-family: inherit;
   font-size: 9px;
   letter-spacing: 1px;
   text-decoration: underline;
   text-underline-offset: 3px;
+  text-shadow: 0 0 12px rgba(142, 238, 223, 0.18);
+  cursor: pointer;
 }
 
 .home-help-content {
@@ -5289,8 +5317,9 @@ body.checkpoint-arrival #hud-scrim::after {
 @media (min-width: 769px) {
   .money-page {
     display: flex;
-    align-items: center;
+    align-items: safe center;
     justify-content: center;
+    padding-block: 12px;
   }
 }
 
@@ -5317,28 +5346,33 @@ body.checkpoint-arrival #hud-scrim::after {
     radial-gradient(circle at 20% 18%,
       rgba(255, 222, 119, 0.12) 0%,
       rgba(255, 222, 119, 0) 28%),
+    radial-gradient(circle at 78% 8%,
+      rgba(87, 220, 196, 0.16) 0%,
+      rgba(87, 220, 196, 0) 30%),
     linear-gradient(180deg,
-      rgba(7, 14, 29, 0.34) 0%,
-      rgba(7, 14, 29, 0.76) 100%);
+      rgba(7, 14, 29, 0.42) 0%,
+      rgba(7, 14, 29, 0.84) 100%);
 }
 
 .money-card {
   position: relative;
   z-index: 2;
-  width: min(964px, 100%);
+  width: min(860px, 100%);
   margin: 0 auto;
-  padding: 26px 20px 24px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   overflow: visible;
-  border-color: rgba(232, 181, 70, 0.72);
+  border: 2px solid rgba(124, 160, 210, 0.42);
   border-radius: 14px;
   background:
-    linear-gradient(180deg, rgba(19, 27, 49, 0.97) 0%, rgba(19, 26, 47, 0.97) 100%);
+    radial-gradient(circle at 86% 0%, rgba(87, 220, 196, 0.13), transparent 30%),
+    linear-gradient(180deg, rgba(15, 26, 47, 0.98) 0%, rgba(10, 17, 32, 0.98) 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 18px 48px rgba(0, 0, 0, 0.46);
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 22px 58px rgba(0, 0, 0, 0.52);
 }
 
 .play-money-modal.modal-bg {
@@ -5392,6 +5426,7 @@ body.checkpoint-arrival #hud-scrim::after {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding-bottom: 2px;
 }
 
 .money-head-top {
@@ -5406,7 +5441,7 @@ body.checkpoint-arrival #hud-scrim::after {
   margin: 0;
   font-size: 10px;
   letter-spacing: 2.6px;
-  color: #f0ce58;
+  color: #f7c95a;
   opacity: 1;
 }
 
@@ -5422,13 +5457,13 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: center;
   justify-content: center;
   min-height: 24px;
-  padding: 0 12px;
+  padding: 0 11px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(187, 209, 243, 0.18);
+  background: rgba(255, 255, 255, 0.07);
   color: #f7fbff;
-  font-size: 7px;
-  letter-spacing: 0.8px;
+  font-size: 7.5px;
+  letter-spacing: 0.9px;
   line-height: 1.2;
 }
 
@@ -5446,23 +5481,27 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .money-title {
   margin: 0;
-  font-size: clamp(28px, 4.4vw, 34px);
+  font-size: clamp(27px, 3vw, 31px);
   line-height: 0.95;
-  letter-spacing: 1px;
-  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.22);
+  color: #f7fbff;
+  letter-spacing: 1.4px;
+  text-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.24),
+    0 0 22px rgba(87, 220, 196, 0.12);
 }
 
 .money-subtitle {
   margin: 0;
-  color: rgba(231, 239, 255, 0.86);
-  font-size: 9px;
-  line-height: 1.7;
+  max-width: 640px;
+  color: rgba(219, 232, 247, 0.86);
+  font-size: 10px;
+  line-height: 1.45;
 }
 
 .money-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
-  gap: 13px;
+  grid-template-columns: minmax(270px, 0.85fr) minmax(350px, 1.15fr);
+  gap: 10px;
   align-items: stretch;
 }
 
@@ -5470,30 +5509,32 @@ body.checkpoint-arrival #hud-scrim::after {
   margin-bottom: 0;
   height: auto;
   min-height: 0;
-  padding: 16px;
+  padding: 12px;
   display: flex;
   align-items: stretch;
   flex-direction: column;
-  gap: 18px;
-  border-color: rgba(124, 137, 167, 0.38);
+  gap: 10px;
+  border-color: rgba(130, 221, 218, 0.24);
   border-radius: 12px;
-  background: rgba(39, 46, 72, 0.84);
+  background:
+    linear-gradient(180deg, rgba(29, 47, 76, 0.9), rgba(25, 35, 59, 0.9));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .money-section-label {
   margin: 0;
-  color: #f2f5ff;
-  font-size: 10px;
+  color: #8eeedf;
+  font-size: 9.5px;
   letter-spacing: 1.4px;
   line-height: 1.3;
 }
 
 .money-status-grid {
   width: 100%;
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 7px;
 }
 
 .money-status-row {
@@ -5501,22 +5542,22 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  min-height: 0;
-  padding: 17px 14px;
-  border-radius: 8px;
-  background: rgba(72, 81, 111, 0.4);
-  border: 1px solid rgba(139, 151, 184, 0.25);
+  min-height: 60px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(13, 24, 43, 0.46);
+  border: 1px solid rgba(187, 209, 243, 0.13);
 }
 
 .money-status-row span {
-  color: rgba(203, 211, 232, 0.78);
-  font-size: 8px;
+  color: rgba(214, 226, 245, 0.74);
+  font-size: 9.5px;
   letter-spacing: 1.15px;
 }
 
 .money-status-row strong {
-  color: #ffe066;
-  font-size: 9px;
+  color: #ffe887;
+  font-size: 11px;
   text-align: right;
   line-height: 1.35;
   word-break: break-word;
@@ -5525,33 +5566,36 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-action-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   min-height: 0;
-  padding: 16px;
+  padding: 12px;
   border-radius: 12px;
-  background: rgba(39, 46, 72, 0.84);
-  border: 1px solid rgba(124, 137, 167, 0.38);
+  background:
+    linear-gradient(180deg, rgba(26, 41, 70, 0.92), rgba(21, 31, 54, 0.92));
+  border: 1px solid rgba(130, 221, 218, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
 }
 
 .money-action-tabs {
   display: grid;
-  grid-template-columns: repeat(3, max-content);
-  align-items: end;
-  gap: 4px;
-  border-bottom: 1px solid rgba(145, 156, 188, 0.26);
-  padding: 11px 0 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid rgba(187, 209, 243, 0.12);
+  border-radius: 12px;
+  background: rgba(7, 16, 31, 0.48);
 }
 
 .money-action-tab {
-  min-width: 98px;
-  min-height: 30px;
+  min-width: 0;
+  min-height: 32px;
   border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: 5px 5px 0 0;
+  border-radius: 9px;
   background: transparent;
   color: rgba(196, 203, 223, 0.62);
   font-family: inherit;
-  font-size: 8px;
+  font-size: 10px;
   letter-spacing: 1px;
   cursor: pointer;
   transition:
@@ -5563,19 +5607,34 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-action-tab:hover,
 .money-action-tab:focus-visible {
   color: #f7fbff;
-  outline: none;
+  outline: 2px solid rgba(142, 238, 223, 0.68);
+  outline-offset: 2px;
 }
 
 .money-action-tab.active {
-  border-color: rgba(246, 211, 102, 0.28);
-  background: rgba(255, 224, 102, 0.13);
-  color: #ffe066;
+  border-color: rgba(255, 232, 135, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 224, 102, 0.22), rgba(255, 224, 102, 0.1));
+  color: #ffe887;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
 }
 
 .money-message-stack {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+}
+
+.money-action-hint {
+  margin: 0;
+  min-height: 0;
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(130, 221, 218, 0.18);
+  background: rgba(7, 16, 31, 0.38);
+  color: rgba(219, 232, 247, 0.82);
+  font-size: 9.5px;
+  line-height: 1.35;
 }
 
 .money-action-panel .flow-alert,
@@ -5591,28 +5650,29 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .money-amount-block .money-input {
   margin-bottom: 0;
-  min-height: 50px;
-  border-radius: 10px;
-  border-color: rgba(143, 151, 184, 0.48);
-  background: rgba(21, 24, 42, 0.86);
-  font-size: 22px;
+  min-height: 46px;
+  border-radius: 12px;
+  border-color: rgba(130, 221, 218, 0.28);
+  background: rgba(6, 14, 28, 0.82);
+  color: #f8fbff;
+  font-size: 21px;
   padding: 10px 16px;
 }
 
 .money-quick-picks {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
 .money-quick-pick {
   font-family: inherit;
-  font-size: 7px;
-  min-height: 26px;
-  padding: 0 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(180, 191, 220, 0.28);
-  background: rgba(104, 116, 151, 0.44);
+  font-size: 8.5px;
+  min-height: 29px;
+  padding: 0 8px;
+  border-radius: 9px;
+  border: 1px solid rgba(180, 191, 220, 0.2);
+  background: rgba(10, 23, 43, 0.68);
   color: #f4f8ff;
   cursor: pointer;
   transition:
@@ -5623,8 +5683,55 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .money-quick-pick:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 224, 102, 0.36);
+  background: rgba(255, 224, 102, 0.13);
+  border-color: rgba(255, 224, 102, 0.4);
+  color: #ffe887;
+}
+
+.money-quick-pick:focus-visible,
+.money-primary-btn:focus-visible,
+.money-panel-nav-btn:focus-visible {
+  outline: 2px solid rgba(142, 238, 223, 0.72);
+  outline-offset: 3px;
+}
+
+.money-quick-pick-max {
+  border-style: dashed;
+  color: #8eeedf;
+  background: rgba(16, 61, 70, 0.48);
+}
+
+.money-faucet-fixed {
+  display: grid;
+  gap: 8px;
+  min-height: 120px;
+  padding: 18px;
+  border: 1px solid rgba(130, 221, 218, 0.24);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(87, 220, 196, 0.16), transparent 34%),
+    rgba(7, 16, 31, 0.48);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.035);
+}
+
+.money-faucet-fixed span {
+  color: #8eeedf;
+  font-size: 9.5px;
+  letter-spacing: 1.2px;
+}
+
+.money-faucet-fixed strong {
+  color: #ffe887;
+  font-size: 24px;
+  line-height: 1.1;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.24);
+}
+
+.money-faucet-fixed p {
+  margin: 0;
+  color: rgba(219, 232, 247, 0.78);
+  font-size: 10px;
+  line-height: 1.55;
 }
 
 .money-primary-btn {
@@ -5632,10 +5739,11 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: center;
   width: 100%;
   justify-content: center;
-  min-height: 47px;
-  padding: 12px 14px;
-  border-radius: 10px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 12px;
   font-size: 12px;
+  letter-spacing: 1.5px;
   background: linear-gradient(180deg, #ffe889 0%, #eabf3c 100%);
   color: #2a1b53;
   border: none;
@@ -5667,24 +5775,29 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .money-helper {
   margin: 0;
-  color: rgba(225, 235, 255, 0.78);
+  color: rgba(219, 232, 247, 0.78);
   font-size: 8px;
   line-height: 1.7;
 }
 
 .money-panel-footer {
-  margin-top: 8px;
+  margin-top: 2px;
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 6px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(145, 156, 188, 0.26);
+  gap: 5px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(187, 209, 243, 0.14);
+}
+
+.money-primary-btn:disabled {
+  opacity: 0.72;
+  filter: saturate(0.75);
 }
 
 .money-activity {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 12px;
+  border-top: 1px solid rgba(187, 209, 243, 0.12);
+  padding-top: 8px;
 }
 
 .money-activity-eyebrow {
@@ -5703,10 +5816,10 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: flex-start;
   gap: 6px;
   padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-size: 9px;
+  border-radius: 11px;
+  background: rgba(7, 16, 31, 0.5);
+  border: 1px solid rgba(187, 209, 243, 0.12);
+  font-size: 10px;
   color: rgba(226, 236, 255, 0.84);
 }
 
@@ -5714,6 +5827,17 @@ body.checkpoint-arrival #hud-scrim::after {
 .money-activity-item .mono {
   color: #ffe066;
   word-break: break-all;
+}
+
+.money-activity-empty {
+  margin: 0;
+  padding: 11px 12px;
+  border: 1px dashed rgba(187, 209, 243, 0.18);
+  border-radius: 11px;
+  background: rgba(7, 16, 31, 0.38);
+  color: rgba(219, 232, 247, 0.76);
+  font-size: 10px;
+  line-height: 1.5;
 }
 
 .money-footer-actions {
@@ -5729,10 +5853,11 @@ body.checkpoint-arrival #hud-scrim::after {
   justify-content: center;
   text-align: center;
   text-decoration: none;
+  border-radius: 11px;
 }
 
 .money-footer-actions .money-panel-nav-btn.money-nav-home-btn {
-  min-height: 50px;
+  min-height: 44px;
   background: linear-gradient(180deg, #43566f 0%, #304157 100%) !important;
   border: 2px solid #7891b3 !important;
   color: #e8f1ff !important;
@@ -5740,7 +5865,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .money-footer-actions .money-panel-nav-btn.money-nav-play-btn {
-  min-height: 50px;
+  min-height: 44px;
   background: linear-gradient(180deg, #3c8dff 0%, #0052ff 100%) !important;
   border: 2px solid #9bbcff !important;
   color: #f5f9ff !important;
@@ -5850,9 +5975,27 @@ body.checkpoint-arrival #hud-scrim::after {
     letter-spacing: 0.45px;
   }
 
+  .money-quick-picks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .money-quick-pick {
+    min-height: 34px;
+    font-size: 7px;
+  }
+
   .money-amount-block .money-input {
     min-height: 46px;
     font-size: 18px;
+  }
+
+  .money-faucet-fixed {
+    min-height: 104px;
+    padding: 14px;
+  }
+
+  .money-faucet-fixed strong {
+    font-size: 20px;
   }
 
   .money-primary-btn,

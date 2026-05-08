@@ -520,6 +520,11 @@ export function HomePage() {
     }
   }
 
+  function openPassportFromGuide() {
+    closeGameGuide();
+    void loadTrustPassport(true);
+  }
+
   const trackedRuns = profitBoard.reduce(
     (sum, entry) => sum + toNumber(entry.total_games),
     0,
@@ -620,33 +625,6 @@ export function HomePage() {
     passportProgression?.currentTierLabel ?? "Rookie";
   const passportRequirements = passportProgression?.requirements ?? [];
   const passportBenefits = passportStatus?.benefits ?? null;
-  const passportStatusLabel = !passportStatus
-    ? passportBusy
-      ? "LOADING"
-      : "NOT LOADED"
-    : passportStatus.passport.revoked
-      ? "REVOKED"
-      : !passportStatus.passport.configured
-        ? "OFFLINE"
-        : passportStatus.passport.valid
-          ? "VALID"
-          : passportStatus.eligibility.eligible
-            ? "READY"
-            : "IN PROGRESS";
-  const passportStatusTone = !passportStatus
-    ? passportBusy
-      ? "loading"
-      : "offline"
-    : passportStatus.passport.revoked
-      ? "revoked"
-      : !passportStatus.passport.configured
-        ? "offline"
-        : passportStatus.passport.valid
-          ? "valid"
-          : passportStatus.eligibility.eligible
-            ? "ready"
-            : "progress";
-
   return (
     <main className="flow-page home-page">
       <header className="home-nav home-nav-global">
@@ -1138,11 +1116,6 @@ export function HomePage() {
                   EGGPASS
                 </h3>
               </div>
-              <span
-                className={`play-passport-state-pill play-passport-state-${passportStatusTone}`}
-              >
-                {passportStatusLabel}
-              </span>
             </div>
 
             <div className="play-passport-status-layout">
@@ -1566,13 +1539,13 @@ export function HomePage() {
               )}
             </div>
             {isLastGuideSlide ? (
-              <Link
-                href="/play?passport=1"
+              <button
+                type="button"
                 className="home-guide-passport-link"
-                onClick={closeGameGuide}
+                onClick={openPassportFromGuide}
               >
                 VIEW PASSPORT
-              </Link>
+              </button>
             ) : null}
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import type { DepositFlowViewModel } from "./types";
 import { useDepositFlow } from "./useDepositFlow";
@@ -38,6 +38,12 @@ function readWalletStatus(flow: DepositFlowViewModel) {
   if (!flow.isConnected) return "Not Connected";
   if (!flow.isAppChain) return "RPC Missing";
   return "Connected";
+}
+
+function readWalletStatusTone(flow: DepositFlowViewModel) {
+  if (!flow.isConnected) return "warning";
+  if (!flow.isAppChain) return "warning";
+  return "ready";
 }
 
 function readPrimaryLabel(flow: DepositFlowViewModel) {
@@ -170,7 +176,41 @@ export function ManageMoneyVaultCard({
       ? flow.disableWithdrawButton
       : moneyAction === "faucet"
         ? flow.disableFaucetButton
-        : flow.disableDepositButton;
+      : flow.disableDepositButton;
+  const activeActionHint =
+    moneyAction === "withdraw"
+      ? "Move available vault balance back to your wallet."
+      : moneyAction === "faucet"
+        ? "Claim test USDC to fund your next run."
+        : "Move wallet USDC into your playable vault balance.";
+  const walletStatus = readWalletStatus(flow);
+  const walletStatusTone = readWalletStatusTone(flow);
+  const isFaucetMode = moneyAction === "faucet";
+  const faucetAmountLabel =
+    flow.faucetAmountDisplay === "-" ? "-" : `$${flow.faucetAmountDisplay}`;
+
+  function onMoneyTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    const currentIndex = moneyActionTabs.findIndex(
+      (tab) => tab.mode === moneyAction,
+    );
+    const lastIndex = moneyActionTabs.length - 1;
+    let nextIndex = currentIndex;
+
+    if (event.key === "ArrowRight") {
+      nextIndex = currentIndex >= lastIndex ? 0 : currentIndex + 1;
+    } else if (event.key === "ArrowLeft") {
+      nextIndex = currentIndex <= 0 ? lastIndex : currentIndex - 1;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = lastIndex;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    setMoneyAction(moneyActionTabs[nextIndex].mode);
+  }
 
   return (
     <section className={["flow-card money-card", className].filter(Boolean).join(" ")}>
@@ -187,6 +227,12 @@ export function ManageMoneyVaultCard({
       <header className="money-header">
         <div className="money-head-top">
           <p className="flow-eyebrow">EGGSISTENTIAL VAULT</p>
+          <div className="money-head-badges" aria-label="Vault status">
+            <span className={`money-head-badge money-head-badge-${walletStatusTone}`}>
+              {walletStatus}
+            </span>
+            <span className="money-head-badge">USDC</span>
+          </div>
         </div>
         <h1 className="flow-title money-title">MY VAULT</h1>
         <p className="money-subtitle">
@@ -200,7 +246,7 @@ export function ManageMoneyVaultCard({
             <div className="money-status-grid">
               <div className="money-status-row">
                 <span>Wallet Status</span>
-                <strong>{readWalletStatus(flow)}</strong>
+                <strong>{walletStatus}</strong>
               </div>
               <div className="money-status-row">
                 <span>Wallet Balance</span>
@@ -229,6 +275,7 @@ export function ManageMoneyVaultCard({
                     moneyAction === tab.mode ? " active" : ""
                   }`}
                   onClick={() => setMoneyAction(tab.mode)}
+                  onKeyDown={onMoneyTabKeyDown}
                 >
                   {tab.label}
                 </button>
@@ -236,6 +283,7 @@ export function ManageMoneyVaultCard({
             </div>
 
             <div className="money-message-stack">
+              <p className="money-action-hint">{activeActionHint}</p>
               {flow.configMessage ? (
                 <p className="flow-alert">{flow.configMessage}</p>
               ) : null}
@@ -247,36 +295,46 @@ export function ManageMoneyVaultCard({
               ) : null}
             </div>
 
-            <div className="money-amount-block">
-              <label className="flow-label" htmlFor="money-amount-ui">
-                AMOUNT (USDC)
-              </label>
-              <input
-                id="money-amount-ui"
-                className="flow-input money-input"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="10.00"
-                value={flow.amount}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  flow.setAmount(event.target.value)
-                }
-              />
-
-              <div className="money-quick-picks">
-                {quickAmounts.map((preset) => (
-                  <button
-                    key={`${preset.label}-${preset.value}`}
-                    type="button"
-                    className="money-quick-pick"
-                    onClick={() => flow.setAmount(preset.value)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+            {isFaucetMode ? (
+              <div className="money-faucet-fixed" aria-label="Faucet amount">
+                <span>FAUCET AMOUNT</span>
+                <strong>{faucetAmountLabel}</strong>
+                <p>Claimable test USDC for play balance.</p>
               </div>
-            </div>
+            ) : (
+              <div className="money-amount-block">
+                <label className="flow-label" htmlFor="money-amount-ui">
+                  AMOUNT (USDC)
+                </label>
+                <input
+                  id="money-amount-ui"
+                  className="flow-input money-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="10.00"
+                  value={flow.amount}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    flow.setAmount(event.target.value)
+                  }
+                />
+
+                <div className="money-quick-picks">
+                  {quickAmounts.map((preset) => (
+                    <button
+                      key={`${preset.label}-${preset.value}`}
+                      type="button"
+                      className={`money-quick-pick${
+                        preset.label.includes("MAX") ? " money-quick-pick-max" : ""
+                      }`}
+                      onClick={() => flow.setAmount(preset.value)}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <button
               className="flow-btn money-primary-btn"
@@ -314,9 +372,9 @@ export function ManageMoneyVaultCard({
           </section>
         </div>
 
-        {activityItems.length ? (
-          <section className="money-activity">
-            <p className="flow-eyebrow money-activity-eyebrow">RECENT ACTIVITY</p>
+        <section className="money-activity">
+          <p className="flow-eyebrow money-activity-eyebrow">RECENT ACTIVITY</p>
+          {activityItems.length ? (
             <div className="money-activity-list">
               {activityItems.map((item) => (
                 <div key={item.label} className="money-activity-item">
@@ -331,8 +389,10 @@ export function ManageMoneyVaultCard({
                 </div>
               ))}
             </div>
-          </section>
-        ) : null}
+          ) : (
+            <p className="money-activity-empty">No vault activity yet.</p>
+          )}
+        </section>
     </section>
   );
 }

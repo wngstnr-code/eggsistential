@@ -16,6 +16,8 @@ type FaucetStatusPayload = {
   cooldownSeconds?: number;
   remainingSeconds?: number;
   nextEligibleAt?: string | null;
+  amount?: string;
+  amountUnits?: string;
 };
 
 type FaucetRequestPayload = {
@@ -103,6 +105,8 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
   const [faucetEnabled, setFaucetEnabled] = useState(false);
   const [faucetCooldownSeconds, setFaucetCooldownSeconds] = useState(0);
   const [faucetTxHash, setFaucetTxHash] = useState("");
+  const [faucetAmountDisplay, setFaucetAmountDisplay] = useState("-");
+  const [faucetAmountUnits, setFaucetAmountUnits] = useState("");
   const [depositTxHash, setDepositTxHash] = useState("");
   const [withdrawTxHash, setWithdrawTxHash] = useState("");
   const [walletBalanceDisplay, setWalletBalanceDisplay] = useState("-");
@@ -124,6 +128,8 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
         if (cancelled) return;
         setFaucetEnabled(Boolean(status.enabled));
         setFaucetCooldownSeconds(Number(status.remainingSeconds || 0));
+        setFaucetAmountDisplay(formatMoney2(status.amount));
+        setFaucetAmountUnits(String(status.amountUnits || ""));
       })
       .catch(() => {
         if (cancelled) return;
@@ -309,6 +315,8 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
       const status = await backendFetch<FaucetStatusPayload>("/api/faucet/status");
       setFaucetEnabled(Boolean(status.enabled));
       setFaucetCooldownSeconds(Number(status.remainingSeconds || 0));
+      setFaucetAmountDisplay(formatMoney2(status.amount));
+      setFaucetAmountUnits(String(status.amountUnits || ""));
 
       if (!status.enabled) {
         setErrorMessage(
@@ -369,6 +377,8 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
     withdrawTxUrl: explorerTxUrl(withdrawTxHash),
     faucetTxHash,
     faucetTxUrl: explorerTxUrl(faucetTxHash),
+    faucetAmountDisplay,
+    faucetAmountUnits,
     isApproveBusy: false,
     isDepositBusy,
     isWithdrawBusy,
