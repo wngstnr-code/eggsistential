@@ -1369,7 +1369,7 @@ export function PlayTopNav() {
                 void onStatusActionClick();
               }}
               disabled={
-                isConnecting || isBackendAuthLoading || isResolvingPlayBlocker
+                isConnectingUi || isBackendAuthLoading || isResolvingPlayBlocker
               }
             >
               {statusActionLabel}
