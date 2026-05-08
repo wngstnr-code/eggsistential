@@ -84,22 +84,22 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
 
 const ABOUT_FEATURES = [
   {
-    title: "FAST ARCADE STAKES",
-    copy: "Connect, run, and feel the multiplier rise before the crash catches up.",
+    title: "SKILL-FIRST ARCADE RUNS",
+    copy: "Every run rewards timing, focus, and lane-reading under pressure.",
     tone: "risk",
     imageSrc: "/images/1.png",
     imageAlt: "EGGSISTENTIAL arcade stakes preview",
   },
   {
-    title: "CHECKPOINT CASH OUTS",
-    copy: "Cash out at checkpoints or keep pushing for a bigger payout.",
+    title: "CHECKPOINT DECISIONS",
+    copy: "At each checkpoint, choose to secure progress or keep pushing for a higher score.",
     tone: "checkpoint",
     imageSrc: "/images/2.png",
     imageAlt: "EGGSISTENTIAL checkpoint cash out preview",
   },
   {
-    title: "SOLANA WALLET FLOW",
-    copy: "From wallet connect to live play, the Solana flow stays quick and simple.",
+    title: "SMOOTH SOLANA FLOW",
+    copy: "From wallet connect to live play, your progress sync stays fast and simple.",
     tone: "wallet",
     imageSrc: "/images/3.png",
     imageAlt: "EGGSISTENTIAL wallet flow preview",
@@ -115,12 +115,12 @@ const FLOW_STEPS = [
   {
     label: "STEP 2",
     title: "Run Session",
-    copy: "Start a live run with stake from vault balance. Backend tracks checkpoints and anti-cheat rules.",
+    copy: "Start a live run from your vault balance. The backend tracks checkpoints and fair-play rules.",
   },
   {
     label: "STEP 3",
-    title: "Signed Settlement",
-    copy: "Result is prepared for Solana settlement. Win goes back to vault balance once the program flow is wired.",
+    title: "Result Settlement",
+    copy: "Run results settle through the Solana flow, then update your vault balance and player history.",
   },
 ];
 
@@ -128,7 +128,7 @@ const PASSPORT_FEATURES = [
   {
     label: "HUMAN SCORE",
     title: "Behavior-based trust signal",
-    copy: "Passport points are built from gameplay patterns and anti-bot signals, not from social hype.",
+    copy: "Passport score is built from real gameplay patterns and anti-bot signals, not social hype.",
   },
   {
     label: "ONCHAIN PROOF",
@@ -137,15 +137,15 @@ const PASSPORT_FEATURES = [
   },
   {
     label: "USE CASE",
-    title: "Airdrop and allowlist filter",
-    copy: "Projects can reduce sybil noise by checking passport eligibility directly from contract + API.",
+    title: "Access and reward filter",
+    copy: "Partner projects can reduce sybil noise by checking passport eligibility from contract and API.",
   },
 ];
 
 const INTEGRATION_STEPS = [
-  "Read passport status from backend API for quick integration in web app flows.",
-  "Verify wallet passport eligibility from Solana program data for trustless checks.",
-  "Combine both: fast UX from API plus Solana verification before sensitive actions.",
+  "Read passport status from backend API for quick integration in app flows.",
+  "Verify wallet passport eligibility from Solana program data for trust-minimized checks.",
+  "Combine both: fast UX from API plus Solana verification for sensitive actions.",
 ];
 
 function shortAddress(address: string) {
@@ -575,8 +575,8 @@ export function HomePage() {
                 <span className="home-wordmark-rest">SISTENTIAL</span>
               </h1>
               <p className="home-subcopy">
-                Cross the road, stack the multiplier, and cash out before the
-                run crashes.
+                A skill-based reflex adventure where timing and smart
+                checkpoint decisions shape your progress.
               </p>
               {showHeroConnectPrompt && !isConnected ? (
                 <div className="home-hero-connect-stack">
@@ -674,8 +674,9 @@ export function HomePage() {
               ?
             </h2>
             <p className="home-about-copy">
-              EGGSISTENTIAL is a fast risk-reward demo where players cross lanes,
-              stack multiplier, and choose when to cash out.
+              EGGSISTENTIAL is a fast reflex game where players read lane
+              patterns, survive longer runs, and build on-chain progression
+              through smart checkpoint decisions.
             </p>
           </div>
 
@@ -856,12 +857,12 @@ export function HomePage() {
             <div>
               <h3>TRUST PASSPORT</h3>
               <p>
-                Passport is a reusable trust layer from your gameplay behavior.
-                It can be consumed by this game and external projects as
-                anti-bot signal.
+                Passport is your on-chain player reputation from gameplay
+                behavior. It helps this game and partner apps recognize real,
+                consistent players.
               </p>
             </div>
-            <p>Solana program wiring: token mint, vault, settlement, and passport.</p>
+            <p>Built on Solana: vault, settlement, progression, and Passport trust layer.</p>
           </div>
         </div>
       </section>
@@ -900,7 +901,7 @@ export function HomePage() {
               <span className="home-wordmark-rest">SISTENTIAL</span>
             </p>
             <h3 className="home-footer-title">
-              Fast arcade risk with fixed-stake runs on Solana.
+              Skill-based arcade progression with Solana-native player identity.
             </h3>
           </div>
 
