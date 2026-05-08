@@ -2143,30 +2143,65 @@ body.checkpoint-arrival #hud-scrim::after {
 #bet-btn {
   min-width: 108px;
   min-height: var(--top-bar-control-height);
-  border-radius: 12px;
-  border: 2px solid #8b5a00;
-  background: linear-gradient(180deg, #ffd93d 0%, #e7a303 100%);
+  border-radius: 14px;
+  border: 2px solid #745019;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 32%),
+    linear-gradient(180deg, #ffe56f 0%, #ffc51f 48%, #e69508 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.36),
+    inset 0 -4px 0 rgba(158, 96, 4, 0.46),
+    4px 5px 0 rgba(72, 45, 8, 0.78),
+    0 0 18px rgba(255, 197, 31, 0.22);
+  color: #271703;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 14px;
+  letter-spacing: 1.2px;
+  text-shadow: 0 1px 0 rgba(255, 247, 187, 0.56);
+}
+
+#bet-btn:hover:not(:disabled) {
+  filter: brightness(1.04) saturate(1.08);
+}
+
+#bet-btn:focus-visible {
+  outline: 3px solid rgba(125, 245, 190, 0.94);
+  outline-offset: 3px;
 }
 
 #bet-btn.active {
-  color: #112214;
-  border-color: #1b5e3a;
-  background: linear-gradient(180deg, #7df5be 0%, #33b57f 100%);
+  color: #082619;
+  border-color: #0d5a3a;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, #9dffd1 0%, #4fdaa2 48%, #1d9d6e 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -4px 0 rgba(11, 104, 72, 0.42),
+    4px 5px 0 rgba(7, 59, 42, 0.76),
+    0 0 18px rgba(79, 218, 162, 0.24);
 }
 
 #bet-btn.busy {
   color: #fff;
-  border-color: #7c1c1c;
-  background: linear-gradient(180deg, #ff7c7c 0%, #d83b3b 100%);
+  border-color: #761b22;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, #ff948c 0%, #eb514e 48%, #c92232 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -4px 0 rgba(104, 10, 20, 0.42),
+    4px 5px 0 rgba(83, 12, 20, 0.72),
+    0 0 18px rgba(235, 81, 78, 0.22);
+  text-shadow: 0 2px 0 rgba(82, 6, 14, 0.34);
   animation: ui-pulse 0.8s ease-in-out infinite alternate;
 }
 
 #bet-btn:disabled {
-  opacity: 0.8;
+  filter: grayscale(0.18) brightness(0.82);
+  opacity: 0.86;
   cursor: not-allowed;
 }
 
@@ -2521,6 +2556,7 @@ body.checkpoint-arrival #hud-scrim::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   padding: 0 12px;
   height: var(--play-nav-control-height);
   min-height: var(--play-nav-control-height);
@@ -2536,18 +2572,99 @@ body.checkpoint-arrival #hud-scrim::after {
     filter 0.08s ease;
 }
 
+.play-wallet-trigger svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.6;
+  flex: 0 0 auto;
+}
+
+.play-wallet-trigger-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.play-wallet-trigger.connected,
+.play-wallet-trigger.connect {
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 0 12px 0 9px;
+}
+
 .play-wallet-trigger.connected {
-  background: linear-gradient(180deg,
-      rgba(16, 24, 44, 0.9) 0%,
-      rgba(30, 42, 72, 0.9) 100%);
-  border: 2px solid rgba(184, 212, 255, 0.9);
-  color: #f3f8ff;
+  background: linear-gradient(180deg, #ffd47a 0%, #f28b1d 100%);
+  border: 2px solid #9b5a0c;
+  color: #3a2105;
+  box-shadow:
+    3px 4px 0 rgba(122, 67, 8, 0.9),
+    0 0 14px rgba(242, 139, 29, 0.3);
+}
+
+.play-wallet-trigger.connected .play-wallet-trigger-label,
+.play-wallet-trigger.connect .play-wallet-trigger-label {
+  flex: 1 1 auto;
+  font-size: 12px;
+  line-height: 1.08;
+  padding-left: 7px;
+  text-align: left;
+}
+
+.play-wallet-trigger.connected .play-wallet-trigger-label {
+  text-shadow: 0 1px 0 rgba(255, 244, 210, 0.36);
+}
+
+.play-wallet-trigger.connect .play-wallet-trigger-label {
+  text-shadow: 0 2px 0 rgba(112, 29, 22, 0.42);
+}
+
+.play-wallet-profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid rgba(94, 52, 5, 0.62);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 50% 34%, #fff0a6 0%, #f7b733 58%, #c86c13 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 rgba(99, 54, 7, 0.72);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+}
+
+.play-wallet-profile-icon svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 2.8;
+}
+
+.play-wallet-trigger.connect .play-wallet-profile-icon {
+  border-color: rgba(118, 27, 21, 0.72);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0) 42%),
+    radial-gradient(circle at 50% 34%, #ffe0d2 0%, #ff745f 58%, #b93028 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    0 2px 0 rgba(103, 24, 18, 0.78);
+}
+
+.play-wallet-trigger.icon-only {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
 }
 
 .play-wallet-trigger.connect {
-  background: linear-gradient(180deg, #ffe29c 0%, #f3b848 100%);
-  border: 2px solid #8d611a;
-  color: #2f1e08;
+  background: linear-gradient(180deg, #ff9b7d 0%, #df463d 100%);
+  border: 2px solid #8b241f;
+  color: #fff8ef;
+  box-shadow:
+    3px 4px 0 rgba(123, 28, 23, 0.9),
+    0 0 14px rgba(255, 84, 70, 0.34);
 }
 
 .play-wallet-trigger:active:not(:disabled) {
@@ -2641,6 +2758,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .play-menu-trigger {
+  --play-menu-shadow-color: #263748;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2652,7 +2770,7 @@ body.checkpoint-arrival #hud-scrim::after {
   cursor: pointer;
   border: 2px solid #2c3e50;
   background: linear-gradient(180deg, #f5f6f7 0%, #bdc3c7 100%);
-  box-shadow: 0 4px 0 #7f8c8d;
+  box-shadow: 0 4px 0 var(--play-menu-shadow-color);
   transition:
     transform 0.05s ease,
     box-shadow 0.05s ease;
@@ -2681,7 +2799,7 @@ body.checkpoint-arrival #hud-scrim::after {
 .play-menu-trigger:active,
 .play-menu-trigger.active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #7f8c8d;
+  box-shadow: 0 1px 0 var(--play-menu-shadow-color);
 }
 
 .play-menu-popover {
@@ -3633,15 +3751,20 @@ body.checkpoint-arrival #hud-scrim::after {
   width: 100%;
   min-height: 40px;
   border-radius: 12px;
-  border: 2px solid #6f3a0d;
-  background: linear-gradient(180deg, #f7a24e 0%, #b95713 100%);
-  color: #fffdf4;
+  border: 2px solid #315176;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, transparent 34%),
+    linear-gradient(180deg, #dbeeff 0%, #7fa9dd 100%);
+  color: #10223a;
   font-family: inherit;
   font-size: 11px;
   letter-spacing: 1px;
-  text-shadow: 0 2px 0 rgba(73, 29, 3, 0.42);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
   cursor: pointer;
-  box-shadow: 0 3px 0 rgba(78, 34, 7, 0.82);
+  box-shadow: 0 3px 0 #1d3557;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition:
     transform 0.05s ease,
     box-shadow 0.05s ease;
@@ -4127,7 +4250,7 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-menu-trigger {
     width: 30px;
     border-radius: 7px;
-    box-shadow: 0 3px 0 #7f8c8d;
+    box-shadow: 0 3px 0 var(--play-menu-shadow-color);
   }
 
   .hamburger-icon {
@@ -8100,8 +8223,8 @@ body.checkpoint-arrival #hud-scrim::after {
 .play-desktop-passport-badge {
   position: relative;
   order: -1;
-  width: 84px;
-  min-width: 84px;
+  width: 116px;
+  min-width: 116px;
   min-height: var(--top-bar-control-height);
   border-radius: 14px;
   border: 2px solid #253653;
@@ -8122,16 +8245,16 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .play-desktop-passport-badge svg {
   position: absolute;
-  width: 27px;
-  height: 27px;
-  opacity: 0.3;
+  width: 46px;
+  height: 46px;
+  opacity: 0.34;
   stroke-width: 2.7;
 }
 
 .play-desktop-passport-badge span {
   position: relative;
   z-index: 1;
-  font-size: 10px;
+  font-size: 18px;
   letter-spacing: 0;
   line-height: 1;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
@@ -8179,6 +8302,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .play-alert-trigger {
+  --play-alert-shadow-color: #7f8c8d;
   position: relative;
   width: 44px;
   min-width: 44px;
@@ -8186,7 +8310,7 @@ body.checkpoint-arrival #hud-scrim::after {
   border-radius: 12px;
   border: 2px solid #2c3e50;
   background: linear-gradient(180deg, #f5f6f7 0%, #bdc3c7 100%);
-  box-shadow: 0 4px 0 #7f8c8d;
+  box-shadow: 0 4px 0 var(--play-alert-shadow-color);
   color: #263748;
   font-family: inherit;
   font-size: 18px;
@@ -8211,15 +8335,31 @@ body.checkpoint-arrival #hud-scrim::after {
   padding: 0;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 3px 0 #7f8c8d;
+}
+
+.play-nav-actions .play-alert-trigger {
+  box-shadow: 0 3px 0 var(--play-alert-shadow-color);
+}
+
+.play-nav-actions .play-menu-trigger {
+  box-shadow: 0 3px 0 var(--play-menu-shadow-color);
 }
 
 .play-alert-trigger:active {
   transform: translateY(3px);
-  box-shadow: 0 1px 0 #7f8c8d;
+  box-shadow: 0 1px 0 var(--play-alert-shadow-color);
+}
+
+.play-alert-trigger-ready {
+  --play-alert-shadow-color: #0b4c37;
+  border-color: #1c6f54;
+  background: linear-gradient(180deg, #63e6b5 0%, #1e9d75 100%);
+  box-shadow: 0 3px 0 #0b4c37, 0 0 12px rgba(99, 230, 181, 0.28);
+  color: #f5fff9;
 }
 
 .play-alert-trigger-warning {
+  --play-alert-shadow-color: #9f721f;
   border-color: #8d611a;
   background: linear-gradient(180deg, #ffe39f 0%, #e7b954 100%);
   box-shadow: 0 3px 0 #9f721f;
@@ -8227,6 +8367,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .play-alert-trigger-error {
+  --play-alert-shadow-color: #a22929;
   border-color: #7c1c1c;
   background: linear-gradient(180deg, #ff8a8a 0%, #dd3d3d 100%);
   box-shadow: 0 3px 0 #a22929;
@@ -8234,6 +8375,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .play-alert-trigger-busy {
+  --play-alert-shadow-color: #2f648f;
   border-color: #1f4766;
   background: linear-gradient(180deg, #9dd5ff 0%, #5397cd 100%);
   box-shadow: 0 3px 0 #2f648f;
@@ -8242,13 +8384,14 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .play-alert-badge {
   position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 9px;
-  height: 9px;
+  right: -2px;
+  top: -2px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
-  border: 1px solid #fff;
-  background: #ff5050;
+  border: 2px solid #0b111d;
+  background: #ff1f3d;
+  box-shadow: 0 0 10px rgba(255, 31, 61, 0.88);
 }
 
 .play-alert-panel {
@@ -8335,17 +8478,23 @@ body.checkpoint-arrival #hud-scrim::after {
     flex-direction: column;
     gap: 8px;
     pointer-events: none;
+    --play-top-control-size: 45px;
   }
 
   .play-nav-row {
     position: relative;
     display: grid;
-    grid-template-columns: 44px 44px minmax(128px, 1fr) auto;
+    grid-template-columns:
+      var(--play-top-control-size)
+      var(--play-top-control-size)
+      minmax(0, 1fr)
+      var(--play-top-control-size)
+      var(--play-top-control-size);
     justify-content: stretch;
     gap: 8px;
     align-items: center;
-    min-height: 52px;
-    padding: 0 2px;
+    min-height: var(--play-top-control-size);
+    padding: 0;
     pointer-events: auto;
   }
 
@@ -8360,9 +8509,9 @@ body.checkpoint-arrival #hud-scrim::after {
     grid-column: 3;
     justify-self: stretch;
     width: 100%;
-    max-width: 172px;
-    height: 46px;
-    border-radius: 23px; 
+    max-width: none;
+    height: var(--play-top-control-size);
+    border-radius: calc(var(--play-top-control-size) / 2);
     border: 2px solid #1a253d; 
     background: #0b111d; 
     box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.8), 0 1px 1px rgba(255, 255, 255, 0.05); 
@@ -8370,7 +8519,7 @@ body.checkpoint-arrival #hud-scrim::after {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1px;
+    gap: 2px;
     pointer-events: none;
     z-index: 1;
     box-sizing: border-box;
@@ -8382,8 +8531,10 @@ body.checkpoint-arrival #hud-scrim::after {
     top: auto;
     transform: none;
     grid-column: 2;
-    width: 44px;
-    height: 44px;
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
     border-radius: 12px;
     border: 2px solid #253653;
     background: linear-gradient(180deg, #263654 0%, #121b2f 100%);
@@ -8404,8 +8555,8 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .play-nav-passport-badge svg {
     position: absolute;
-    width: 21px;
-    height: 21px;
+    width: 34px;
+    height: 34px;
     opacity: 0.3;
     stroke-width: 2.7;
   }
@@ -8413,7 +8564,7 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-nav-passport-badge span {
     position: relative;
     z-index: 1;
-    font-size: 8px;
+    font-size: 12px;
     letter-spacing: 0;
     line-height: 1;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
@@ -8459,7 +8610,7 @@ body.checkpoint-arrival #hud-scrim::after {
     letter-spacing: 1px;
     color: #8a9fb5; 
     line-height: 1;
-    margin-top: 2px;
+    margin-top: 0;
   }
 
   .play-nav-balance-value {
@@ -8484,10 +8635,10 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .play-wallet-trigger {
     position: relative;
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    min-height: 44px;
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
     border-radius: 12px !important; 
     padding: 0;
     border: 2px solid #32476b !important;
@@ -8506,9 +8657,16 @@ body.checkpoint-arrival #hud-scrim::after {
     color: #fff8ef !important;
   }
 
+  .play-wallet-trigger.connected {
+    border-color: #9b5a0c !important;
+    background: linear-gradient(180deg, #ffd47a 0%, #f28b1d 100%) !important;
+    box-shadow: 0 4px 0 #7a4308, 0 0 14px rgba(242, 139, 29, 0.38) !important;
+    color: #3a2105 !important;
+  }
+
   .play-wallet-trigger.icon-only svg {
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     stroke-width: 2.6;
   }
 
@@ -8530,26 +8688,37 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-wallet-menu {
-    width: 44px;
-    max-width: 44px;
+    width: var(--play-top-control-size);
+    max-width: var(--play-top-control-size);
     grid-column: 1;
   }
 
   .play-nav-actions {
-    display: flex;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, var(--play-top-control-size));
+    gap: 8px;
     z-index: 2;
-    grid-column: 4;
-    justify-self: end;
+    grid-column: 4 / span 2;
+    justify-self: stretch;
   }
 
   .play-menu-trigger {
-    width: 44px;
-    height: 44px;
-    min-height: 44px;
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
     justify-content: center;
     align-items: center;
     padding: 0;
+    border-radius: 12px;
+  }
+
+  .play-nav-actions .play-alert-trigger,
+  .play-nav-actions .play-menu-trigger {
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
     border-radius: 12px;
   }
 
@@ -8658,6 +8827,15 @@ body.checkpoint-arrival #hud-scrim::after {
     overflow: hidden;
     max-width: 100%;
     text-overflow: clip;
+  }
+
+  .play-bottom-nav-tab-passport svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .play-bottom-nav-tab-passport span {
+    font-size: 7px;
   }
 
   .play-bottom-nav-tab:active {
@@ -8992,6 +9170,10 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 @media (max-width: 420px) {
+  .play-nav {
+    --play-top-control-size: 45px;
+  }
+
   #top-bar-left,
   #top-bar-center {
     width: min(196px, 70vw) !important;
@@ -9003,25 +9185,27 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .play-nav-balance-chip {
-    max-width: 132px;
-    height: 40px;
-    border-radius: 20px;
+    max-width: none;
+    height: var(--play-top-control-size);
+    border-radius: calc(var(--play-top-control-size) / 2);
   }
 
   .play-nav-passport-badge {
     left: auto;
-    width: 40px;
-    height: 40px;
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
     border-radius: 12px;
   }
 
   .play-nav-passport-badge svg {
-    width: 16px;
-    height: 16px;
+    width: 31px;
+    height: 31px;
   }
 
   .play-nav-passport-badge span {
-    font-size: 7px;
+    font-size: 11px;
   }
 
   .play-nav-balance-value {
@@ -9044,6 +9228,15 @@ body.checkpoint-arrival #hud-scrim::after {
   .play-bottom-nav-tab svg {
     width: 20px;
     height: 20px;
+  }
+
+  .play-bottom-nav-tab-passport svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .play-bottom-nav-tab-passport span {
+    font-size: 6.25px;
   }
 
   .play-bottom-nav-center {
@@ -9070,20 +9263,15 @@ body.checkpoint-arrival #hud-scrim::after {
     font-size: 9px;
   }
 
-  .play-alert-trigger {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    font-size: 16px;
-  }
-
+  .play-alert-trigger,
+  .play-nav-actions .play-alert-trigger,
   .play-nav-actions .play-menu-trigger {
-    width: 38px;
-    min-width: 38px;
-    height: 38px;
-    min-height: 38px;
-    border-radius: 9px;
+    width: var(--play-top-control-size);
+    min-width: var(--play-top-control-size);
+    height: var(--play-top-control-size);
+    min-height: var(--play-top-control-size);
+    border-radius: 12px;
+    font-size: 16px;
   }
 }
 
@@ -9114,15 +9302,15 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .play-nav-actions .play-alert-icon,
 .play-nav-actions .hamburger-icon {
-  width: 16px;
-  height: 16px;
+  width: 21px;
+  height: 21px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .play-nav-actions .play-alert-icon {
-  font-size: 14px;
+  font-size: 18px;
   line-height: 1;
   font-weight: 700;
   transform: translateY(-1px);
@@ -9159,12 +9347,12 @@ body.checkpoint-arrival #hud-scrim::after {
 @media (max-width: 420px) {
   .play-nav-actions .play-alert-icon,
   .play-nav-actions .hamburger-icon {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
   }
 
   .play-nav-actions .play-alert-icon {
-    font-size: 13px;
+    font-size: 16px;
   }
 
 .play-nav-actions .hamburger-icon span {

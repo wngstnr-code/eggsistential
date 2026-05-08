@@ -1056,11 +1056,28 @@ export function PlayTopNav() {
                   ) : null}
                 </>
               ) : isConnecting ? (
-                "CONNECTING..."
+                <>
+                  <span className="play-wallet-profile-icon" aria-hidden="true">
+                    <WalletCards />
+                  </span>
+                  <span className="play-wallet-trigger-label">CONNECTING...</span>
+                </>
               ) : isConnected ? (
-                shortAddress(account, false)
+                <>
+                  <span className="play-wallet-profile-icon" aria-hidden="true">
+                    <WalletCards />
+                  </span>
+                  <span className="play-wallet-trigger-label">
+                    {shortAddress(account, false)}
+                  </span>
+                </>
               ) : (
-                "CONNECT WALLET"
+                <>
+                  <span className="play-wallet-profile-icon" aria-hidden="true">
+                    <WalletCards />
+                  </span>
+                  <span className="play-wallet-trigger-label">CONNECT WALLET</span>
+                </>
               )}
             </button>
             {isConnected && isWalletMenuOpen ? (
