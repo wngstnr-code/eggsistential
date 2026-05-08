@@ -6,11 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   BadgeCheck,
-  CheckCircle2,
   Egg,
-  LockKeyhole,
   Play as PlayIcon,
-  ShieldCheck,
   Trophy,
   WalletCards,
 } from "lucide-react";
@@ -1530,41 +1527,6 @@ export function PlayTopNav() {
                 <span style={{ width: `${passportPercent}%` }} />
               </div>
               <p>{passportStatusText || "Load EggPass status to view progress."}</p>
-            </div>
-
-            <div className="play-passport-requirements">
-              {passportRequirements.length > 0 ? (
-                passportRequirements.map((requirement) => (
-                  <div
-                    key={requirement.key}
-                    className={`play-passport-requirement${requirement.met ? " met" : ""}`}
-                  >
-                    <span className="play-passport-requirement-icon">
-                      {requirement.met ? (
-                        <CheckCircle2 aria-hidden="true" />
-                      ) : (
-                        <LockKeyhole aria-hidden="true" />
-                      )}
-                    </span>
-                    <span className="play-passport-requirement-label">
-                      {requirement.label}
-                    </span>
-                    <strong>
-                      {requirement.current}/{requirement.target}
-                    </strong>
-                  </div>
-                ))
-              ) : (
-                <div className="play-passport-requirement met">
-                  <span className="play-passport-requirement-icon">
-                    <ShieldCheck aria-hidden="true" />
-                  </span>
-                  <span className="play-passport-requirement-label">
-                    Top tier progress complete
-                  </span>
-                  <strong>DONE</strong>
-                </div>
-              )}
             </div>
 
             {passportStats ? (

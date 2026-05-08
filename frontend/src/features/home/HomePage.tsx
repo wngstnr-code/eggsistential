@@ -5,11 +5,8 @@
 import Link from "next/link";
 import {
   BadgeCheck,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  LockKeyhole,
-  ShieldCheck,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -37,7 +34,7 @@ const FALLBACK_DISTANCE_BOARD: ChickenBridgeLeaderboardEntry[] = [
     games_played: 36,
     best_multiplier: 6.4,
     passportTier: 4,
-    passportTierLabel: "Egg Oracle",
+    passportTierLabel: "Oracle",
     passportReward: "Partner Perks Passport",
   },
   {
@@ -46,7 +43,7 @@ const FALLBACK_DISTANCE_BOARD: ChickenBridgeLeaderboardEntry[] = [
     games_played: 28,
     best_multiplier: 4.8,
     passportTier: 3,
-    passportTierLabel: "Elite Survivor",
+    passportTierLabel: "Elite",
     passportReward: "Tournament Access",
   },
   {
@@ -55,7 +52,7 @@ const FALLBACK_DISTANCE_BOARD: ChickenBridgeLeaderboardEntry[] = [
     games_played: 19,
     best_multiplier: 4.2,
     passportTier: 2,
-    passportTierLabel: "Disciplined Player",
+    passportTierLabel: "Steady",
     passportReward: "Allowlist Eligible",
   },
 ];
@@ -67,7 +64,7 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
     total_games: 14,
     total_wins: 8,
     passportTier: 4,
-    passportTierLabel: "Egg Oracle",
+    passportTierLabel: "Oracle",
     passportReward: "Partner Perks Passport",
   },
   {
@@ -76,7 +73,7 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
     total_games: 21,
     total_wins: 11,
     passportTier: 3,
-    passportTierLabel: "Elite Survivor",
+    passportTierLabel: "Elite",
     passportReward: "Tournament Access",
   },
   {
@@ -85,7 +82,7 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
     total_games: 17,
     total_wins: 9,
     passportTier: 1,
-    passportTierLabel: "Verified Runner",
+    passportTierLabel: "Runner",
     passportReward: "Verified Identity",
   },
 ];
@@ -1208,43 +1205,6 @@ export function HomePage() {
                 {passportStatusText ||
                   "Load EggPass status to view your player progress."}
               </p>
-            </div>
-
-            <div className="play-passport-requirements">
-              {passportRequirements.length > 0 ? (
-                passportRequirements.map((requirement) => (
-                  <div
-                    key={requirement.key}
-                    className={`play-passport-requirement${requirement.met ? " met" : ""}`}
-                  >
-                    <span className="play-passport-requirement-icon">
-                      {requirement.met ? (
-                        <CheckCircle2 aria-hidden="true" />
-                      ) : (
-                        <LockKeyhole aria-hidden="true" />
-                      )}
-                    </span>
-                    <span className="play-passport-requirement-label">
-                      {requirement.label}
-                    </span>
-                    <strong>
-                      {requirement.current}/{requirement.target}
-                    </strong>
-                  </div>
-                ))
-              ) : (
-                <div className="play-passport-requirement met">
-                  <span className="play-passport-requirement-icon">
-                    <ShieldCheck aria-hidden="true" />
-                  </span>
-                  <span className="play-passport-requirement-label">
-                    {passportBusy
-                      ? "Loading passport progress"
-                      : "Top tier progress complete"}
-                  </span>
-                  <strong>{passportBusy ? "..." : "DONE"}</strong>
-                </div>
-              )}
             </div>
 
             {passportStats ? (

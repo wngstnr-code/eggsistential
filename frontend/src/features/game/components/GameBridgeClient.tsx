@@ -251,7 +251,7 @@ export function GameBridgeClient({
             currentTier: 0,
             currentTierLabel: "Rookie",
             nextTier: 1,
-            nextTierLabel: "Verified Runner",
+            nextTierLabel: "Runner",
             progressLabel: "Passport status is unavailable in background mode.",
             percentToNextTier: 0,
             requirements: [],

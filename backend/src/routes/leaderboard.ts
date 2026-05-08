@@ -6,10 +6,10 @@ const router = Router();
 const CHECKPOINT_ROW_INTERVAL = 40;
 
 const TIER_RULES = [
-  { tier: 1, label: "Verified Runner", checkpoint: 2, requiredCashouts: 3 },
-  { tier: 2, label: "Disciplined Player", checkpoint: 4, requiredCashouts: 4 },
-  { tier: 3, label: "Elite Survivor", checkpoint: 6, requiredCashouts: 4 },
-  { tier: 4, label: "Egg Oracle", checkpoint: 8, requiredCashouts: 3 },
+  { tier: 1, label: "Runner", checkpoint: 2, requiredCashouts: 3 },
+  { tier: 2, label: "Steady", checkpoint: 4, requiredCashouts: 4 },
+  { tier: 3, label: "Elite", checkpoint: 6, requiredCashouts: 4 },
+  { tier: 4, label: "Oracle", checkpoint: 8, requiredCashouts: 3 },
 ] as const;
 
 const TIER_REWARDS = new Map<number, string>([

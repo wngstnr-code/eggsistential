@@ -112,10 +112,10 @@ type TierRule = {
 const CHECKPOINT_ROW_INTERVAL = 40;
 
 const TIER_RULES: TierRule[] = [
-  { tier: 1, label: "Verified Runner", checkpoint: 2, requiredCashouts: 3 },
-  { tier: 2, label: "Disciplined Player", checkpoint: 4, requiredCashouts: 4 },
-  { tier: 3, label: "Elite Survivor", checkpoint: 6, requiredCashouts: 4 },
-  { tier: 4, label: "Egg Oracle", checkpoint: 8, requiredCashouts: 3 },
+  { tier: 1, label: "Runner", checkpoint: 2, requiredCashouts: 3 },
+  { tier: 2, label: "Steady", checkpoint: 4, requiredCashouts: 4 },
+  { tier: 3, label: "Elite", checkpoint: 6, requiredCashouts: 4 },
+  { tier: 4, label: "Oracle", checkpoint: 8, requiredCashouts: 3 },
 ];
 
 const TIER_LABELS = new Map<number, string>([
@@ -147,7 +147,7 @@ function buildTierBenefits(tier: number, unlocked: boolean): PassportBenefit[] {
       return [
         {
           key: "verified_runner_badge",
-          label: "Verified Runner badge",
+          label: "Runner badge",
           description: "Unlock the baseline on-chain trust badge for partner checks.",
           category: "trust",
           tierRequired: 1,
@@ -467,7 +467,7 @@ async function evaluateEligibility(walletAddress: string): Promise<PassportEligi
     return enrichEligibility({
       eligible: false,
       tier: 0,
-      reason: `Cash out at checkpoint ${tierOneRule.checkpoint}+ ${tierOneRule.requiredCashouts} times to unlock Tier 1. Current progress: ${tierOneCashouts}/${tierOneRule.requiredCashouts}.`,
+      reason: `Cash out at checkpoint ${tierOneRule.checkpoint}+ ${tierOneRule.requiredCashouts} times to unlock ${tierOneRule.label}. Current progress: ${tierOneCashouts}/${tierOneRule.requiredCashouts}.`,
       stats,
     });
   }
