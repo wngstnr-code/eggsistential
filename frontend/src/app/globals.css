@@ -3533,6 +3533,9 @@ body.checkpoint-arrival #hud-scrim::after {
 .play-passport-modal .play-passport-cta {
   width: 100%;
   min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 12px;
   border: 3px solid #9bbcff;
   background: linear-gradient(180deg, #3c8dff 0%, #0052ff 100%);
@@ -3540,6 +3543,7 @@ body.checkpoint-arrival #hud-scrim::after {
   font-family: "Press Start 2P", cursive;
   font-size: 10px;
   letter-spacing: 1px;
+  text-decoration: none;
   cursor: pointer;
   box-shadow:
     0 4px 0 #0038b5,
@@ -6781,7 +6785,9 @@ body.checkpoint-arrival #hud-scrim::after {
     linear-gradient(135deg, rgba(255, 231, 147, 0.18) 0%, transparent 34%),
     linear-gradient(180deg, rgba(15, 30, 79, 0.93) 0%, rgba(9, 18, 51, 0.96) 100%);
   color: #f4f8ff;
+  font-family: inherit;
   text-decoration: none;
+  cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     0 10px 24px rgba(3, 9, 26, 0.36);

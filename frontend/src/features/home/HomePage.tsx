@@ -3,7 +3,15 @@
 
 
 import Link from "next/link";
-import { BadgeCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  BadgeCheck,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  LockKeyhole,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useWallet } from "~/features/wallet/WalletProvider";
 import { backendFetch } from "~/lib/backend/api";
@@ -84,22 +92,22 @@ const FALLBACK_PROFIT_BOARD: ProfitLeaderboardEntry[] = [
 
 const ABOUT_FEATURES = [
   {
-    title: "FAST ARCADE STAKES",
-    copy: "Connect, run, and feel the multiplier rise before the crash catches up.",
+    title: "SKILL-FIRST ARCADE RUNS",
+    copy: "Every run rewards timing, focus, and lane-reading under pressure.",
     tone: "risk",
     imageSrc: "/images/1.png",
     imageAlt: "EGGSISTENTIAL arcade stakes preview",
   },
   {
-    title: "CHECKPOINT CASH OUTS",
-    copy: "Cash out at checkpoints or keep pushing for a bigger payout.",
+    title: "CHECKPOINT DECISIONS",
+    copy: "At each checkpoint, choose to secure progress or keep pushing for a higher score.",
     tone: "checkpoint",
     imageSrc: "/images/2.png",
     imageAlt: "EGGSISTENTIAL checkpoint cash out preview",
   },
   {
-    title: "SOLANA WALLET FLOW",
-    copy: "From wallet connect to live play, the Solana flow stays quick and simple.",
+    title: "SMOOTH SOLANA FLOW",
+    copy: "From wallet connect to live play, your progress sync stays fast and simple.",
     tone: "wallet",
     imageSrc: "/images/3.png",
     imageAlt: "EGGSISTENTIAL wallet flow preview",
@@ -115,12 +123,12 @@ const FLOW_STEPS = [
   {
     label: "STEP 2",
     title: "Run Session",
-    copy: "Start a live run with stake from vault balance. Backend tracks checkpoints and anti-cheat rules.",
+    copy: "Start a live run from your vault balance. The backend tracks checkpoints and fair-play rules.",
   },
   {
     label: "STEP 3",
-    title: "Signed Settlement",
-    copy: "Result is prepared for Solana settlement. Win goes back to vault balance once the program flow is wired.",
+    title: "Result Settlement",
+    copy: "Run results settle through the Solana flow, then update your vault balance and player history.",
   },
 ];
 
@@ -128,7 +136,7 @@ const PASSPORT_FEATURES = [
   {
     label: "HUMAN SCORE",
     title: "Behavior-based trust signal",
-    copy: "Passport points are built from gameplay patterns and anti-bot signals, not from social hype.",
+    copy: "Passport score is built from real gameplay patterns and anti-bot signals, not social hype.",
   },
   {
     label: "ONCHAIN PROOF",
@@ -137,8 +145,8 @@ const PASSPORT_FEATURES = [
   },
   {
     label: "USE CASE",
-    title: "Airdrop and allowlist filter",
-    copy: "Projects can reduce sybil noise by checking passport eligibility directly from contract + API.",
+    title: "Access and reward filter",
+    copy: "Partner projects can reduce sybil noise by checking passport eligibility from contract and API.",
   },
 ];
 
@@ -189,9 +197,9 @@ const GAME_GUIDE_SLIDES = [
 ];
 
 const INTEGRATION_STEPS = [
-  "Read passport status from backend API for quick integration in web app flows.",
-  "Verify wallet passport eligibility from Solana program data for trustless checks.",
-  "Combine both: fast UX from API plus Solana verification before sensitive actions.",
+  "Read passport status from backend API for quick integration in app flows.",
+  "Verify wallet passport eligibility from Solana program data for trust-minimized checks.",
+  "Combine both: fast UX from API plus Solana verification for sensitive actions.",
 ];
 
 function shortAddress(address: string) {
@@ -207,6 +215,22 @@ function toNumber(value: unknown, fallback = 0) {
 function formatMoney(value: unknown) {
   const numeric = toNumber(value);
   return `$${numeric.toFixed(4)}`;
+}
+
+function formatPassportDate(epochSeconds?: number | null) {
+  if (!epochSeconds) return "-";
+  return new Date(epochSeconds * 1000).toLocaleDateString();
+}
+
+function readPassportStatusMessage(status: ChickenBridgePassportStatus) {
+  if (status.passport.valid) {
+    return `Passport valid - Tier ${status.passport.tier} - Exp ${formatPassportDate(status.passport.expiry)}`;
+  }
+
+  if (status.passport.revoked) return "Passport revoked.";
+  if (!status.passport.configured) return "Passport program is not configured yet.";
+  if (status.eligibility.eligible) return `Eligible for Tier ${status.eligibility.tier}.`;
+  return status.eligibility.reason || "Keep playing to unlock your Passport.";
 }
 
 function readBestScore(entry: ChickenBridgeLeaderboardEntry) {
@@ -257,6 +281,13 @@ export function HomePage() {
   const [failedGuideImages, setFailedGuideImages] = useState<
     Record<string, boolean>
   >({});
+  const [showHelp, setShowHelp] = useState(false);
+  const [showPassportInfo, setShowPassportInfo] = useState(false);
+  const [showTrustPassport, setShowTrustPassport] = useState(false);
+  const [passportBusy, setPassportBusy] = useState(false);
+  const [passportStatus, setPassportStatus] =
+    useState<ChickenBridgePassportStatus | null>(null);
+  const [passportStatusText, setPassportStatusText] = useState("");
   const [showHeroConnectPrompt, setShowHeroConnectPrompt] = useState(false);
   const [profileCopyLabel, setProfileCopyLabel] = useState("COPY");
   const [distanceBoard, setDistanceBoard] = useState<
@@ -463,6 +494,32 @@ export function HomePage() {
     clearWalletError();
   }
 
+  async function loadTrustPassport(openPanel = true) {
+    if (openPanel) setShowTrustPassport(true);
+    if (passportBusy) return;
+
+    if (!hasBackendApiConfig()) {
+      setPassportStatusText("Backend API is not configured yet.");
+      return;
+    }
+
+    setPassportBusy(true);
+    try {
+      const status =
+        await backendFetch<ChickenBridgePassportStatus>("/api/passport/status");
+      setPassportStatus(status);
+      setPassportStatusText(readPassportStatusMessage(status));
+    } catch (error) {
+      const message =
+        error && typeof error === "object" && "message" in error
+          ? String((error as { message?: string }).message || "")
+          : "Failed to check passport status.";
+      setPassportStatusText(message || "Failed to check passport status.");
+    } finally {
+      setPassportBusy(false);
+    }
+  }
+
   const trackedRuns = profitBoard.reduce(
     (sum, entry) => sum + toNumber(entry.total_games),
     0,
@@ -551,6 +608,44 @@ export function HomePage() {
     distanceBoard.find((entry) => readPassportTier(entry) >= 4) ??
     distanceBoard.find((entry) => readPassportTier(entry) >= 1) ??
     null;
+  const passportProgression = passportStatus?.progression ?? null;
+  const passportStats =
+    passportProgression?.stats ?? passportStatus?.eligibility.stats ?? null;
+  const passportPercent = Math.max(
+    0,
+    Math.min(100, passportProgression?.percentToNextTier ?? 0),
+  );
+  const passportCurrentTier = passportProgression?.currentTier ?? 0;
+  const passportCurrentTierLabel =
+    passportProgression?.currentTierLabel ?? "Rookie";
+  const passportRequirements = passportProgression?.requirements ?? [];
+  const passportBenefits = passportStatus?.benefits ?? null;
+  const passportStatusLabel = !passportStatus
+    ? passportBusy
+      ? "LOADING"
+      : "NOT LOADED"
+    : passportStatus.passport.revoked
+      ? "REVOKED"
+      : !passportStatus.passport.configured
+        ? "OFFLINE"
+        : passportStatus.passport.valid
+          ? "VALID"
+          : passportStatus.eligibility.eligible
+            ? "READY"
+            : "IN PROGRESS";
+  const passportStatusTone = !passportStatus
+    ? passportBusy
+      ? "loading"
+      : "offline"
+    : passportStatus.passport.revoked
+      ? "revoked"
+      : !passportStatus.passport.configured
+        ? "offline"
+        : passportStatus.passport.valid
+          ? "valid"
+          : passportStatus.eligibility.eligible
+            ? "ready"
+            : "progress";
 
   return (
     <main className="flow-page home-page">
@@ -672,8 +767,8 @@ export function HomePage() {
                 <span className="home-wordmark-rest">SISTENTIAL</span>
               </h1>
               <p className="home-subcopy">
-                Cross the road, stack the multiplier, and cash out before the
-                run crashes.
+                A skill-based reflex adventure where timing and smart
+                checkpoint decisions shape your progress.
               </p>
               {showHeroConnectPrompt && !isConnected ? (
                 <div className="home-hero-connect-stack">
@@ -736,10 +831,11 @@ export function HomePage() {
           </div>
         </div>
         {isConnected ? (
-          <Link
-            href="/play?passport=1"
+          <button
+            type="button"
             className="home-passport-hero"
             aria-label="Open trust passport status"
+            onClick={() => void loadTrustPassport(true)}
           >
             <span className="home-passport-hero-icon" aria-hidden="true">
               <BadgeCheck size={18} strokeWidth={2.7} />
@@ -748,7 +844,7 @@ export function HomePage() {
               <strong>TRUST PASSPORT</strong>
               <small>View status and tier</small>
             </span>
-          </Link>
+          </button>
         ) : null}
       </section>
 
@@ -764,8 +860,9 @@ export function HomePage() {
               ?
             </h2>
             <p className="home-about-copy">
-              EGGSISTENTIAL is a fast risk-reward demo where players cross lanes,
-              stack multiplier, and choose when to cash out.
+              EGGSISTENTIAL is a fast reflex game where players read lane
+              patterns, survive longer runs, and build on-chain progression
+              through smart checkpoint decisions.
             </p>
           </div>
 
@@ -946,12 +1043,12 @@ export function HomePage() {
             <div>
               <h3>TRUST PASSPORT</h3>
               <p>
-                Passport is a reusable trust layer from your gameplay behavior.
-                It can be consumed by this game and external projects as
-                anti-bot signal.
+                Passport is your on-chain player reputation from gameplay
+                behavior. It helps this game and partner apps recognize real,
+                consistent players.
               </p>
             </div>
-            <p>Solana program wiring: token mint, vault, settlement, and passport.</p>
+            <p>Built on Solana: vault, settlement, progression, and Passport trust layer.</p>
           </div>
         </div>
       </section>
@@ -990,7 +1087,7 @@ export function HomePage() {
               <span className="home-wordmark-rest">SISTENTIAL</span>
             </p>
             <h3 className="home-footer-title">
-              Fast arcade risk with fixed-stake runs on Solana.
+              Skill-based arcade progression with Solana-native player identity.
             </h3>
           </div>
 
@@ -1003,6 +1100,357 @@ export function HomePage() {
           </div>
         </div>
       </footer>
+
+      {showTrustPassport ? (
+        <div
+          className="modal-bg play-passport-modal play-passport-status-modal"
+          onClick={() => {
+            if (!passportBusy) setShowTrustPassport(false);
+          }}
+        >
+          <div
+            className="modal-box play-passport-box play-passport-status-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="home-passport-status-title"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close passport status"
+              onClick={() => {
+                if (!passportBusy) setShowTrustPassport(false);
+              }}
+              disabled={passportBusy}
+            >
+              X
+            </button>
+            <div className="play-passport-status-headline">
+              <div>
+                <p className="play-passport-kicker">TRUST PASSPORT</p>
+                <h3
+                  id="home-passport-status-title"
+                  className="play-passport-title"
+                >
+                  EGGPASS
+                </h3>
+              </div>
+              <span
+                className={`play-passport-state-pill play-passport-state-${passportStatusTone}`}
+              >
+                {passportStatusLabel}
+              </span>
+            </div>
+
+            <div className="play-passport-status-layout">
+              <div className="play-passport-card play-passport-live-card">
+                <div className="play-passport-base-badge" aria-label="Solana">
+                  <span className="play-passport-base-text">SOLANA</span>
+                  <span
+                    className="play-passport-base-logo"
+                    aria-hidden="true"
+                  />
+                </div>
+                <p className="play-passport-name">
+                  {shortAddress(passportStatus?.walletAddress || account || "")}
+                </p>
+                <p className="play-passport-tier">
+                  TIER {passportCurrentTier}
+                </p>
+                <p className="play-passport-expiry">
+                  {passportStatus?.passport.valid
+                    ? `VALID UNTIL ${formatPassportDate(passportStatus.passport.expiry)}`
+                    : passportCurrentTierLabel}
+                </p>
+              </div>
+
+              <div className="play-passport-summary">
+                <div className="play-passport-summary-row">
+                  <span>CURRENT TIER</span>
+                  <strong>{passportCurrentTierLabel}</strong>
+                </div>
+                <div className="play-passport-summary-row">
+                  <span>NEXT TIER</span>
+                  <strong>
+                    {passportProgression?.nextTierLabel || "MAX TIER"}
+                  </strong>
+                </div>
+                <div className="play-passport-summary-row">
+                  <span>ONCHAIN</span>
+                  <strong>
+                    {passportStatus?.passport.valid ? "VALID" : "NOT ACTIVE"}
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {passportBenefits ? (
+              <div className="play-passport-benefits">
+                <div>
+                  <span>UNLOCKED ACCESS</span>
+                  <div className="play-passport-benefit-list">
+                    {passportBenefits.current.length > 0 ? (
+                      passportBenefits.current.map((benefit) => (
+                        <strong key={benefit}>{benefit}</strong>
+                      ))
+                    ) : (
+                      <strong>Basic Profile</strong>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span>NEXT UNLOCK</span>
+                  <div className="play-passport-benefit-list">
+                    {passportBenefits.next.length > 0 ? (
+                      passportBenefits.next.map((benefit) => (
+                        <strong key={benefit}>{benefit}</strong>
+                      ))
+                    ) : (
+                      <strong>Max Tier</strong>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="play-passport-progress-block">
+              <div className="play-passport-progress-head">
+                <span>{passportProgression?.nextTierLabel || "TOP TIER"}</span>
+                <strong>{passportPercent}%</strong>
+              </div>
+              <div
+                className="play-passport-progress-track"
+                role="progressbar"
+                aria-label="Passport tier progress"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={passportPercent}
+              >
+                <span style={{ width: `${passportPercent}%` }} />
+              </div>
+              <p>
+                {passportStatusText ||
+                  "Load EggPass status to view your player progress."}
+              </p>
+            </div>
+
+            <div className="play-passport-requirements">
+              {passportRequirements.length > 0 ? (
+                passportRequirements.map((requirement) => (
+                  <div
+                    key={requirement.key}
+                    className={`play-passport-requirement${requirement.met ? " met" : ""}`}
+                  >
+                    <span className="play-passport-requirement-icon">
+                      {requirement.met ? (
+                        <CheckCircle2 aria-hidden="true" />
+                      ) : (
+                        <LockKeyhole aria-hidden="true" />
+                      )}
+                    </span>
+                    <span className="play-passport-requirement-label">
+                      {requirement.label}
+                    </span>
+                    <strong>
+                      {requirement.current}/{requirement.target}
+                    </strong>
+                  </div>
+                ))
+              ) : (
+                <div className="play-passport-requirement met">
+                  <span className="play-passport-requirement-icon">
+                    <ShieldCheck aria-hidden="true" />
+                  </span>
+                  <span className="play-passport-requirement-label">
+                    {passportBusy
+                      ? "Loading passport progress"
+                      : "Top tier progress complete"}
+                  </span>
+                  <strong>{passportBusy ? "..." : "DONE"}</strong>
+                </div>
+              )}
+            </div>
+
+            {passportStats ? (
+              <div className="play-passport-stats-grid">
+                <div>
+                  <span>CASHOUTS</span>
+                  <strong>{passportStats.successfulCashouts}</strong>
+                </div>
+                <div>
+                  <span>BEST HOPS</span>
+                  <strong>{passportStats.bestHops}</strong>
+                </div>
+                <div>
+                  <span>CONSISTENCY</span>
+                  <strong>{passportStats.consistencyScore}%</strong>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="play-passport-actions">
+              <button
+                type="button"
+                className="play-passport-secondary"
+                onClick={() => {
+                  void loadTrustPassport(false);
+                }}
+                disabled={passportBusy}
+              >
+                REFRESH
+              </button>
+              <a className="play-passport-cta" href="/play?passport=1">
+                OPEN IN PLAY
+              </a>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showHelp && (
+        <div className="home-modal-overlay" onClick={() => setShowHelp(false)}>
+          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="home-modal-close"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              X
+            </button>
+            <h2>HOW TO PLAY</h2>
+            <div className="home-help-content">
+              <div className="help-step">
+                <span className="step-num">1</span>
+                <div>
+                  <p className="step-title">FUND YOUR RUN</p>
+                  <p>
+                    Open Manage Money, claim faucet if needed, then deposit
+                    USDC to your vault. Your vault balance is what you use to
+                    start live runs.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">2</span>
+                <div>
+                  <p className="step-title">SURVIVE AND STACK</p>
+                  <p>
+                    In each run, move lane by lane and avoid traffic timing
+                    traps. The farther you go, the more pressure you face, but
+                    your potential multiplier keeps improving.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">3</span>
+                <div>
+                  <p className="step-title">CASH OUT SMART</p>
+                  <p>
+                    Checkpoints are your decision moments: secure profit now or
+                    risk another push for a bigger payout. Discipline matters
+                    more than greed if you want long-term growth.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">4</span>
+                <div>
+                  <p className="step-title">BUILD YOUR PASSPORT</p>
+                  <p>
+                    Consistent checkpoint cashouts improve your Passport tier.
+                    Higher tiers can unlock better events, better access, and
+                    stronger trust perks across partner experiences.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              className="flow-btn secondary info-modal-action"
+              type="button"
+              onClick={() => setShowHelp(false)}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showPassportInfo && (
+        <div
+          className="home-modal-overlay"
+          onClick={() => setShowPassportInfo(false)}
+        >
+          <div className="home-modal-box" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="home-modal-close"
+              type="button"
+              onClick={() => setShowPassportInfo(false)}
+            >
+              X
+            </button>
+            <h2>WHAT IS PASSPORT</h2>
+            <div className="home-help-content">
+              <div className="help-step">
+                <span className="step-num">1</span>
+                <div>
+                  <p className="step-title">WHAT IS A PASSPORT?</p>
+                  <p>
+                    A Passport is your reputation card in Eggsistential. It
+                    grows from how you play: how consistently you survive, how
+                    often you cash out with discipline, and how stable your
+                    performance is across runs.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">2</span>
+                <div>
+                  <p className="step-title">WHY DO PLAYERS NEED IT?</p>
+                  <p>
+                    Your Passport makes your progress meaningful beyond a single
+                    score. A higher tier shows that you are a real, active
+                    player with a strong gameplay track record.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">3</span>
+                <div>
+                  <p className="step-title">WHAT YOU GET FROM IT</p>
+                  <p>
+                    Your Passport can unlock tiered benefits: access to
+                    ranked/tournament events, allowlist priority, partner
+                    rewards, and community campaigns that require verified
+                    players.
+                  </p>
+                </div>
+              </div>
+              <div className="help-step">
+                <span className="step-num">4</span>
+                <div>
+                  <p className="step-title">HOW TO LEVEL IT UP</p>
+                  <p>
+                    Play clean and consistent: reach checkpoints, cash out at
+                    the right moments, and repeat that performance over time.
+                    The more disciplined your playstyle is, the faster your
+                    Passport tier increases.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              className="flow-btn secondary info-modal-action"
+              type="button"
+              onClick={() => setShowPassportInfo(false)}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      )}
 
       {showGameGuide && activeGuide ? (
         <div
