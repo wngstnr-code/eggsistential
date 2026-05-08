@@ -3,6 +3,7 @@
 
 
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   BadgeCheck,
   ChevronLeft,
@@ -113,21 +114,26 @@ const ABOUT_FEATURES = [
 
 const FLOW_STEPS = [
   {
-    label: "STEP 1",
-    title: "Deposit to Vault",
-    copy: "Deposit USDC to vault as your playable balance before starting a live run.",
+    label: "01",
+    action: "FUND",
+    title: "Load the Vault",
+    copy: "Move USDC in. This becomes your playable balance.",
   },
   {
-    label: "STEP 2",
-    title: "Run Session",
-    copy: "Start a live run from your vault balance. The backend tracks checkpoints and fair-play rules.",
+    label: "02",
+    action: "RUN",
+    title: "Cross or Cash Out",
+    copy: "Reach checkpoints, bank profit, or push for a bigger multiplier.",
   },
   {
-    label: "STEP 3",
-    title: "Result Settlement",
-    copy: "Run results settle through the Solana flow, then update your vault balance and player history.",
+    label: "03",
+    action: "SETTLE",
+    title: "Lock the Result",
+    copy: "Your vault and Passport update after the run settles.",
   },
 ];
+
+const PASSPORT_BENEFITS = ["Trust tier", "Access signal", "Reward eligibility"];
 
 const PASSPORT_FEATURES = [
   {
@@ -151,35 +157,35 @@ const GAME_GUIDE_SLIDES = [
   {
     title: "CROSS THE ROAD",
     copy: "Move lane by lane, dodge traffic, and survive as far as you can.",
-    imageSrc: "/images/onboarding-cross-road.png",
+    imageSrc: "/images/a.webp",
     imageAlt: "Chicken waiting to cross busy arcade lanes",
     tone: "road",
   },
   {
     title: "STACK MULTIPLIER",
     copy: "Each forward step adds multiplier. Every 40 hops opens a checkpoint.",
-    imageSrc: "/images/onboarding-multiplier.png",
+    imageSrc: "/images/b.webp",
     imageAlt: "Chicken hopping forward with multiplier trail",
     tone: "multiplier",
   },
   {
     title: "CASH OUT SMART",
     copy: "Cash out only at checkpoints. Push farther for more, but a crash loses your stake.",
-    imageSrc: "/images/onboarding-cashout.png",
+    imageSrc: "/images/c.webp",
     imageAlt: "Chicken standing inside a glowing checkpoint cashout zone",
     tone: "cashout",
   },
   {
     title: "BEAT THE TIMER",
     copy: "You have 60 seconds between checkpoints. Overtime slowly cuts your multiplier.",
-    imageSrc: "/images/onboarding-timer.png",
+    imageSrc: "/images/d.webp",
     imageAlt: "Chicken racing toward a checkpoint with a countdown aura",
     tone: "timer",
   },
   {
     title: "TRUST PASSPORT",
     copy: "Passport is your on-chain reputation, built from clean runs and disciplined checkpoint cashouts.",
-    imageSrc: "/images/onboarding-passport.png",
+    imageSrc: "/images/e.webp",
     imageAlt: "Chicken beside a floating on-chain reputation passport",
     tone: "passport",
   },
@@ -187,7 +193,7 @@ const GAME_GUIDE_SLIDES = [
     title: "LEVEL YOUR PASSPORT",
     copy: "Higher tiers unlock trust perks, allowlist access, tournaments, and partner rewards.",
     note: "Tier 1 starts after 3 cashouts at checkpoint 2+.",
-    imageSrc: "/images/onboarding-passport-tiers.png",
+    imageSrc: "/images/f.webp",
     imageAlt: "Four floating passport tier cards with eggs and checkpoint stamps",
     tone: "tiers",
   },
@@ -261,6 +267,7 @@ function readPassportReward(
 }
 
 export function HomePage() {
+  const reduceMotion = useReducedMotion();
   const {
     account,
     canDisconnect,
@@ -737,32 +744,39 @@ export function HomePage() {
         <div className="home-shell home-shell-wide">
           <div className="home-hero-grid">
             <div className="home-hero-copy">
-              <h1 className="home-title home-wordmark">
+              <motion.h1
+                className="home-title home-wordmark"
+                whileHover={reduceMotion ? undefined : { scale: 1.015 }}
+              >
                 <span className="home-wordmark-egg">EGG</span>
                 <span className="home-wordmark-rest">SISTENTIAL</span>
-              </h1>
+              </motion.h1>
               <p className="home-subcopy">
                 A skill-based reflex adventure where timing and smart
                 checkpoint decisions shape your progress.
               </p>
               {showHeroConnectPrompt && !isConnected ? (
                 <div className="home-hero-connect-stack">
-                  <button
+                  <motion.button
                     type="button"
                     className="flow-btn home-btn-main home-hero-cta"
                     onClick={() => void connectWallet()}
                     disabled={isConnecting}
+                    whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
+                    whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                   >
                     {isConnecting ? "CONNECTING..." : "CONNECT WALLET"}
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="button"
                     className="flow-btn home-btn-main home-hero-back-btn"
                     onClick={onHeroBack}
                     disabled={isConnecting}
+                    whileHover={reduceMotion ? undefined : { y: -2, scale: 1.015 }}
+                    whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                   >
                     BACK
-                  </button>
+                  </motion.button>
                   {error ? (
                     <p className="flow-alert home-hero-connect-error">
                       {error}
@@ -770,47 +784,57 @@ export function HomePage() {
                   ) : null}
                 </div>
               ) : !isConnected ? (
-                <button
+                <motion.button
                   type="button"
                   className="flow-btn home-btn-main home-hero-cta"
                   onClick={onHeroPlayNow}
+                  whileHover={reduceMotion ? undefined : { y: -3, scale: 1.025 }}
+                  whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                 >
                   PLAY NOW
-                </button>
+                </motion.button>
               ) : null}
 
               {isConnected && !showHeroConnectPrompt ? (
                 <div className="home-hero-connected-actions">
-                  <a
+                  <motion.a
                     href="/play"
                     className="flow-btn home-btn-main dashboard-btn dashboard-btn-play"
+                    whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
+                    whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                   >
                     PLAY NOW
-                  </a>
-                  <a
+                  </motion.a>
+                  <motion.a
                     href="/managemoney"
                     className="flow-btn home-btn-main dashboard-btn dashboard-btn-deposit"
+                    whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
+                    whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                   >
                     MANAGE MONEY
-                  </a>
-                  <button
+                  </motion.a>
+                  <motion.button
                     type="button"
                     className="flow-btn home-btn-main dashboard-btn dashboard-btn-guide"
                     onClick={openGameGuide}
+                    whileHover={reduceMotion ? undefined : { y: -3, scale: 1.02 }}
+                    whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
                   >
                     GAME GUIDE
-                  </button>
+                  </motion.button>
                 </div>
               ) : null}
             </div>
           </div>
         </div>
         {isConnected ? (
-          <button
+          <motion.button
             type="button"
             className="home-passport-hero"
             aria-label="Open trust passport status"
             onClick={() => void loadTrustPassport(true)}
+            whileHover={reduceMotion ? undefined : { y: -5, scale: 1.03 }}
+            whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
           >
             <span className="home-passport-hero-icon" aria-hidden="true">
               <BadgeCheck size={18} strokeWidth={2.7} />
@@ -819,11 +843,14 @@ export function HomePage() {
               <strong>TRUST PASSPORT</strong>
               <small>View status and tier</small>
             </span>
-          </button>
+          </motion.button>
         ) : null}
       </section>
 
-      <section id="preview" className="home-section home-section-about">
+      <section
+        id="preview"
+        className="home-section home-section-about"
+      >
         <div className="home-shell home-shell-section">
           <div className="home-about-head">
             <h2 className="home-section-title home-about-title">
@@ -843,7 +870,11 @@ export function HomePage() {
 
           <div className="home-about-grid">
             {ABOUT_FEATURES.map((item) => (
-              <article key={item.title} className="home-about-feature">
+              <motion.article
+                key={item.title}
+                className="home-about-feature"
+                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.015 }}
+              >
                 <div
                   className={`home-about-media home-about-media-${item.tone}`}
                 >
@@ -862,7 +893,7 @@ export function HomePage() {
                 </div>
                 <h3 className="home-about-feature-title">{item.title}</h3>
                 <p className="home-about-feature-copy">{item.copy}</p>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>
@@ -999,32 +1030,51 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="home-section home-section-system">
+      <section
+        className="home-section home-section-system"
+      >
         <div className="home-shell home-shell-section">
           <div className="home-section-head">
-            <h2 className="home-section-title">ONCHAIN GAME FLOW</h2>
+            <div>
+              <p className="home-section-kicker">LIVE RUN LOOP</p>
+              <h2 className="home-section-title">VAULT TO PASSPORT</h2>
+            </div>
           </div>
-          <div className="home-feature-grid">
+          <div
+            className="home-flow-track"
+            aria-label="Vault to Passport flow"
+          >
             {FLOW_STEPS.map((step) => (
-              <article key={step.title} className="home-feature-card">
-                <p>{step.label}</p>
+              <motion.article
+                key={step.title}
+                className="home-flow-card"
+                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.018 }}
+              >
+                <div className="home-flow-card-top">
+                  <p>{step.label}</p>
+                  <span>{step.action}</span>
+                </div>
                 <h3>{step.title}</h3>
                 <span>{step.copy}</span>
-              </article>
+              </motion.article>
             ))}
           </div>
 
-          <div className="home-money-band">
-            <div>
-              <h3>TRUST PASSPORT</h3>
-              <p>
-                Passport is your on-chain player reputation from gameplay
-                behavior. It helps this game and partner apps recognize real,
-                consistent players.
-              </p>
+          <motion.div
+            className="home-money-band"
+            whileHover={reduceMotion ? undefined : { y: -4, scale: 1.006 }}
+          >
+            <div className="home-money-band-copy">
+              <p className="home-money-kicker">TRUST PASSPORT</p>
+              <h3>Play clean. Build trust.</h3>
+              <p>Cashouts, consistency, and fair runs shape your player reputation.</p>
             </div>
-            <p>Built on Solana: vault, settlement, progression, and Passport trust layer.</p>
-          </div>
+            <div className="home-money-band-pills" aria-label="Passport benefits">
+              {PASSPORT_BENEFITS.map((benefit) => (
+                <span key={benefit}>{benefit}</span>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
