@@ -187,17 +187,6 @@ export function ManageMoneyVaultCard({
       <header className="money-header">
         <div className="money-head-top">
           <p className="flow-eyebrow">EGGSISTENTIAL VAULT</p>
-          <div className="money-head-badges">
-            <span
-              className={`money-head-badge ${
-                flow.needsApproval
-                  ? "money-head-badge-warning"
-                  : "money-head-badge-ready"
-              }`}
-            >
-              {flow.needsApproval ? "APPROVAL NEEDED" : "VAULT READY"}
-            </span>
-          </div>
         </div>
         <h1 className="flow-title money-title">MY VAULT</h1>
         <p className="money-subtitle">
@@ -378,4 +367,3 @@ export function ManageMoneyPage() {
     </main>
   );
 }
-
