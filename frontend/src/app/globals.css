@@ -2232,6 +2232,22 @@ body.checkpoint-arrival #hud-scrim::after {
   line-height: 1;
 }
 
+.leaderboard-tier-badge-icon {
+  min-height: 20px;
+  width: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.leaderboard-tier-badge-logo {
+  width: 20px;
+  height: 20px;
+  display: block;
+  border-radius: 50%;
+}
+
 .leaderboard-reward-label {
   flex-basis: 100%;
   color: #8a5c00;
@@ -7918,6 +7934,22 @@ body.checkpoint-arrival #hud-scrim::after {
   padding: 0 6px;
   font-size: 7px !important;
   line-height: 1 !important;
+}
+
+.home-tier-badge-icon {
+  min-height: 20px;
+  width: 20px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-tier-badge-logo {
+  width: 20px;
+  height: 20px;
+  display: block;
+  border-radius: 50%;
 }
 
 .home-social-item .home-access-note {

@@ -250,6 +250,28 @@ function readPassportTier(
   return Math.max(0, Math.min(4, Math.floor(toNumber(entry.passportTier))));
 }
 
+function readPassportTierLabel(
+  entry: Pick<ChickenBridgeLeaderboardEntry, "passportTier" | "passportTierLabel">,
+) {
+  if (entry.passportTierLabel) return entry.passportTierLabel;
+  const tier = readPassportTier(entry);
+  if (tier >= 4) return "Oracle";
+  if (tier >= 3) return "Elite";
+  if (tier >= 2) return "Steady";
+  if (tier >= 1) return "Runner";
+  return "Rookie";
+}
+
+function readPassportTierBadgeIcon(
+  entry: Pick<ChickenBridgeLeaderboardEntry, "passportTier" | "passportTierLabel">,
+) {
+  const tier = readPassportTier(entry);
+  if (tier >= 4) return "/images/oracle.png";
+  if (tier >= 3) return "/images/elite.png";
+  if (tier >= 2) return "/images/steady.png";
+  return "/images/runner.png";
+}
+
 function readPassportReward(
   entry: Pick<
     ChickenBridgeLeaderboardEntry,
@@ -966,8 +988,16 @@ export function HomePage() {
                       <h4>
                         {shortAddress(entry.wallet_address)}
                         {readPassportTier(entry) >= 1 ? (
-                          <span className="home-tier-badge">
-                            T{readPassportTier(entry)}
+                          <span
+                            className="home-tier-badge home-tier-badge-icon"
+                            aria-label={readPassportTierLabel(entry)}
+                            title={readPassportTierLabel(entry)}
+                          >
+                            <img
+                              className="home-tier-badge-logo"
+                              src={readPassportTierBadgeIcon(entry)}
+                              alt={readPassportTierLabel(entry)}
+                            />
                           </span>
                         ) : null}
                       </h4>
@@ -1006,8 +1036,16 @@ export function HomePage() {
                       <h4>
                         {shortAddress(entry.wallet_address)}
                         {readPassportTier(entry) >= 1 ? (
-                          <span className="home-tier-badge">
-                            T{readPassportTier(entry)}
+                          <span
+                            className="home-tier-badge home-tier-badge-icon"
+                            aria-label={readPassportTierLabel(entry)}
+                            title={readPassportTierLabel(entry)}
+                          >
+                            <img
+                              className="home-tier-badge-logo"
+                              src={readPassportTierBadgeIcon(entry)}
+                              alt={readPassportTierLabel(entry)}
+                            />
                           </span>
                         ) : null}
                       </h4>

@@ -4933,6 +4933,25 @@ function initBettingUI() {
     return Math.max(0, Math.min(4, Math.floor(tier)));
   }
 
+  function leaderboardPassportTierLabel(entry) {
+    const explicit = String(entry?.passportTierLabel || "").trim();
+    if (explicit) return explicit;
+    const tier = leaderboardPassportTier(entry);
+    if (tier >= 4) return "Oracle";
+    if (tier >= 3) return "Elite";
+    if (tier >= 2) return "Steady";
+    if (tier >= 1) return "Runner";
+    return "Rookie";
+  }
+
+  function leaderboardPassportTierIcon(entry) {
+    const tier = leaderboardPassportTier(entry);
+    if (tier >= 4) return "/images/oracle.png";
+    if (tier >= 3) return "/images/elite.png";
+    if (tier >= 2) return "/images/steady.png";
+    return "/images/runner.png";
+  }
+
   function leaderboardPassportReward(entry) {
     if (entry?.passportReward) return String(entry.passportReward);
     const tier = leaderboardPassportTier(entry);
@@ -5270,8 +5289,16 @@ function initBettingUI() {
 
       if (tier >= 1) {
         const tierEl = document.createElement("span");
-        tierEl.className = "leaderboard-tier-badge";
-        tierEl.innerText = `T${tier}`;
+        tierEl.className = "leaderboard-tier-badge leaderboard-tier-badge-icon";
+        tierEl.setAttribute("aria-label", leaderboardPassportTierLabel(entry));
+        tierEl.setAttribute("title", leaderboardPassportTierLabel(entry));
+
+        const tierImg = document.createElement("img");
+        tierImg.className = "leaderboard-tier-badge-logo";
+        tierImg.src = leaderboardPassportTierIcon(entry);
+        tierImg.alt = leaderboardPassportTierLabel(entry);
+        tierEl.appendChild(tierImg);
+
         walletEl.appendChild(tierEl);
       }
 
