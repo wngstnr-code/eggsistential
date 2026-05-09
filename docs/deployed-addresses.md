@@ -4,13 +4,12 @@ This page is the source of truth for EGGSISTENTIAL deployment references.
 
 ## Frontend
 
-- Frontend URL: `TBD (not deployed yet)`
-- Docs URL: `TBD (not published yet)`
+- Frontend URL: `https://eggsistential.vercel.app`
 
 ## Backend
 
 
-- Backend URL: `TBD (not deployed yet)`
+- Backend URL: `https://eggsistential-production.up.railway.app`
 
 ## On-Chain (Devnet)
 
