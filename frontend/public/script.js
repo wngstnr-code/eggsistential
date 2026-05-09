@@ -4949,7 +4949,8 @@ function initBettingUI() {
     if (tier >= 4) return "/images/oracle.png";
     if (tier >= 3) return "/images/elite.png";
     if (tier >= 2) return "/images/steady.png";
-    return "/images/runner.png";
+    if (tier >= 1) return "/images/runner.png";
+    return "/images/rookie.png";
   }
 
   function leaderboardPassportReward(entry) {
@@ -5287,14 +5288,12 @@ function initBettingUI() {
       walletAddressEl.innerText = shortWalletAddress(entry?.wallet_address);
       walletEl.appendChild(walletAddressEl);
 
-      if (tier >= 1) {
-        const tierEl = document.createElement("img");
-        tierEl.className = "leaderboard-tier-badge";
-        tierEl.src = leaderboardPassportTierIcon(entry);
-        tierEl.alt = `${leaderboardPassportTierLabel(entry)} passport badge`;
-        tierEl.title = `Tier ${tier} - ${leaderboardPassportTierLabel(entry)}`;
-        walletEl.appendChild(tierEl);
-      }
+      const tierEl = document.createElement("img");
+      tierEl.className = "leaderboard-tier-badge";
+      tierEl.src = leaderboardPassportTierIcon(entry);
+      tierEl.alt = `${leaderboardPassportTierLabel(entry)} passport badge`;
+      tierEl.title = `Tier ${tier} - ${leaderboardPassportTierLabel(entry)}`;
+      walletEl.appendChild(tierEl);
 
       if (reward) {
         const rewardEl = document.createElement("span");
