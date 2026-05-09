@@ -1655,7 +1655,7 @@ export function HomePage() {
       <div className="home-help-stack" aria-label="Quick help links">
         <a
           className="home-help-btn fixed-help home-help-doc-btn"
-          href="https://eggsistential.gitbook.io/eggsistential/"
+          href="https://eggsistential.gitbook.io/eggsistential"
           target="_blank"
           rel="noreferrer"
           title="Open Documentation"

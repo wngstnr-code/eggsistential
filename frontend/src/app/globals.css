@@ -1030,15 +1030,42 @@ canvas.game {
   bottom: auto;
 }
 
-.home-help-doc-btn {
+.home-help-stack .home-help-doc-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  border: 6px solid #304869;
+  background: linear-gradient(180deg, #f0f5fb 0%, #dde6f1 100%);
+  color: #2f4868;
   text-decoration: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 8px 0 rgba(8, 16, 31, 0.5),
+    0 12px 24px rgba(5, 10, 20, 0.36);
+  transition:
+    transform 0.08s ease,
+    filter 0.12s ease;
+}
+
+.home-help-stack .home-help-doc-btn:hover,
+.home-help-stack .home-help-doc-btn:focus-visible {
+  filter: brightness(1.05);
+}
+
+.home-help-stack .home-help-doc-btn:focus-visible {
+  outline: 3px solid rgba(120, 240, 214, 0.92);
+  outline-offset: 3px;
+}
+
+.home-help-stack .home-help-doc-btn:active {
+  transform: translate(1px, 2px);
 }
 
 .home-help-doc-icon {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: block;
-  transform: translateX(0.5px);
+  transform: none;
 }
 
 .home-modal-overlay,
@@ -1795,13 +1822,19 @@ canvas.game {
     gap: 8px;
   }
 
-  .home-help-doc-btn {
-    font-size: inherit;
+  .home-help-stack .home-help-doc-btn {
+    width: 52px;
+    height: 52px;
+    border-width: 4px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.82),
+      0 5px 0 rgba(8, 16, 31, 0.5),
+      0 10px 18px rgba(5, 10, 20, 0.34);
   }
 
   .home-help-doc-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
   }
 
   .home-modal-box,
