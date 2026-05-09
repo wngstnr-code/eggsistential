@@ -1066,7 +1066,7 @@ async function cashOut(reason) {
       showBetHud(false);
       showBetPanel(true);
       const fallbackMessage = isUserRejectedBridgeError(error)
-        ? "Cash out was canceled in wallet. Resolve pending settlement, then start betting again."
+        ? "Cash out was canceled in wallet. Resolve pending settlement, then start playing again."
         : "Failed to settle cashout.";
       const message = formatBridgeError(
         error,
@@ -6069,7 +6069,7 @@ function initBettingUI() {
     } finally {
       startBetBusy = false;
       if (startBetBtn) {
-        startBetBtn.innerText = "START BET";
+        startBetBtn.innerText = "START PLAY";
         startBetBtn.disabled = false;
       }
       if (!bet.active && !keepStatusMessage) {

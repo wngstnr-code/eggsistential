@@ -310,7 +310,7 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
 
           <div className="modal-actions">
             <button id="start-bet-btn" className="primary">
-              START BET
+              START PLAY
             </button>
             <button id="free-play-btn" className="ghost">
               FREE PRACTICE
