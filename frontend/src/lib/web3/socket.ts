@@ -3,6 +3,12 @@ import { BACKEND_API_URL } from "../backend/config";
 
 let socket: Socket | null = null;
 
+type SocketCallback = (...args: unknown[]) => void;
+type GameEventSocket = {
+  on: (event: string, callback: SocketCallback) => void;
+  off: (event: string, callback: SocketCallback) => void;
+};
+
 export interface GameStartedPayload {
   sessionId: string;
   onchainSessionId: string;
@@ -168,10 +174,12 @@ export function onGameEvent<K extends keyof GameEventMap>(
     return () => {};
   }
 
-  socket.on(event, callback as any);
+  const socketCallback = callback as SocketCallback;
+  const gameSocket = socket as unknown as GameEventSocket;
+  gameSocket.on(event, socketCallback);
 
   return () => {
-    socket?.off(event, callback as any);
+    (socket as unknown as GameEventSocket | null)?.off(event, socketCallback);
   };
 }
 

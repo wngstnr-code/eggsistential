@@ -209,7 +209,13 @@ export function PlayTopNav() {
   const isConnectingUi = isHydrated ? isConnecting : false;
 
   useEffect(() => {
-    setIsHydrated(true);
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (!cancelled) setIsHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -907,42 +913,49 @@ export function PlayTopNav() {
 
   useEffect(() => {
     if (!isConnected) {
-      setIsWalletMenuOpen(false);
+      queueMicrotask(() => setIsWalletMenuOpen(false));
     }
   }, [isConnected]);
 
   useEffect(() => {
     if (isMenuOpen) {
-      setIsAlertsOpen(false);
+      queueMicrotask(() => setIsAlertsOpen(false));
     }
   }, [isMenuOpen]);
 
   useEffect(() => {
     if (!isMobile) {
-      setIsAlertsOpen(false);
+      queueMicrotask(() => setIsAlertsOpen(false));
     }
   }, [isMobile]);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(SFX_STORAGE_KEY);
-      const initial = raw == null || raw === "" ? 0.9 : Number.parseFloat(raw);
-      const safe = Number.isFinite(initial)
-        ? Math.min(1, Math.max(0, initial))
-        : 0.9;
-      const initialPercent = Math.round(safe * 100);
-      setSfxVolumePercent(initialPercent);
-      if (initialPercent > 0) {
-        lastNonZeroSfxVolumeRef.current = initialPercent;
+    let cancelled = false;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const raw = localStorage.getItem(SFX_STORAGE_KEY);
+        const initial = raw == null || raw === "" ? 0.9 : Number.parseFloat(raw);
+        const safe = Number.isFinite(initial)
+          ? Math.min(1, Math.max(0, initial))
+          : 0.9;
+        const initialPercent = Math.round(safe * 100);
+        setSfxVolumePercent(initialPercent);
+        if (initialPercent > 0) {
+          lastNonZeroSfxVolumeRef.current = initialPercent;
+        }
+        window.dispatchEvent(
+          new CustomEvent("chicken:set-sfx-volume", {
+            detail: { value: safe },
+          }),
+        );
+      } catch {
+        setSfxVolumePercent(90);
       }
-      window.dispatchEvent(
-        new CustomEvent("chicken:set-sfx-volume", {
-          detail: { value: safe },
-        }),
-      );
-    } catch {
-      setSfxVolumePercent(90);
-    }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -1143,24 +1156,6 @@ export function PlayTopNav() {
         width={96}
         height={96}
         className="play-tournament-badge-image"
-        aria-hidden="true"
-      />
-    </button>
-  );
-
-  const howBadgeButton = (className: string) => (
-    <button
-      type="button"
-      className={className}
-      aria-label="How to play"
-      title="How to play"
-    >
-      <Image
-        src="/images/how.png"
-        alt=""
-        width={96}
-        height={96}
-        className="play-how-badge-image"
         aria-hidden="true"
       />
     </button>

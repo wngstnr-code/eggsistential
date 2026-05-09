@@ -414,7 +414,9 @@ export function HomePage() {
     }
 
     let cancelled = false;
-    setIsSocialLoading(true);
+    queueMicrotask(() => {
+      if (!cancelled) setIsSocialLoading(true);
+    });
 
     void Promise.allSettled([
       backendFetch<{ leaderboard?: ChickenBridgeLeaderboardEntry[] }>(
@@ -456,7 +458,7 @@ export function HomePage() {
 
   useEffect(() => {
     if (isConnected) {
-      setShowHeroConnectPrompt(false);
+      queueMicrotask(() => setShowHeroConnectPrompt(false));
     }
   }, [isConnected]);
 
@@ -471,9 +473,11 @@ export function HomePage() {
       return;
     }
 
-    setShowHeroConnectPrompt(true);
-    setShowProfilePopover(false);
-    clearWalletError();
+    queueMicrotask(() => {
+      setShowHeroConnectPrompt(true);
+      setShowProfilePopover(false);
+      clearWalletError();
+    });
     window.sessionStorage.removeItem(HOME_CONNECT_PROMPT_KEY);
     window.scrollTo({ top: 0, behavior: "auto" });
 

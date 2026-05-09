@@ -320,9 +320,15 @@ export function WalletProvider({ children }: WalletProviderProps) {
   const ensureBackendSessionEvent = useEffectEvent(ensureBackendSession);
 
   useEffect(() => {
-    if (accountRef.current && accountRef.current !== account) {
+    let cancelled = false;
+    const resetBackendAuth = () => {
+      if (cancelled) return;
       setBackendAddress("");
       setBackendAuthError("");
+    };
+
+    if (accountRef.current && accountRef.current !== account) {
+      queueMicrotask(resetBackendAuth);
       backendSessionRef.current = {
         inFlight: null,
         lastCheckedAt: 0,
@@ -332,21 +338,29 @@ export function WalletProvider({ children }: WalletProviderProps) {
     }
 
     if (!account) {
-      setError("");
-      setBackendAddress("");
-      setBackendAuthError("");
+      queueMicrotask(() => {
+        if (cancelled) return;
+        setError("");
+        setBackendAddress("");
+        setBackendAuthError("");
+      });
     }
 
     accountRef.current = account;
+    return () => {
+      cancelled = true;
+    };
   }, [account]);
 
   useEffect(() => {
     if (!hasBackendConfig || !isConnected || !account) {
-      setBackendAddress("");
+      queueMicrotask(() => setBackendAddress(""));
       return;
     }
 
-    void ensureBackendSessionEvent();
+    queueMicrotask(() => {
+      void ensureBackendSessionEvent();
+    });
   }, [account, hasBackendConfig, isConnected]);
 
   const value: WalletContextValue = {
