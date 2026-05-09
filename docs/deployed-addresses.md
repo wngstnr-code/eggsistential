@@ -1,21 +1,25 @@
 # Deployed Addresses
 
-## Purpose
+This page is the source of truth for EGGSISTENTIAL deployment references.
 
-This page is intended to hold the addresses and deployment references used by the live EGGSISTENTIAL system.
+## Frontend
 
-## Recommended Entries
+- Frontend URL: `TBD (not deployed yet)`
+- Docs URL: `TBD (not published yet)`
 
-Add the following when ready:
+## Backend
 
-- frontend production URL
-- backend production URL
-- Solana cluster
-- program ID
-- vault-related addresses
-- token mint
-- Passport-related addresses
+- Backend URL: `TBD (not deployed yet)`
 
-## Current Status
+## On-Chain (Devnet)
 
-Keep this page as the single source of truth for production-facing addresses so users, partners, and developers do not need to search across the repository.
+- Cluster: `devnet`
+- RPC URL: `https://api.devnet.solana.com`
+- Program ID: `2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k`
+- Token Mint: `HjqwSpFMS9PPWze1DRrq79ZVNUYW2F5SbJuaPs9Djhjy`
+- Config PDA: `DDJeYM5dsLV6u3qUHmEcSSu8mGWZzN34nzSTUx7NSNsS`
+- Vault Authority PDA: `FUGcRYhyywCyak7wNr8xfcnQhERpj7xxpwrkpV6YRrnS`
+- Vault Token Account: `FwSf99RYEJJS3h3tigRhG8MFt3uzbJihGi3TcgxL9Kuo`
+- Passport Address: `2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k`
+- Faucet Address: `2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k`
+- Settlement Address: `2cATotAz8hga1PfPHXpAeapd1WFMMnB9AgY4DNWjX62k`
