@@ -217,7 +217,7 @@ function toNumber(value: unknown, fallback = 0) {
 
 function formatMoney(value: unknown) {
   const numeric = toNumber(value);
-  return `$${numeric.toFixed(4)}`;
+  return `$${numeric.toFixed(2)}`;
 }
 
 function formatPassportDate(epochSeconds?: number | null) {

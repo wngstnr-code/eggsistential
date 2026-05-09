@@ -7826,9 +7826,10 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .home-social-card-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
+  min-height: 42px;
   margin-bottom: 14px;
 }
 
@@ -7895,9 +7896,17 @@ body.checkpoint-arrival #hud-scrim::after {
   justify-content: space-between;
   gap: 16px;
   padding: 13px 14px;
+  height: 110px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.home-social-item > div {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  align-content: center;
 }
 
 .home-social-item p {
@@ -7955,12 +7964,16 @@ body.checkpoint-arrival #hud-scrim::after {
 .home-social-item .home-access-note {
   margin-top: 5px;
   color: #8ff0c1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-social-item strong {
   color: #ffe066;
   font-size: 10px;
   white-space: nowrap;
+  align-self: center;
 }
 
 .home-footer {
@@ -8510,6 +8523,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .home-social-item {
+    height: auto;
     align-items: flex-start;
     flex-direction: column;
   }
