@@ -1148,6 +1148,24 @@ export function PlayTopNav() {
     </button>
   );
 
+  const howBadgeButton = (className: string) => (
+    <button
+      type="button"
+      className={className}
+      aria-label="How to play"
+      title="How to play"
+    >
+      <Image
+        src="/images/how.png"
+        alt=""
+        width={96}
+        height={96}
+        className="play-how-badge-image"
+        aria-hidden="true"
+      />
+    </button>
+  );
+
   return (
     <>
       {desktopTopBarCenter

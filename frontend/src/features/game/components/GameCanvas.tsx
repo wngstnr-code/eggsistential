@@ -402,8 +402,16 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
         className="fixed-help"
         type="button"
         title="Game Rules"
+        aria-label="Game Rules"
       >
-        ?
+        <Image
+          src="/images/how.png"
+          alt=""
+          width={96}
+          height={96}
+          className="fixed-help-image"
+          aria-hidden="true"
+        />
       </button>
 
       <button
@@ -452,10 +460,11 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
             >
               X
             </button>
-            <h2 id="character-modal-title">CHOOSE BIRD</h2>
-            <p className="subtitle">
-              Current pick: {selectedCharacterName}
-            </p>
+            <div className="character-modal-header">
+              <span className="character-modal-kicker">RUNNER SELECT</span>
+              <h2 id="character-modal-title">CHOOSE BIRD</h2>
+              <p className="subtitle">Current pick: {selectedCharacterName}</p>
+            </div>
 
             <div className="character-grid" aria-label="Character choices">
               {characters.map((character) => {
@@ -495,7 +504,7 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
         style={{ display: "none" }}
       >
         <div
-          className="info-modal-box"
+          className="info-modal-box game-help-box"
           role="dialog"
           aria-modal="true"
           aria-labelledby="game-help-title"
@@ -507,7 +516,11 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
           >
             X
           </button>
-          <h2 id="game-help-title">GAME RULES</h2>
+          <div className="game-help-header">
+            <span className="game-help-kicker">HOW TO PLAY</span>
+            <h2 id="game-help-title">GAME RULES</h2>
+            <p>Hop smart, reach checkpoint, cash out before the road wins.</p>
+          </div>
           <div className="home-help-content">
             <div className="help-step">
               <span className="step-num">1</span>
