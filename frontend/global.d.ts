@@ -216,6 +216,7 @@ type ChickenBridgePassportProgression = {
 
 type ChickenBridgePassportStatus = {
   walletAddress: string;
+  passportId?: string | null;
   eligibility: ChickenBridgePassportEligibility;
   passport: ChickenBridgePassportOnchainStatus;
   progression: ChickenBridgePassportProgression;

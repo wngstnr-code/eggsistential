@@ -310,12 +310,14 @@ export function HomePage() {
   const [showHelp, setShowHelp] = useState(false);
   const [showPassportInfo, setShowPassportInfo] = useState(false);
   const [showTrustPassport, setShowTrustPassport] = useState(false);
+  const [showPassportPreview, setShowPassportPreview] = useState(false);
   const [passportBusy, setPassportBusy] = useState(false);
   const [passportStatus, setPassportStatus] =
     useState<ChickenBridgePassportStatus | null>(null);
   const [passportStatusText, setPassportStatusText] = useState("");
   const [showHeroConnectPrompt, setShowHeroConnectPrompt] = useState(false);
   const [profileCopyLabel, setProfileCopyLabel] = useState("COPY");
+  const [passportCopyLabel, setPassportCopyLabel] = useState("COPY");
   const [distanceBoard, setDistanceBoard] = useState<
     ChickenBridgeLeaderboardEntry[]
   >(FALLBACK_DISTANCE_BOARD);
@@ -498,6 +500,20 @@ export function HomePage() {
     } catch {
       setProfileCopyLabel("FAILED");
       window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
+    }
+  }
+
+  async function onCopyPassportId() {
+    const passportId = passportStatus?.passportId;
+    if (!passportId || typeof navigator === "undefined") return;
+
+    try {
+      await navigator.clipboard.writeText(passportId);
+      setPassportCopyLabel("COPIED");
+      window.setTimeout(() => setPassportCopyLabel("COPY"), 1400);
+    } catch {
+      setPassportCopyLabel("FAILED");
+      window.setTimeout(() => setPassportCopyLabel("COPY"), 1400);
     }
   }
 
@@ -1204,25 +1220,27 @@ export function HomePage() {
             </div>
 
             <div className="play-passport-status-layout">
-              <div className="play-passport-card play-passport-live-card">
-                <div className="play-passport-base-badge" aria-label="Solana">
-                  <span className="play-passport-base-text">SOLANA</span>
-                  <span
-                    className="play-passport-base-logo"
-                    aria-hidden="true"
-                  />
+              <div
+                role="button"
+                tabIndex={0}
+                className={`play-passport-card play-passport-live-card play-passport-tier-card-${passportCurrentTier}`}
+                onClick={() => setShowPassportPreview(true)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setShowPassportPreview(true);
+                  }
+                }}
+                aria-label="Open large passport preview"
+              >
+                <div className="play-passport-card-fields">
+                  <span className="play-passport-card-value play-passport-card-wallet">
+                    {shortAddress(passportStatus?.walletAddress || account || "")}
+                  </span>
+                  <span className="play-passport-card-value play-passport-card-id">
+                    {shortAddress(passportStatus?.passportId || "")}
+                  </span>
                 </div>
-                <p className="play-passport-name">
-                  {shortAddress(passportStatus?.walletAddress || account || "")}
-                </p>
-                <p className="play-passport-tier">
-                  TIER {passportCurrentTier}
-                </p>
-                <p className="play-passport-expiry">
-                  {passportStatus?.passport.valid
-                    ? `VALID UNTIL ${formatPassportDate(passportStatus.passport.expiry)}`
-                    : passportCurrentTierLabel}
-                </p>
               </div>
 
               <div className="play-passport-summary">
@@ -1237,10 +1255,18 @@ export function HomePage() {
                   </strong>
                 </div>
                 <div className="play-passport-summary-row">
-                  <span>ONCHAIN</span>
-                  <strong>
-                    {passportStatus?.passport.valid ? "VALID" : "NOT ACTIVE"}
-                  </strong>
+                  <span>PASS ID</span>
+                  <div className="play-passport-pass-id-line">
+                    <strong>{shortAddress(passportStatus?.passportId || "")}</strong>
+                    <button
+                      type="button"
+                      className="play-passport-copy-id"
+                      onClick={onCopyPassportId}
+                      disabled={!passportStatus?.passportId}
+                    >
+                      {passportCopyLabel}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1326,6 +1352,29 @@ export function HomePage() {
               <a className="play-passport-cta" href="/play?passport=1">
                 OPEN IN PLAY
               </a>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showPassportPreview ? (
+        <div
+          className="modal-bg play-passport-modal play-passport-preview-modal"
+          onClick={() => setShowPassportPreview(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Large passport preview"
+        >
+          <div
+            className={`play-passport-card play-passport-preview-card play-passport-tier-card-${passportCurrentTier}`}
+          >
+            <div className="play-passport-card-fields">
+              <span className="play-passport-card-value play-passport-card-wallet">
+                {shortAddress(passportStatus?.walletAddress || account || "")}
+              </span>
+              <span className="play-passport-card-value play-passport-card-id">
+                {shortAddress(passportStatus?.passportId || "")}
+              </span>
             </div>
           </div>
         </div>

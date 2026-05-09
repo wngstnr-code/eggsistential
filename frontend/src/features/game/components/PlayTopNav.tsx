@@ -23,6 +23,11 @@ function shortAddress(address: string, isMobile: boolean = false) {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 
+function shortPassportCardAddress(address: string) {
+  if (!address) return "NONE";
+  return `${address.slice(0, 5)}...${address.slice(-3)}`;
+}
+
 function readActionErrorMessage(error: unknown, fallback: string) {
   if (error && typeof error === "object" && "message" in error) {
     const message = String(
@@ -50,6 +55,35 @@ type PassportPopupState = {
   tier: number;
   expiry: number;
 };
+
+type PassportCardZoomClass =
+  | "play-passport-card-zoom-100"
+  | "play-passport-card-zoom-90"
+  | "play-passport-card-zoom-80";
+
+function getPassportCardZoomClass(): PassportCardZoomClass {
+  if (typeof window === "undefined") return "play-passport-card-zoom-100";
+
+  const viewportWidth = window.innerWidth || 1;
+  const viewportHeight = window.innerHeight || 1;
+  const screenWidth = window.screen?.availWidth || window.screen?.width || 0;
+  const viewportZoom =
+    screenWidth && viewportWidth ? screenWidth / viewportWidth : 1;
+  const browserZoom =
+    window.outerWidth && viewportWidth ? window.outerWidth / viewportWidth : 1;
+  const zoomSignals = [viewportZoom, browserZoom].filter(
+    (value) => value > 0 && value <= 1.05,
+  );
+  const estimatedZoom = zoomSignals.length ? Math.min(...zoomSignals) : 1;
+
+  if (estimatedZoom <= 0.83) return "play-passport-card-zoom-80";
+  if (estimatedZoom <= 0.93) return "play-passport-card-zoom-90";
+  if (viewportHeight >= 1180) return "play-passport-card-zoom-80";
+  if (viewportHeight >= 1000) return "play-passport-card-zoom-90";
+  if (viewportWidth >= 2200) return "play-passport-card-zoom-80";
+  if (viewportWidth >= 1980) return "play-passport-card-zoom-90";
+  return "play-passport-card-zoom-100";
+}
 
 function formatPassportDate(timestamp: number) {
   return timestamp ? new Date(timestamp * 1000).toLocaleDateString() : "-";
@@ -139,6 +173,8 @@ export function PlayTopNav() {
     useState<ChickenBridgePassportStatus | null>(null);
   const [isPassportPanelOpen, setIsPassportPanelOpen] = useState(false);
   const [isMoneyPanelOpen, setIsMoneyPanelOpen] = useState(false);
+  const [isTournamentSoonOpen, setIsTournamentSoonOpen] = useState(false);
+  const [isPassportPreviewOpen, setIsPassportPreviewOpen] = useState(false);
   const [passportPopup, setPassportPopup] = useState<PassportPopupState | null>(
     null,
   );
@@ -149,6 +185,8 @@ export function PlayTopNav() {
   });
   const [isResolvingPlayBlocker, setIsResolvingPlayBlocker] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [passportCardZoomClass, setPassportCardZoomClass] =
+    useState<PassportCardZoomClass>("play-passport-card-zoom-100");
   const [desktopTopBarCenter, setDesktopTopBarCenter] =
     useState<HTMLElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
@@ -172,6 +210,20 @@ export function PlayTopNav() {
 
   useEffect(() => {
     setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    function syncPassportCardZoomClass() {
+      setPassportCardZoomClass(getPassportCardZoomClass());
+    }
+
+    syncPassportCardZoomClass();
+    window.addEventListener("resize", syncPassportCardZoomClass);
+    window.visualViewport?.addEventListener("resize", syncPassportCardZoomClass);
+    return () => {
+      window.removeEventListener("resize", syncPassportCardZoomClass);
+      window.visualViewport?.removeEventListener("resize", syncPassportCardZoomClass);
+    };
   }, []);
 
   function onManageMoneyClick() {
@@ -557,6 +609,13 @@ export function PlayTopNav() {
     }, 10);
   }
 
+  function onTournamentClick() {
+    setIsMenuOpen(false);
+    setIsWalletMenuOpen(false);
+    setIsAlertsOpen(false);
+    setIsTournamentSoonOpen(true);
+  }
+
   async function onStatusActionClick() {
     if (isConnecting || isBackendAuthLoading || isResolvingPlayBlocker) return;
 
@@ -748,6 +807,8 @@ export function PlayTopNav() {
         setIsMenuOpen(false);
         setIsPassportPanelOpen(false);
         setIsMoneyPanelOpen(false);
+        setIsTournamentSoonOpen(false);
+        setIsPassportPreviewOpen(false);
         setPassportPopup(null);
       }
     }
@@ -1006,19 +1067,6 @@ export function PlayTopNav() {
     passportProgression?.currentTierLabel ?? "Rookie";
   const passportBenefits = passportStatus?.benefits ?? null;
   const passportConfigured = passportStatus?.passport.configured ?? true;
-  const passportStatusLabel = !passportStatus
-    ? passportBusy
-      ? "LOADING"
-      : "UNAVAILABLE"
-    : passportStatus.passport.revoked
-      ? "REVOKED"
-      : !passportStatus.passport.configured
-        ? "OFFLINE"
-        : passportStatus.passport.valid
-          ? "ONCHAIN VALID"
-          : passportStatus.eligibility.eligible
-            ? "READY TO CLAIM"
-            : "IN PROGRESS";
   const passportStatusTone = !passportStatus
     ? passportBusy
       ? "loading"
@@ -1081,6 +1129,25 @@ export function PlayTopNav() {
     </button>
   );
 
+  const tournamentBadgeButton = (className: string) => (
+    <button
+      type="button"
+      className={className}
+      onClick={onTournamentClick}
+      aria-label="Tournament, coming soon"
+      title="Tournament coming soon"
+    >
+      <Image
+        src="/images/tour.png"
+        alt=""
+        width={96}
+        height={96}
+        className="play-tournament-badge-image"
+        aria-hidden="true"
+      />
+    </button>
+  );
+
   return (
     <>
       {desktopTopBarCenter
@@ -1089,6 +1156,7 @@ export function PlayTopNav() {
             desktopTopBarCenter,
           )
         : null}
+      {tournamentBadgeButton("play-fixed-tournament-badge")}
       <div className="play-mobile-header-rail" aria-hidden="true" />
       <nav ref={navRef} className="play-nav">
         <div className="play-nav-row">
@@ -1471,33 +1539,32 @@ export function PlayTopNav() {
                   EGGPASS
                 </h3>
               </div>
-              <span
-                className={`play-passport-state-pill play-passport-state-${passportStatusTone}`}
-              >
-                {passportStatusLabel}
-              </span>
             </div>
 
             <div className="play-passport-status-layout">
-              <div className="play-passport-card play-passport-live-card">
-                <div className="play-passport-base-badge" aria-label="Solana">
-                  <span className="play-passport-base-text">SOLANA</span>
-                  <span
-                    className="play-passport-base-logo"
-                    aria-hidden="true"
-                  />
+              <div
+                role="button"
+                tabIndex={0}
+                className={`play-passport-card play-passport-live-card play-passport-tier-card-${passportCurrentTier}`}
+                onClick={() => {
+                  setIsPassportPreviewOpen(true);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setIsPassportPreviewOpen(true);
+                  }
+                }}
+                aria-label="Open large passport card preview"
+              >
+                <div className={`play-passport-card-fields ${passportCardZoomClass}`}>
+                  <span className="play-passport-card-value play-passport-card-wallet">
+                    {shortPassportCardAddress(passportStatus?.walletAddress || account || "")}
+                  </span>
+                  <span className="play-passport-card-value play-passport-card-id">
+                    {shortPassportCardAddress(passportStatus?.passportId || "")}
+                  </span>
                 </div>
-                <p className="play-passport-name">
-                  {shortAddress(passportStatus?.walletAddress || account || "")}
-                </p>
-                <p className="play-passport-tier">
-                  TIER {passportCurrentTier}
-                </p>
-                <p className="play-passport-expiry">
-                  {passportStatus?.passport.valid
-                    ? `VALID UNTIL ${formatPassportDate(passportStatus.passport.expiry)}`
-                    : passportCurrentTierLabel}
-                </p>
               </div>
 
               <div className="play-passport-summary">
@@ -1512,9 +1579,9 @@ export function PlayTopNav() {
                   </strong>
                 </div>
                 <div className="play-passport-summary-row">
-                  <span>ONCHAIN</span>
+                  <span>PASS ID</span>
                   <strong>
-                    {passportStatus?.passport.valid ? "VALID" : "NOT ACTIVE"}
+                    {shortPassportCardAddress(passportStatus?.passportId || "")}
                   </strong>
                 </div>
               </div>
@@ -1661,6 +1728,83 @@ export function PlayTopNav() {
             >
               NICE!
             </button>
+          </div>
+        </div>
+      ) : null}
+      {isTournamentSoonOpen ? (
+        <div
+          className="modal-bg play-tournament-modal"
+          onClick={() => {
+            setIsTournamentSoonOpen(false);
+          }}
+        >
+          <div
+            className="modal-box play-tournament-box"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tournament-soon-title"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <button
+              className="close-btn"
+              type="button"
+              aria-label="Close tournament popup"
+              onClick={() => {
+                setIsTournamentSoonOpen(false);
+              }}
+            >
+              X
+            </button>
+            <Image
+              src="/images/tour.png"
+              alt=""
+              width={128}
+              height={128}
+              className="play-tournament-popup-image"
+              aria-hidden="true"
+            />
+            <p className="play-passport-kicker">TOURNAMENT MODE</p>
+            <h3 id="tournament-soon-title" className="play-passport-title">
+              COMING SOON
+            </h3>
+            <p className="play-tournament-copy">
+              Competitive runs and event rewards are being prepared.
+            </p>
+            <button
+              type="button"
+              className="play-tournament-confirm"
+              onClick={() => {
+                setIsTournamentSoonOpen(false);
+              }}
+            >
+              GOT IT
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {isPassportPreviewOpen ? (
+        <div
+          className="modal-bg play-passport-modal play-passport-preview-modal"
+          onClick={() => {
+            setIsPassportPreviewOpen(false);
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Large passport card preview"
+        >
+          <div
+            className={`play-passport-card play-passport-preview-card play-passport-tier-card-${passportCurrentTier}`}
+          >
+            <div className="play-passport-card-fields">
+              <span className="play-passport-card-value play-passport-card-wallet">
+                {shortPassportCardAddress(passportStatus?.walletAddress || account || "")}
+              </span>
+              <span className="play-passport-card-value play-passport-card-id">
+                {shortPassportCardAddress(passportStatus?.passportId || "")}
+              </span>
+            </div>
           </div>
         </div>
       ) : null}

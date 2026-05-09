@@ -1,6 +1,7 @@
 "use client";
 
 import { GameBridgeClient } from "./GameBridgeClient";
+import Image from "next/image";
 import Script from "next/script";
 import { useEffect, useState } from "react";
 
@@ -415,7 +416,14 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
           setCharacterModalOpen(true);
         }}
       >
-        <span className="character-egg-icon" aria-hidden="true" />
+        <Image
+          src="/images/char.png"
+          alt=""
+          width={96}
+          height={96}
+          className="character-badge-image"
+          aria-hidden="true"
+        />
       </button>
 
       {!backgroundMode && characterModalOpen ? (

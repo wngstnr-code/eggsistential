@@ -5288,17 +5288,11 @@ function initBettingUI() {
       walletEl.appendChild(walletAddressEl);
 
       if (tier >= 1) {
-        const tierEl = document.createElement("span");
-        tierEl.className = "leaderboard-tier-badge leaderboard-tier-badge-icon";
-        tierEl.setAttribute("aria-label", leaderboardPassportTierLabel(entry));
-        tierEl.setAttribute("title", leaderboardPassportTierLabel(entry));
-
-        const tierImg = document.createElement("img");
-        tierImg.className = "leaderboard-tier-badge-logo";
-        tierImg.src = leaderboardPassportTierIcon(entry);
-        tierImg.alt = leaderboardPassportTierLabel(entry);
-        tierEl.appendChild(tierImg);
-
+        const tierEl = document.createElement("img");
+        tierEl.className = "leaderboard-tier-badge";
+        tierEl.src = leaderboardPassportTierIcon(entry);
+        tierEl.alt = `${leaderboardPassportTierLabel(entry)} passport badge`;
+        tierEl.title = `Tier ${tier} - ${leaderboardPassportTierLabel(entry)}`;
         walletEl.appendChild(tierEl);
       }
 

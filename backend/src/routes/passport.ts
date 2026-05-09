@@ -6,6 +6,7 @@ import { env } from "../config/env.js";
 import { supabase } from "../config/supabase.js";
 import {
   buildClaimEggPassTransaction,
+  eggPassPda,
   readEggPass,
   type EggPassClaim,
 } from "../lib/solana.js";
@@ -547,6 +548,9 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
       evaluateEligibility(walletAddress),
       readPassportOnchain(walletAddress),
     ]);
+    const passportId = isValidPubkey(walletAddress)
+      ? eggPassPda(new PublicKey(walletAddress)).toBase58()
+      : null;
     const effectiveTier = passport.valid
       ? Math.max(Number(passport.tier ?? 0), eligibility.tier)
       : eligibility.tier;
@@ -563,6 +567,7 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
 
     res.json({
       walletAddress,
+      passportId,
       eligibility: decoratedEligibility,
       passport,
       progression,
