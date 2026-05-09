@@ -2,6 +2,7 @@
 
 
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -57,6 +58,41 @@ function formatPassportDate(timestamp: number) {
 function clampPercent(value: number) {
   if (!Number.isFinite(value)) return 0;
   return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+function getPassportBadgeMeta(tier: number) {
+  if (tier >= 4) {
+    return {
+      src: "/images/oracle.png",
+      label: "Oracle",
+    };
+  }
+
+  if (tier >= 3) {
+    return {
+      src: "/images/elite.png",
+      label: "Elite",
+    };
+  }
+
+  if (tier >= 2) {
+    return {
+      src: "/images/steady.png",
+      label: "Steady",
+    };
+  }
+
+  if (tier >= 1) {
+    return {
+      src: "/images/runner.png",
+      label: "Runner",
+    };
+  }
+
+  return {
+    src: "/images/rookie.png",
+    label: "Rookie",
+  };
 }
 
 function buildPassportStatusMessage(status: ChickenBridgePassportStatus) {
@@ -968,7 +1004,6 @@ export function PlayTopNav() {
   const passportCurrentTier = passportProgression?.currentTier ?? 0;
   const passportCurrentTierLabel =
     passportProgression?.currentTierLabel ?? "Rookie";
-  const passportRequirements = passportProgression?.requirements ?? [];
   const passportBenefits = passportStatus?.benefits ?? null;
   const passportConfigured = passportStatus?.passport.configured ?? true;
   const passportStatusLabel = !passportStatus
@@ -1019,13 +1054,9 @@ export function PlayTopNav() {
   const passportBadgeTier = passportStatus?.passport.valid
     ? passportStatus.passport.tier
     : passportProgression?.currentTier ?? passportStatus?.eligibility.tier ?? 0;
-  const passportBadgeText = passportBusy
-    ? "..."
-    : hasPassportBadgeStatus
-      ? `T${passportBadgeTier}`
-      : "T?";
+  const passportBadgeMeta = getPassportBadgeMeta(passportBadgeTier);
   const passportBadgeLabel = hasPassportBadgeStatus
-    ? `Open passport status, tier ${passportBadgeTier}`
+    ? `Open passport status, ${passportBadgeMeta.label} tier`
     : "Check passport tier";
   const passportBadgeTone = hasPassportBadgeStatus ? passportStatusTone : "offline";
   const passportBadgeButton = (className: string) => (
@@ -1039,8 +1070,14 @@ export function PlayTopNav() {
       aria-label={passportBadgeLabel}
       title={passportBadgeLabel}
     >
-      <BadgeCheck aria-hidden="true" />
-      <span>{passportBadgeText}</span>
+      <Image
+        src={passportBadgeMeta.src}
+        alt=""
+        width={96}
+        height={96}
+        className="play-passport-badge-image"
+        aria-hidden="true"
+      />
     </button>
   );
 
@@ -1346,7 +1383,8 @@ export function PlayTopNav() {
                 void onCheckPassportClick();
               }}
               disabled={passportBusy}
-              aria-label="Open passport status"
+              aria-label={passportBadgeLabel}
+              title={passportBadgeLabel}
             >
               <BadgeCheck aria-hidden="true" />
               <span>PASS</span>

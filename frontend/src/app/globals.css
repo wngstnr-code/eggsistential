@@ -9230,14 +9230,12 @@ body.checkpoint-arrival #hud-scrim::after {
 .play-desktop-passport-badge {
   position: relative;
   order: -1;
-  width: 116px;
-  min-width: 116px;
-  min-height: var(--top-bar-control-height);
-  border-radius: 14px;
-  border: 2px solid #253653;
-  background: linear-gradient(180deg, #263654 0%, #121b2f 100%);
-  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  color: #9db0c8;
+  width: 64px;
+  min-width: 64px;
+  min-height: 64px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9250,26 +9248,23 @@ body.checkpoint-arrival #hud-scrim::after {
     filter 0.12s ease;
 }
 
-.play-desktop-passport-badge svg {
-  position: absolute;
-  width: 46px;
-  height: 46px;
-  opacity: 0.34;
-  stroke-width: 2.7;
+.play-passport-badge-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
 }
 
-.play-desktop-passport-badge span {
-  position: relative;
-  z-index: 1;
-  font-size: 18px;
-  letter-spacing: 0;
-  line-height: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+.play-desktop-passport-badge:focus-visible,
+.play-nav-passport-badge:focus-visible {
+  outline: 3px solid rgba(125, 245, 190, 0.94);
+  outline-offset: 3px;
+  border-radius: 14px;
 }
 
 .play-desktop-passport-badge:active:not(:disabled) {
-  transform: translate(2px, 3px);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateY(2px);
 }
 
 .play-desktop-passport-badge:disabled {
@@ -9279,17 +9274,11 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .play-desktop-passport-badge-valid,
 .play-desktop-passport-badge-ready {
-  border-color: #1c6f54;
-  background: linear-gradient(180deg, #63e6b5 0%, #1e9d75 100%);
-  box-shadow: 3px 4px 0 rgba(11, 76, 55, 0.78), 0 0 12px rgba(99, 230, 181, 0.28);
-  color: #f5fff9;
+  background: transparent;
 }
 
 .play-desktop-passport-badge-progress {
-  border-color: #8d611a;
-  background: linear-gradient(180deg, #ffe29c 0%, #d59628 100%);
-  box-shadow: 3px 4px 0 rgba(122, 78, 14, 0.78), 0 0 10px rgba(255, 217, 61, 0.18);
-  color: #2f1e08;
+  background: transparent;
 }
 
 .play-desktop-passport-badge-loading {
@@ -9298,8 +9287,8 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .play-desktop-passport-badge-revoked,
 .play-desktop-passport-badge-offline {
-  border-color: #34425f;
-  color: #90a0b8;
+  background: transparent;
+  opacity: 0.82;
 }
 
 .play-alert-wrap {
@@ -9542,11 +9531,9 @@ body.checkpoint-arrival #hud-scrim::after {
     min-width: var(--play-top-control-size);
     height: var(--play-top-control-size);
     min-height: var(--play-top-control-size);
-    border-radius: 12px;
-    border: 2px solid #253653;
-    background: linear-gradient(180deg, #263654 0%, #121b2f 100%);
-    box-shadow: 0 2px 0 #050914, inset 0 1px 0 rgba(255, 255, 255, 0.12);
-    color: #9db0c8;
+    border: none;
+    background: transparent;
+    box-shadow: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -9560,26 +9547,13 @@ body.checkpoint-arrival #hud-scrim::after {
       filter 0.12s ease;
   }
 
-  .play-nav-passport-badge svg {
-    position: absolute;
-    width: 34px;
-    height: 34px;
-    opacity: 0.3;
-    stroke-width: 2.7;
-  }
-
-  .play-nav-passport-badge span {
-    position: relative;
-    z-index: 1;
-    font-size: 12px;
-    letter-spacing: 0;
-    line-height: 1;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
+  .play-nav-passport-badge .play-passport-badge-image {
+    width: 44px;
+    height: 44px;
   }
 
   .play-nav-passport-badge:active:not(:disabled) {
     transform: translateY(2px);
-    box-shadow: 0 0 0 #050914, inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .play-nav-passport-badge:disabled {
@@ -9589,17 +9563,11 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .play-nav-passport-badge-valid,
   .play-nav-passport-badge-ready {
-    border-color: #1c6f54;
-    background: linear-gradient(180deg, #63e6b5 0%, #1e9d75 100%);
-    box-shadow: 0 2px 0 #0b4c37, 0 0 12px rgba(99, 230, 181, 0.28);
-    color: #f5fff9;
+    background: transparent;
   }
 
   .play-nav-passport-badge-progress {
-    border-color: #8d611a;
-    background: linear-gradient(180deg, #ffe29c 0%, #d59628 100%);
-    box-shadow: 0 2px 0 #7a4e0e, 0 0 10px rgba(255, 217, 61, 0.18);
-    color: #2f1e08;
+    background: transparent;
   }
 
   .play-nav-passport-badge-loading {
@@ -9608,8 +9576,8 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .play-nav-passport-badge-revoked,
   .play-nav-passport-badge-offline {
-    border-color: #34425f;
-    color: #90a0b8;
+    background: transparent;
+    opacity: 0.82;
   }
 
   .play-nav-balance-label {
@@ -9907,9 +9875,12 @@ body.checkpoint-arrival #hud-scrim::after {
     --play-tab-ink: #e5eaff;
   }
 
-  .play-bottom-nav-tab-passport svg {
-    width: 25px;
-    height: 25px;
+  .play-bottom-passport-badge-image {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
   }
 
   .play-bottom-nav-tab-passport span {
@@ -10308,13 +10279,9 @@ body.checkpoint-arrival #hud-scrim::after {
     border-radius: 12px;
   }
 
-  .play-nav-passport-badge svg {
-    width: 31px;
-    height: 31px;
-  }
-
-  .play-nav-passport-badge span {
-    font-size: 11px;
+  .play-nav-passport-badge .play-passport-badge-image {
+    width: 32px;
+    height: 32px;
   }
 
   .play-nav-balance-value {
@@ -10346,9 +10313,9 @@ body.checkpoint-arrival #hud-scrim::after {
     height: 21px;
   }
 
-  .play-bottom-nav-tab-passport svg {
-    width: 23px;
-    height: 23px;
+  .play-bottom-passport-badge-image {
+    width: 26px;
+    height: 26px;
   }
 
   .play-bottom-nav-tab-passport span {
