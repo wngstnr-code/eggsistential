@@ -255,7 +255,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     try {
       await backendPost<{ success: boolean; address: string }>("/auth/minipay", {
         address: account,
-        walletProvider: "minipay",
+        walletProvider: walletProviderName || "reown",
       });
 
       setBackendAddress(account);
