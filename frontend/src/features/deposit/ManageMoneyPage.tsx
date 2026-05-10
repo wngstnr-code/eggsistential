@@ -122,21 +122,24 @@ export function ManageMoneyVaultCard({
   async function handleDepositClick() {
     try {
       await flow.onDeposit();
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in ManageMoneyPage:", error);
     }
   }
 
   async function handleWithdrawClick() {
     try {
       await flow.onWithdraw();
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in ManageMoneyPage:", error);
     }
   }
 
   async function handleFaucetClick() {
     try {
       await flow.onRequestFaucet();
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in ManageMoneyPage:", error);
     }
   }
 

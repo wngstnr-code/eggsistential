@@ -68,7 +68,11 @@ export function DashboardPage() {
     setIsLoggingOut(true);
     try {
       if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(HOME_CONNECT_PROMPT_KEY, "1");
+        try {
+          window.sessionStorage.setItem(HOME_CONNECT_PROMPT_KEY, "1");
+        } catch (error) {
+          console.warn("sessionStorage.setItem failed:", error);
+        }
       }
       await disconnectWallet();
     } finally {
@@ -83,7 +87,8 @@ export function DashboardPage() {
       await navigator.clipboard.writeText(account);
       setProfileCopyLabel("COPIED");
       window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
-    } catch {
+    } catch (error) {
+      console.warn("Clipboard write failed:", error);
       setProfileCopyLabel("FAILED");
       window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
     }

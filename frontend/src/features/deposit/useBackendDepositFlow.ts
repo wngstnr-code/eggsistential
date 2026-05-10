@@ -153,7 +153,8 @@ export function useBackendDepositFlow(): DepositFlowViewModel {
         setWalletBalanceDisplay(formatMoney2(status.walletBalance));
         setAvailableBalanceDisplay(formatMoney2(status.availableBalance));
         setLockedBalanceDisplay(formatMoney2(status.lockedBalance));
-      } catch {
+      } catch (error) {
+        console.warn("Caught error in useBackendDepositFlow:", error);
       }
     };
 

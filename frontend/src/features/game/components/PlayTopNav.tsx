@@ -276,7 +276,8 @@ export function PlayTopNav() {
       await navigator.clipboard.writeText(account);
       setWalletCopyLabel("COPIED");
       window.setTimeout(() => setWalletCopyLabel("COPY"), 1400);
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in PlayTopNav:", error);
       setWalletCopyLabel("FAILED");
       window.setTimeout(() => setWalletCopyLabel("COPY"), 1400);
     }
@@ -687,7 +688,8 @@ export function PlayTopNav() {
         if (!cancelled) {
           setPlayBlocker(blocker);
         }
-      } catch {
+      } catch (error) {
+      console.warn("Caught error in PlayTopNav:", error);
         if (!cancelled) {
           setPlayBlocker({ kind: "none" });
         }
@@ -909,7 +911,8 @@ export function PlayTopNav() {
             detail: { value: safe },
           }),
         );
-      } catch {
+      } catch (error) {
+      console.warn("Caught error in PlayTopNav:", error);
         setSfxVolumePercent(90);
       }
     });

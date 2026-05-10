@@ -501,7 +501,8 @@ export function HomePage() {
       await navigator.clipboard.writeText(account);
       setProfileCopyLabel("COPIED");
       window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in HomePage:", error);
       setProfileCopyLabel("FAILED");
       window.setTimeout(() => setProfileCopyLabel("COPY"), 1400);
     }
@@ -515,7 +516,8 @@ export function HomePage() {
       await navigator.clipboard.writeText(passportId);
       setPassportCopyLabel("COPIED");
       window.setTimeout(() => setPassportCopyLabel("COPY"), 1400);
-    } catch {
+    } catch (error) {
+      console.warn("Caught error in HomePage:", error);
       setPassportCopyLabel("FAILED");
       window.setTimeout(() => setPassportCopyLabel("COPY"), 1400);
     }

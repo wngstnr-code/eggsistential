@@ -212,7 +212,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
           account: normalizedAccount,
         };
         return true;
-      } catch {
+      } catch (error) {
+        console.warn("refreshBackendSession failed:", error);
         setBackendAddress("");
         backendSessionRef.current = {
           inFlight: null,
@@ -309,7 +310,8 @@ export function WalletProvider({ children }: WalletProviderProps) {
 
     try {
       await backendPost<{ success: boolean }>("/auth/logout");
-    } catch {
+    } catch (error) {
+      console.warn("logoutBackend failed:", error);
     } finally {
       setBackendAddress("");
       setBackendAuthError("");
