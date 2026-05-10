@@ -52,8 +52,8 @@ export const appKit = hasReownProjectId()
       themeMode: "dark",
       features: {
         analytics: false,
-        email: false,
-        socials: false,
+        email: true,
+        socials: ["google", "apple", "x", "discord"],
         swaps: false,
         onramp: false,
         history: false,
