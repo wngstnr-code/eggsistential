@@ -1197,9 +1197,6 @@ export function HomePage() {
               <span className="home-wordmark-egg">EGG</span>
               <span className="home-wordmark-rest">SISTENTIAL</span>
             </p>
-            <h3 className="home-footer-title">
-              Skill-based arcade progression with Solana-native player identity.
-            </h3>
           </div>
 
           <div className="home-footer-links">
