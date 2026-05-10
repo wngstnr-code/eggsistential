@@ -4,21 +4,21 @@ The Eggsistential backend powers the server-authoritative game flow and authenti
 
 Main responsibilities:
 
-- SIWE authentication
-- MiniPay-compatible session bootstrap
-- session cookie management
-- real-time gameplay over Socket.io
-- settlement signing
-- onchain settlement relaying
-- leaderboard and player APIs
-- trust passport eligibility and signature issuance
+- SIWE (Sign-In With Solana) authentication
+- Social Login (Google, Apple, etc.) session bootstrap
+- Session cookie management
+- Real-time gameplay over Socket.io
+- Settlement signing
+- Onchain settlement relaying
+- Leaderboard and player APIs
+- Trust passport eligibility and signature issuance
 
 ## Stack
 
 - Express
 - Socket.io
-- Viem + Solana Web3
-- SIWE
+- Solana Web3.js
+- SIWE (via SIWS)
 - Supabase
 
 ## Commands
@@ -69,7 +69,7 @@ BACKEND_PRIVATE_KEY=
 SETTLEMENT_SIGNATURE_TTL_SECONDS=86400
 PASSPORT_SIGNATURE_TTL_SECONDS=900
 PASSPORT_VALIDITY_SECONDS=2592000
-MINIPAY_UNVERIFIED_AUTH_ENABLED=true
+SOCIAL_AUTH_ENABLED=true
 ```
 
 ## Current Contract Wiring
@@ -90,14 +90,14 @@ Auth:
 
 - `GET /auth/nonce`
 - `POST /auth/verify`
-- `POST /auth/minipay`
+- `POST /auth/social`
 - `POST /auth/logout`
 - `GET /auth/me`
 
-MiniPay note:
+Social Auth note:
 
-- `POST /auth/minipay` is a wallet-session bootstrap for MiniPay where message signing is unavailable.
-- Keep `MINIPAY_UNVERIFIED_AUTH_ENABLED=true` only for the MiniPay-compatible flow you intend to support.
+- `POST /auth/social` is a wallet-session bootstrap for social/embedded wallets (via Reown AppKit) where message signing might be unavailable or skipped for UX.
+- Keep `SOCIAL_AUTH_ENABLED=true` only for the social/embedded flow you intend to support.
 
 Game and player:
 

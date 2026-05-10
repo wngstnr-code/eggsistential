@@ -56,8 +56,8 @@ export const env = {
   PASSPORT_SIGNATURE_TTL_SECONDS: parseInt(optionalEnv("PASSPORT_SIGNATURE_TTL_SECONDS", "900"), 10),
   PASSPORT_VALIDITY_SECONDS: parseInt(optionalEnv("PASSPORT_VALIDITY_SECONDS", "2592000"), 10),
 
-  MINIPAY_UNVERIFIED_AUTH_ENABLED:
-    optionalEnv("MINIPAY_UNVERIFIED_AUTH_ENABLED", "true").toLowerCase() === "true",
+  SOCIAL_AUTH_ENABLED:
+    optionalEnv("SOCIAL_AUTH_ENABLED", "true").toLowerCase() === "true",
 } as const;
 
 console.log(`🔧 Config loaded:`);

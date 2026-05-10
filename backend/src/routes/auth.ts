@@ -94,11 +94,11 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-router.post("/minipay", async (req, res) => {
+router.post("/social", async (req, res) => {
   try {
-    if (!env.MINIPAY_UNVERIFIED_AUTH_ENABLED) {
+    if (!env.SOCIAL_AUTH_ENABLED) {
       res.status(403).json({
-        error: "MiniPay auth is disabled on this backend.",
+        error: "Social auth is disabled on this backend.",
       });
       return;
     }
@@ -120,11 +120,10 @@ router.post("/minipay", async (req, res) => {
 
     void chainId;
 
-    // Allow MiniPay and other trusted social/embedded providers (Reown AppKit)
+    // Allow trusted social/embedded providers (Reown AppKit)
     // to pass through this unverified auth flow if enabled.
     const lowerProvider = (walletProvider || "").toLowerCase();
     const isSocialOrEmbedded =
-      lowerProvider === "minipay" ||
       lowerProvider.includes("reown") ||
       lowerProvider.includes("appkit") ||
       lowerProvider === "google" ||
@@ -134,7 +133,7 @@ router.post("/minipay", async (req, res) => {
 
     if (!isSocialOrEmbedded) {
       // If it's a standard wallet like Phantom, it should ideally use SIWE,
-      // but for now we'll allow it if MiniPay auth is globally enabled and it's from a known source.
+      // but for now we'll allow it if Social auth is globally enabled and it's from a known source.
       // res.status(400).json({ error: "Unsupported wallet provider for unverified auth." });
     }
 
@@ -145,11 +144,11 @@ router.post("/minipay", async (req, res) => {
     res.json({
       success: true,
       address: walletAddress,
-      authMethod: "minipay",
+      authMethod: "social",
     });
   } catch (err) {
-    console.error("❌ MiniPay auth error:", err);
-    res.status(500).json({ error: "MiniPay authentication failed." });
+    console.error("❌ Social auth error:", err);
+    res.status(500).json({ error: "Social authentication failed." });
   }
 });
 

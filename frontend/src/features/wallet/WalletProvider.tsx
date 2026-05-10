@@ -253,7 +253,7 @@ export function WalletProvider({ children }: WalletProviderProps) {
     setBackendAuthError("");
 
     try {
-      await backendPost<{ success: boolean; address: string }>("/auth/minipay", {
+      await backendPost<{ success: boolean; address: string }>("/auth/social", {
         address: account,
         walletProvider: walletProviderName || "reown",
       });

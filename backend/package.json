@@ -20,8 +20,7 @@
     "helmet": "^8.1.0",
     "siwe": "^3.0.0",
     "socket.io": "^4.8.3",
-    "uuid": "^14.0.0",
-    "viem": "^2.48.4"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@types/cookie": "^0.6.0",

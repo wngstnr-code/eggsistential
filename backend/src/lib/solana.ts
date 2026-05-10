@@ -518,7 +518,7 @@ export async function readActiveOnchainSession(walletAddress: string): Promise<{
 
 /**
  * Returns the on-chain status of a Solana transaction by signature.
- * Replaces viem `getTransactionReceipt`. Throws if signature is invalid.
+ * Throws if signature is invalid.
  */
 export async function readTransactionStatus(signature: string): Promise<{
   found: boolean;

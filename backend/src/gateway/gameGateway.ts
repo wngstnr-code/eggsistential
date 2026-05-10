@@ -54,7 +54,7 @@ import { submitSettlementOnchain } from "../services/settlementExecutor.js";
 let io: SocketServer;
 const SIGN_SETTLEMENT_TIMEOUT_MS = 10_000;
 
-type MiniPaySocketAuthPayload = {
+type SocialSocketAuthPayload = {
   walletAddress?: string;
   walletProvider?: string;
   chainId?: number | string;
@@ -171,16 +171,24 @@ function getWalletFromSocketHandshake(socket: Socket): string | null {
     return cookieWallet;
   }
 
-  if (!env.MINIPAY_UNVERIFIED_AUTH_ENABLED) {
+  if (!env.SOCIAL_AUTH_ENABLED) {
     return null;
   }
 
-  const auth = (socket.handshake.auth ?? {}) as MiniPaySocketAuthPayload;
+  const auth = (socket.handshake.auth ?? {}) as SocialSocketAuthPayload;
   const walletProvider = String(auth.walletProvider || "").toLowerCase();
   const claimedAddress = String(auth.walletAddress || "");
   void auth.chainId;
 
-  if (walletProvider !== "minipay" || !isValidSolanaAddress(claimedAddress)) {
+  const isSocialOrEmbedded =
+    walletProvider.includes("reown") ||
+    walletProvider.includes("appkit") ||
+    walletProvider === "google" ||
+    walletProvider === "apple" ||
+    walletProvider === "discord" ||
+    walletProvider === "x";
+
+  if (!isSocialOrEmbedded || !isValidSolanaAddress(claimedAddress)) {
     return null;
   }
 
