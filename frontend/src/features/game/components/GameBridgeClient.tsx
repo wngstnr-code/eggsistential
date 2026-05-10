@@ -136,6 +136,62 @@ function toBase64Bytes(base64: string) {
   return bytes;
 }
 
+function readUnknownErrorMessage(error: unknown) {
+  if (error && typeof error === "object" && "message" in error) {
+    return String((error as { message?: unknown }).message || "").trim();
+  }
+  if (typeof error === "string") return error.trim();
+  return "";
+}
+
+async function readSendTransactionLogs(error: unknown, connection: Connection) {
+  if (!error || typeof error !== "object") return null;
+
+  const candidate = error as {
+    logs?: unknown;
+    getLogs?: (connection?: Connection) => Promise<string[] | null> | string[] | null;
+  };
+
+  if (Array.isArray(candidate.logs)) {
+    return candidate.logs.map(String);
+  }
+
+  if (typeof candidate.getLogs === "function") {
+    try {
+      const logs = await candidate.getLogs(connection);
+      return Array.isArray(logs) ? logs.map(String) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function isBlockhashError(message: string, logs: string[] | null) {
+  const haystack = [message, ...(logs || [])].join("\n").toLowerCase();
+  return haystack.includes("blockhash not found") || haystack.includes("blockhash");
+}
+
+function isUserRejectedWalletError(message: string) {
+  const lower = message.toLowerCase();
+  return (
+    lower.includes("user rejected") ||
+    lower.includes("rejected the request") ||
+    lower.includes("user denied") ||
+    lower.includes("rejected by user")
+  );
+}
+
+function isSolFeeBalanceError(message: string, logs: string[] | null) {
+  const haystack = [message, ...(logs || [])].join("\n").toLowerCase();
+  return (
+    haystack.includes("attempt to debit an account but found no record of a prior credit") ||
+    haystack.includes("insufficient funds for fee") ||
+    haystack.includes("insufficient lamports")
+  );
+}
+
 export function GameBridgeClient({
   backgroundMode = false,
 }: GameBridgeClientProps) {
@@ -455,9 +511,44 @@ export function GameBridgeClient({
       };
       const tx = Transaction.from(toBase64Bytes(unsignedTx));
       const connection = new Connection(SOLANA_RPC_URL, "confirmed");
-      const txHash = await wallet.sendTransaction(tx, connection);
-      await connection.confirmTransaction(txHash, "confirmed");
-      return txHash;
+      const latestBlockhash = await connection.getLatestBlockhash("confirmed");
+      tx.recentBlockhash = latestBlockhash.blockhash;
+      tx.lastValidBlockHeight = latestBlockhash.lastValidBlockHeight;
+
+      try {
+        const txHash = await wallet.sendTransaction(tx, connection);
+        await connection.confirmTransaction(
+          {
+            signature: txHash,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+          },
+          "confirmed",
+        );
+        return txHash;
+      } catch (error) {
+        const message = readUnknownErrorMessage(error);
+        const logs = await readSendTransactionLogs(error, connection);
+
+        if (isUserRejectedWalletError(message)) {
+          throw new Error("Start bet was canceled in wallet.");
+        }
+
+        if (isSolFeeBalanceError(message, logs)) {
+          throw new Error("Wallet needs SOL for network fees before starting a bet.");
+        }
+
+        if (isBlockhashError(message, logs)) {
+          throw new Error("Transaction expired. Please try again.");
+        }
+
+        console.warn("Solana wallet transaction failed", {
+          message,
+          logs,
+        });
+
+        throw error;
+      }
     }
 
     function waitForSocketResult<T>(

@@ -754,11 +754,14 @@ function formatBridgeError(error, fallback, userRejectedMessage) {
 
   if (
     lower.includes("insufficient funds") ||
+    lower.includes("needs sol for network fees") ||
+    lower.includes("no record of a prior credit") ||
+    lower.includes("insufficient lamports") ||
     lower.includes("gas required exceeds allowance") ||
     lower.includes("intrinsic gas too low") ||
     lower.includes("exceeds allowance")
   ) {
-    return "Wallet gas balance is insufficient for this transaction.";
+    return "Wallet needs SOL for network fees before starting a bet.";
   }
 
   if (
@@ -956,7 +959,7 @@ async function startBet(stake) {
         "Failed to start live bet.",
         "Start bet was canceled in wallet.",
       );
-      console.error("Failed to start live bet:", error);
+      console.warn("Failed to start live bet:", message);
       window.dispatchEvent(
         new CustomEvent("chicken:game-error", { detail: { message } }),
       );
@@ -1511,11 +1514,11 @@ function showResult(data) {
   if (!resultDOM || !titleEl || !bodyEl) return;
 
   const shouldPlaySfx = !data.silent;
+  resultDOM.dataset.result = data.type || "gameover";
 
   if (data.type === "cashout") {
     if (shouldPlaySfx) playCashoutSfx();
     titleEl.innerText = "CASHED OUT";
-    titleEl.style.color = "#27ae60";
     const profitClass =
       data.profit >= 0 ? "profit-positive" : "profit-negative";
     const profitSign = data.profit >= 0 ? "+" : "-";
@@ -1529,7 +1532,6 @@ function showResult(data) {
   } else if (data.type === "crash") {
     if (shouldPlaySfx) playCrashSfx();
     titleEl.innerText = "CRASHED";
-    titleEl.style.color = "#c0392b";
     bodyEl.innerHTML = `
       <p>Last checkpoint: <strong>${data.cp}</strong></p>
       <p>Hops survived: <strong>${data.rows}</strong></p>
@@ -1539,7 +1541,6 @@ function showResult(data) {
   } else {
     if (shouldPlaySfx) playCrashSfx();
     titleEl.innerText = "GAME OVER";
-    titleEl.style.color = "#c0392b";
     bodyEl.innerHTML = `<p>Hops: <strong>${position.currentRow}</strong></p>`;
   }
   resultDOM.style.visibility = "visible";
@@ -1547,7 +1548,10 @@ function showResult(data) {
 
 function hideResult() {
   const el = document.getElementById("result-container");
-  if (el) el.style.visibility = "hidden";
+  if (el) {
+    el.style.visibility = "hidden";
+    delete el.dataset.result;
+  }
 }
 
 function Camera() {
@@ -6112,7 +6116,7 @@ function initBettingUI() {
   window.addEventListener("chicken:game-error", (event) => {
     const message = event?.detail?.message;
     if (message) {
-      console.error("Backend game error:", message);
+      console.warn("Backend game error:", message);
       dispatchPlayStatus({
         message,
         tone: "error",

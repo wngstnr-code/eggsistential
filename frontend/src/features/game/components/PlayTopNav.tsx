@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
-  BadgeCheck,
   Egg,
+  Medal,
   Play as PlayIcon,
   Trophy,
   WalletCards,
@@ -1171,7 +1171,10 @@ export function PlayTopNav() {
         : null}
       {tournamentBadgeButton("play-fixed-tournament-badge")}
       <div className="play-mobile-header-rail" aria-hidden="true" />
-      <nav ref={navRef} className="play-nav">
+      <nav
+        ref={navRef}
+        className={`play-nav${isMenuOpen ? " play-nav-menu-open" : ""}`}
+      >
         <div className="play-nav-row">
           <div ref={walletMenuRef} className="play-wallet-menu">
             <button
@@ -1459,16 +1462,13 @@ export function PlayTopNav() {
             </button>
             <button
               type="button"
-              className="play-bottom-nav-tab play-bottom-nav-tab-passport"
-              onClick={() => {
-                void onCheckPassportClick();
-              }}
-              disabled={passportBusy}
-              aria-label={passportBadgeLabel}
-              title={passportBadgeLabel}
+              className="play-bottom-nav-tab play-bottom-nav-tab-tour"
+              onClick={onTournamentClick}
+              aria-label="Tournament, coming soon"
+              title="Tournament coming soon"
             >
-              <BadgeCheck aria-hidden="true" />
-              <span>PASS</span>
+              <Medal aria-hidden="true" />
+              <span>TOUR</span>
             </button>
           </div>
         ) : null}
