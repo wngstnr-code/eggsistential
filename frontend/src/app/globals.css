@@ -11716,20 +11716,6 @@ body.checkpoint-arrival #hud-scrim::after {
     letter-spacing: 1px !important;
   }
 
-  .home-nav-global {
-    padding: 8px 12px !important;
-  }
-
-  .home-brand-name {
-    font-size: 9px !important;
-  }
-
-  .home-nav-login {
-    min-width: 0 !important;
-    padding: 6px 10px !important;
-    font-size: 9px !important;
-  }
-
   .home-subcopy {
     font-size: 9px !important;
     line-height: 1.5 !important;
