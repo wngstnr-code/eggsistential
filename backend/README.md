@@ -4,22 +4,18 @@ The Eggsistential backend powers the server-authoritative game flow and authenti
 
 Main responsibilities:
 
-- SIWE (Sign-In With Solana) authentication
-- Social Login (Google, Apple, etc.) session bootstrap
-- Session cookie management
-- Real-time gameplay over Socket.io
-- Settlement signing
-- Onchain settlement relaying
-- Leaderboard and player APIs
-- Trust passport eligibility and signature issuance
+- **SIWS Authentication**: Sign-In With Solana for secure wallet sessions.
+- **Social Login**: Easy onboarding for non-crypto users via Reown AppKit.
+- **Real-time Gameplay**: Low-latency game state synchronization over Socket.io.
+- **Secure Settlements**: Signs and relays game outcomes to the Solana blockchain.
+- **Player APIs**: Manages leaderboards, player profiles, and on-chain trust signatures.
 
 ## Stack
 
-- Express
-- Socket.io
-- Solana Web3.js
-- SIWE (via SIWS)
-- Supabase
+- **Express**: Web framework.
+- **Socket.io**: Real-time communication.
+- **Solana Web3.js**: Blockchain interaction.
+- **Supabase**: Database and storage.
 
 ## Commands
 
@@ -34,8 +30,8 @@ npm run start
 
 Default local setup:
 
-- backend URL: `http://localhost:8000`
-- expected frontend origin: `http://localhost:3000`
+- Backend URL: `http://localhost:8000`
+- Expected frontend origin: `http://localhost:3000`
 
 ## Required Environment
 
@@ -44,106 +40,24 @@ The backend reads values from `backend/.env`.
 ```bash
 PORT=8000
 FRONTEND_URL=http://localhost:3000
-
 SESSION_SECRET=your_session_secret
+SUPABASE_URL=your_supabase_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_key
 
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+# Solana Config
+NETWORK_NAME=solana-devnet
+RPC_URL=https://api.devnet.solana.com
+SOLANA_CLUSTER=devnet
 
-NETWORK_NAME=solana-testnet
-RPC_URL=https://api.testnet.solana.com
-SOLANA_CLUSTER=testnet
-NATIVE_TOKEN_SYMBOL=SOL
-MIN_RECOMMENDED_NATIVE_BALANCE=0.05
-
-GAME_VAULT_ADDRESS=
-GAME_SETTLEMENT_ADDRESS=
-TRUST_PASSPORT_ADDRESS=
-FAUCET_CONTRACT_ADDRESS=
-FAUCET_MODE=drip_to
-FAUCET_AMOUNT_UNITS=1000000
-FAUCET_COOLDOWN_SECONDS=300
-
+# Contract Addresses
+PROGRAM_ID=
+TOKEN_MINT=
+VAULT_TOKEN_ACCOUNT=
 BACKEND_PRIVATE_KEY=
-
-SETTLEMENT_SIGNATURE_TTL_SECONDS=86400
-PASSPORT_SIGNATURE_TTL_SECONDS=900
-PASSPORT_VALIDITY_SECONDS=2592000
 SOCIAL_AUTH_ENABLED=true
 ```
 
-## Current Contract Wiring
-
-- `GAME_VAULT_ADDRESS=` set this to your active Solana testnet vault address
-- `GAME_SETTLEMENT_ADDRESS=` set this to your active Solana testnet settlement address
-- `TRUST_PASSPORT_ADDRESS=` set this to your active Solana testnet passport address
-- `FAUCET_CONTRACT_ADDRESS=` set this to your active Solana testnet faucet address
-
-The backend signer must stay in sync with the onchain signer used by:
-
-- settlement signatures
-- passport signatures
-
-## Important Routes
-
-Auth:
-
-- `GET /auth/nonce`
-- `POST /auth/verify`
-- `POST /auth/social`
-- `POST /auth/logout`
-- `GET /auth/me`
-
-Social Auth note:
-
-- `POST /auth/social` is a wallet-session bootstrap for social/embedded wallets (via Reown AppKit) where message signing might be unavailable or skipped for UX.
-- Keep `SOCIAL_AUTH_ENABLED=true` only for the social/embedded flow you intend to support.
-
-Game and player:
-
-- `GET /api/game/active`
-- `GET /api/game/pending-settlement`
-- `POST /api/game/submit-settlement`
-- `GET /api/leaderboard/...`
-- `GET /api/player/...`
-
-Passport:
-
-- `GET /api/passport/status`
-- `POST /api/passport/issue-signature`
-
-Faucet:
-
-- `GET /api/faucet/status`
-- `POST /api/faucet/request`
-
-Health:
-
-- `GET /health`
-
-## Common Issues
-
-### Frontend cannot authenticate
-
-Check:
-
-- the backend is actually running on the same URL configured in `NEXT_PUBLIC_BACKEND_API_URL`
-- `FRONTEND_URL` matches the deployed or local frontend origin
-- the browser accepts cookies for the current environment
-
-### Cashout fails
-
-Common causes:
-
-- the backend relayer ran out of native gas token (`SOL` on Solana testnet)
-- Solana RPC failed or was rate-limited
-- the backend signer does not match the onchain `backendSigner`
-- the vault treasury is not large enough for the payout
-
-The backend maps settlement failures into more specific messages to make debugging easier.
-
 ## Database
 
-Supabase schema:
-
-- [database/schema.sql](./database/schema.sql)
+The project uses Supabase for storing player history and session states.
+The schema is defined in [database/schema.sql](./database/schema.sql).

@@ -1,73 +1,37 @@
 # Eggsistential Solana Program
 
-`sc` adalah workspace Solana/Anchor untuk game flow backend-authoritative Eggsistential.
+The core logic of Eggsistential is implemented as a Solana smart contract using the Anchor framework.
 
-## Layout
+## Architecture
 
-- `Anchor.toml`
-- `Cargo.toml`
-- `programs/eggsistential/`
+- **`programs/eggsistential/src/lib.rs`**: Main program entry point.
+- **`instructions.rs`**: Implementation of game logic (Deposit, Start, Settle, etc.).
+- **`state.rs`**: Definitions for on-chain accounts (PlayerBalance, Session, EggPass).
+- **`constants.rs`**: Program-wide settings and seeds.
 
-Source utama ada di:
+## Key On-Chain Concepts
 
-- `programs/eggsistential/src/lib.rs`
-- `programs/eggsistential/src/instructions.rs`
-- `programs/eggsistential/src/state.rs`
-- `programs/eggsistential/src/error.rs`
-- `programs/eggsistential/src/events.rs`
-
-## Accounts
-
-- `Config`: admin, backend signer, mint, pause flag, expiry delay, faucet amount, dan aggregate balances
-- `PlayerBalance`: saldo `available`, `locked`, dan satu `active_session`
-- `Session`: state satu ronde game untuk `session_id`
-- `EggPass`: trust tier, checkpoint cashout evidence, reputation score, issue time, expiry, dan revoke status
-- `UsedNonce`: replay protection untuk claim `EggPass`
-
-## Instructions
-
-- `initialize_config`
-- `set_backend_signer`
-- `set_session_expiry_delay`
-- `set_faucet_claim_amount`
-- `set_paused`
-- `claim_faucet`
-- `deposit`
-- `withdraw`
-- `fund_treasury`
-- `treasury_withdraw`
-- `start_session`
-- `settle_session`
-- `expire_session`
-- `claim_egg_pass`
-- `revoke_egg_pass`
-
-## Integration Notes
-
-- SPL mint authority harus dipegang PDA `vault-authority` agar faucet bisa `mint_to`
-- dana program disimpan di vault ATA milik PDA
-- settlement dan `EggPass` claim membutuhkan `backend_signer` sebagai signer transaksi
-- `session_id` dan `nonce` disimpan sebagai `[u8; 32]` agar PDA seed stabil
-- `EggPass` tier mengikuti disciplined checkpoint cashout model:
-  - Tier 1: minimal 3 cashout di checkpoint 2
-  - Tier 2: minimal 4 cashout di checkpoint 4
-  - Tier 3: minimal 4 cashout di checkpoint 6
-  - Tier 4: minimal 3 cashout di checkpoint 8
-- `EggPass` account menyimpan `highest_checkpoint`, per-checkpoint cashout counts, dan `reputation_score` agar partner apps dapat membaca bukti reputasi ringkas langsung dari account data.
+- **Vault Authority**: A Program Derived Address (PDA) that holds and manages all deposited assets securely.
+- **EggPass**: An on-chain reputation system that tracks your skill tier based on successful checkpoint cashouts.
+- **Session-Based Gameplay**: Every run is backed by an on-chain session to ensure transparency and prevent double-spending.
 
 ## Commands
 
+### Development
+
 ```bash
-cargo fmt --all --check
-NO_DNA=1 anchor build --no-idl
+# Build the program
+anchor build --no-idl
+
+# Run unit tests
 cargo test --manifest-path programs/eggsistential/Cargo.toml
 ```
 
-Devnet deploy target:
+### Deployment
 
 ```bash
-anchor keys list
-NO_DNA=1 anchor deploy --provider.cluster devnet
+# Deploy to Devnet
+anchor deploy --provider.cluster devnet
 ```
 
-Catatan: full `anchor build` tanpa `--no-idl` masih dapat gagal di fase IDL generation pada Anchor `0.30.1`, sementara SBF program build dan unit test sudah terverifikasi.
+*Note: Use `--no-idl` if you encounter IDL generation issues with Anchor 0.30.1.*
