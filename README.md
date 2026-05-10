@@ -2,6 +2,10 @@
 
 **Eggsistential** is a high-stakes, skill-based arcade game built on the Solana blockchain. It combines the addictive "just one more try" gameplay of classics like Frogger with the transparency and thrill of on-chain competition.
 
+## Live Demo
+
+**Play now at: [https://eggsistential.vercel.app](https://eggsistential.vercel.app)**
+
 ## The Vision
 
 In Eggsistential, your skill directly impacts your rewards. No black boxes, no hidden odds—just you, a chicken, and a dangerous road. Cross lanes, hit checkpoints, and build your reputation as an elite runner.
