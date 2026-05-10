@@ -6,7 +6,7 @@ import { AppProviders } from "~/providers/AppProviders";
 const APP_URL = "https://eggsistential.vercel.app";
 const APP_NAME = "EGGSISTENTIAL";
 const APP_DESCRIPTION =
-  "A hilariously competitive onchain chicken-crossing game where skill decides your fate and every hop can turn into profit.";
+  "A high-performance, skill-based survival arena on Solana SVM. Verifiable arcade gameplay featuring \"Proof of Survival\" and real-time on-chain reputation.";
 const APP_IMAGE = `${APP_URL}/images/1.webp`;
 const APP_ICON = "/favicon.png";
 const APP_SPLASH_BG = "#0a1428";

@@ -1,6 +1,6 @@
 # EGGSISTENTIAL
 
-**Eggsistential** is a high-stakes, skill-based arcade game built on the Solana blockchain. It combines the addictive "just one more try" gameplay of classics like Frogger with the transparency and thrill of on-chain competition.
+**Eggsistential** is a high-performance, skill-based survival arena on Solana SVM. It combines the addictive "just one more try" gameplay of classics like Frogger with verifiable arcade gameplay featuring "Proof of Survival" and real-time on-chain reputation.
 
 ## Live Demo
 
