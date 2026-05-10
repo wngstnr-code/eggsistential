@@ -2,7 +2,6 @@ import { useEffect, useCallback, useRef } from "react";
 import {
   initializeSocket,
   onGameEvent,
-  disconnectSocket,
   isSocketConnected,
   type GameEventMap,
 } from "./socket";

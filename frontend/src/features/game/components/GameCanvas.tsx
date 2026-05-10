@@ -56,25 +56,18 @@ const characters = [
   },
 ];
 
-function readStoredCharacter() {
-  if (typeof window === "undefined") return "chicken";
-  try {
-    const stored = window.localStorage.getItem(CHARACTER_STORAGE_KEY);
-    return stored && characters.some((character) => character.id === stored)
-      ? stored
-      : "chicken";
-  } catch {
-    return "chicken";
-  }
-}
 
 export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
   const [characterModalOpen, setCharacterModalOpen] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState("chicken");
-
-  useEffect(() => {
-    setSelectedCharacter(readStoredCharacter());
-  }, []);
+  const [selectedCharacter, setSelectedCharacter] = useState(() => {
+    if (typeof window === "undefined") return "chicken";
+    try {
+      const stored = window.localStorage.getItem(CHARACTER_STORAGE_KEY);
+      return stored && characters.some((c) => c.id === stored) ? stored : "chicken";
+    } catch {
+      return "chicken";
+    }
+  });
 
   useEffect(() => {
     const openCharacterMenu = () => {

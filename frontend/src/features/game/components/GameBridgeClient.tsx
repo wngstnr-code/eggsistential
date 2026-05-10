@@ -488,7 +488,8 @@ export function GameBridgeClient({
             return latest;
           }
         } catch (error) {
-    console.warn("Caught error in GameBridgeClient:", error);}
+          console.warn("Caught error in GameBridgeClient:", error);
+        }
         await new Promise((resolve) => window.setTimeout(resolve, 220));
       }
       return latest;
@@ -793,7 +794,7 @@ export function GameBridgeClient({
         const blocker = await getPlayBlocker();
         emitPlayBlocker(blocker);
         if (blocker.kind === "none") return false;
-        const settledCount = await submitAllPendingSettlements();
+        await submitAllPendingSettlements();
         await backendFetch<{
           success: boolean;
           resolved?: boolean;
@@ -813,7 +814,7 @@ export function GameBridgeClient({
         const blocker = await getPlayBlocker();
         emitPlayBlocker(blocker);
         if (blocker.kind === "none") return false;
-        const settledCount = await submitAllPendingSettlements();
+        await submitAllPendingSettlements();
         await backendFetch<{
           success: boolean;
           resolved?: boolean;

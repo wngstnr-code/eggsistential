@@ -264,7 +264,7 @@ export function PlayTopNav() {
   }
 
   function onLogoutClick() {
-    disconnectWallet();
+    void disconnectWallet();
     setIsWalletMenuOpen(false);
     setIsMenuOpen(false);
   }
@@ -311,7 +311,6 @@ export function PlayTopNav() {
   }
 
   function onStatsClick() {
-    console.log("PlayTopNav: Stats button clicked");
     setIsMenuOpen(false);
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent("chicken:open-stats"));
@@ -569,7 +568,6 @@ export function PlayTopNav() {
   }
 
   function onLeaderboardMenuClick() {
-    console.log("PlayTopNav: Leaderboard button clicked");
     setIsMenuOpen(false);
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent("chicken:open-leaderboard"));
@@ -689,7 +687,7 @@ export function PlayTopNav() {
           setPlayBlocker(blocker);
         }
       } catch (error) {
-      console.warn("Caught error in PlayTopNav:", error);
+        console.warn("Caught error in PlayTopNav:", error);
         if (!cancelled) {
           setPlayBlocker({ kind: "none" });
         }
@@ -912,7 +910,7 @@ export function PlayTopNav() {
           }),
         );
       } catch (error) {
-      console.warn("Caught error in PlayTopNav:", error);
+        console.warn("Caught error in PlayTopNav:", error);
         setSfxVolumePercent(90);
       }
     });

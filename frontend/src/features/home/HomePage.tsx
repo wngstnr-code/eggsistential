@@ -490,7 +490,7 @@ export function HomePage() {
   }, [clearWalletError, isConnected]);
 
   function onLogout() {
-    disconnectWallet();
+    void disconnectWallet();
     setShowProfilePopover(false);
   }
 
@@ -671,7 +671,6 @@ export function HomePage() {
   const passportCurrentTier = passportProgression?.currentTier ?? 0;
   const passportCurrentTierLabel =
     passportProgression?.currentTierLabel ?? "Rookie";
-  const passportRequirements = passportProgression?.requirements ?? [];
   const passportBenefits = passportStatus?.benefits ?? null;
   return (
     <main className="flow-page home-page">
