@@ -307,6 +307,9 @@ export function HomePage() {
   const [failedGuideImages, setFailedGuideImages] = useState<
     Record<string, boolean>
   >({});
+  const [loadingGuideImages, setLoadingGuideImages] = useState<
+    Record<string, boolean>
+  >({});
   const [showHelp, setShowHelp] = useState(false);
   const [showPassportInfo, setShowPassportInfo] = useState(false);
   const [showTrustPassport, setShowTrustPassport] = useState(false);
@@ -334,6 +337,13 @@ export function HomePage() {
   const isLastGuideSlide = activeGuideSlide === GAME_GUIDE_SLIDES.length - 1;
 
   function openGameGuide() {
+    const firstSlide = GAME_GUIDE_SLIDES[0];
+    if (firstSlide) {
+      setLoadingGuideImages((current) => ({
+        ...current,
+        [firstSlide.imageSrc]: true,
+      }));
+    }
     setActiveGuideSlide(0);
     setShowGameGuide(true);
   }
@@ -343,17 +353,34 @@ export function HomePage() {
   }
 
   function goToPreviousGuideSlide() {
-    setActiveGuideSlide((current) => Math.max(0, current - 1));
+    setActiveGuideSlide((current) => {
+      const next = Math.max(0, current - 1);
+      const slide = GAME_GUIDE_SLIDES[next];
+      if (slide) {
+        setLoadingGuideImages((prev) => ({ ...prev, [slide.imageSrc]: true }));
+      }
+      return next;
+    });
   }
 
   function goToNextGuideSlide() {
-    setActiveGuideSlide((current) =>
-      Math.min(GAME_GUIDE_SLIDES.length - 1, current + 1),
-    );
+    setActiveGuideSlide((current) => {
+      const next = Math.min(GAME_GUIDE_SLIDES.length - 1, current + 1);
+      const slide = GAME_GUIDE_SLIDES[next];
+      if (slide) {
+        setLoadingGuideImages((prev) => ({ ...prev, [slide.imageSrc]: true }));
+      }
+      return next;
+    });
   }
 
   function markGuideImageFailed(imageSrc: string) {
     setFailedGuideImages((current) => ({ ...current, [imageSrc]: true }));
+    setLoadingGuideImages((current) => ({ ...current, [imageSrc]: false }));
+  }
+
+  function markGuideImageLoaded(imageSrc: string) {
+    setLoadingGuideImages((current) => ({ ...current, [imageSrc]: false }));
   }
 
   useEffect(() => {
@@ -1552,11 +1579,22 @@ export function HomePage() {
               {activeGuideSlide + 1} / {GAME_GUIDE_SLIDES.length}
             </div>
             <div className={`home-guide-art home-guide-art-${activeGuide.tone}`}>
+              {loadingGuideImages[activeGuide.imageSrc] &&
+              !failedGuideImages[activeGuide.imageSrc] ? (
+                <div className="home-guide-loading" aria-hidden="true">
+                  <div className="home-guide-spinner" />
+                  <span>LOADING GUIDE...</span>
+                </div>
+              ) : null}
               {!failedGuideImages[activeGuide.imageSrc] ? (
                 <img
                   src={activeGuide.imageSrc}
                   alt={activeGuide.imageAlt}
+                  onLoad={() => markGuideImageLoaded(activeGuide.imageSrc)}
                   onError={() => markGuideImageFailed(activeGuide.imageSrc)}
+                  style={{
+                    opacity: loadingGuideImages[activeGuide.imageSrc] ? 0 : 1,
+                  }}
                 />
               ) : null}
               <div className="home-guide-fallback" aria-hidden="true">
@@ -1602,7 +1640,16 @@ export function HomePage() {
                   key={slide.title}
                   type="button"
                   className={index === activeGuideSlide ? "active" : ""}
-                  onClick={() => setActiveGuideSlide(index)}
+                  onClick={() => {
+                    const s = GAME_GUIDE_SLIDES[index];
+                    if (s) {
+                      setLoadingGuideImages((prev) => ({
+                        ...prev,
+                        [s.imageSrc]: true,
+                      }));
+                    }
+                    setActiveGuideSlide(index);
+                  }}
                   aria-label={`Open ${slide.title}`}
                   aria-current={index === activeGuideSlide ? "step" : undefined}
                 />

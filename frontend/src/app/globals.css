@@ -1241,6 +1241,36 @@ canvas.game {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: opacity 250ms ease;
+}
+
+.home-guide-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(11, 25, 45, 0.42);
+  color: #8eeedf;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 0 12px rgba(142, 238, 223, 0.28);
+}
+
+.home-guide-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(142, 238, 223, 0.18);
+  border-top-color: #8eeedf;
+  border-radius: 999px;
+  animation: home-guide-spin 800ms linear infinite;
+}
+
+@keyframes home-guide-spin {
+  to { transform: rotate(360deg); }
 }
 
 .home-guide-fallback {
