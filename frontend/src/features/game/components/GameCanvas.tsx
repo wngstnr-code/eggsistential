@@ -70,7 +70,11 @@ function readStoredCharacter() {
 
 export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
   const [characterModalOpen, setCharacterModalOpen] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState(readStoredCharacter);
+  const [selectedCharacter, setSelectedCharacter] = useState("chicken");
+
+  useEffect(() => {
+    setSelectedCharacter(readStoredCharacter());
+  }, []);
 
   useEffect(() => {
     const openCharacterMenu = () => {
@@ -105,7 +109,8 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
     setSelectedCharacter(characterId);
     try {
       window.localStorage.setItem(CHARACTER_STORAGE_KEY, characterId);
-    } catch {
+    } catch (error) {
+      console.warn("Failed to save character to localStorage", error);
     }
     window.dispatchEvent(
       new CustomEvent("chicken:character-selected", {
