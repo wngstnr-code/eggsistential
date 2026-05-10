@@ -108,7 +108,8 @@ function emitPlayBlocker(blocker: ChickenBridgePlayBlocker) {
 async function fetchActiveBackendSession() {
   try {
     return await backendFetch<ActiveBackendSessionPayload>("/api/game/active");
-  } catch {
+  } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);
     return {
       hasActiveGame: false,
       session: null,
@@ -119,7 +120,8 @@ async function fetchActiveBackendSession() {
 async function fetchPendingSettlements() {
   try {
     return await backendFetch<PendingSettlementsPayload>("/api/game/pending-settlement");
-  } catch {
+  } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);
     return {
       hasPending: false,
       pendingSettlements: [],
@@ -160,7 +162,8 @@ async function readSendTransactionLogs(error: unknown, connection: Connection) {
     try {
       const logs = await candidate.getLogs(connection);
       return Array.isArray(logs) ? logs.map(String) : null;
-    } catch {
+    } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);
       return null;
     }
   }
@@ -439,7 +442,8 @@ export function GameBridgeClient({
       lastSettleSweepAtRef.current = now;
       try {
         await submitAllPendingSettlements();
-      } catch {
+      } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);
       } finally {
         settleSweepBusyRef.current = false;
       }
@@ -457,7 +461,8 @@ export function GameBridgeClient({
           },
         );
         return Boolean(response?.success);
-      } catch {
+      } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);
         return false;
       }
     }
@@ -482,7 +487,8 @@ export function GameBridgeClient({
           if (Math.abs(latest - previous) > 0.000001) {
             return latest;
           }
-        } catch {}
+        } catch (error) {
+    console.warn("Caught error in GameBridgeClient:", error);}
         await new Promise((resolve) => window.setTimeout(resolve, 220));
       }
       return latest;

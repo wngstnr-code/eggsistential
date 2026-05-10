@@ -168,6 +168,7 @@ export function PlayTopNav() {
   const [sfxVolumePercent, setSfxVolumePercent] = useState(90);
   const [passportStatusText, setPassportStatusText] = useState("");
   const [passportBusy, setPassportBusy] = useState(false);
+  const isPassportBusyRef = useRef(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [passportStatus, setPassportStatus] =
     useState<ChickenBridgePassportStatus | null>(null);
@@ -298,7 +299,8 @@ export function PlayTopNav() {
     const normalized = nextPercent / 100;
     try {
       localStorage.setItem(SFX_STORAGE_KEY, String(normalized));
-    } catch {
+    } catch (error) {
+      console.warn("Failed to save SFX volume to localStorage", error);
     }
     window.dispatchEvent(
       new CustomEvent("chicken:set-sfx-volume", {
@@ -324,7 +326,8 @@ export function PlayTopNav() {
   }
 
   async function loadPassportStatus(openPanel: boolean, announce = true) {
-    if (passportBusy) return null;
+    if (isPassportBusyRef.current) return null;
+    isPassportBusyRef.current = true;
     setPassportBusy(true);
     try {
       const bridge = getBridgeApi();
@@ -371,58 +374,13 @@ export function PlayTopNav() {
       }
       return null;
     } finally {
+      isPassportBusyRef.current = false;
       setPassportBusy(false);
     }
   }
 
   async function onCheckPassportClick() {
     await loadPassportStatus(true);
-    if (!passportBusy) return;
-
-    if (passportBusy) return;
-    setPassportBusy(true);
-    try {
-      const bridge = getBridgeApi();
-      const status = await bridge.getPassportStatus();
-      const passport = status.passport;
-      if (passport?.valid) {
-        const expiryText = passport.expiry
-          ? new Date(passport.expiry * 1000).toLocaleDateString()
-          : "-";
-        const message = `PASSPORT VALID • TIER ${passport.tier} • EXP ${expiryText}`;
-        setPassportStatusText(message);
-        dispatchStatusUpdate({
-          message,
-          tone: "ready",
-          durationMs: 3600,
-        });
-        return;
-      }
-
-      const eligibility = status.eligibility;
-      const message = eligibility?.eligible
-        ? `ELIGIBLE TIER ${eligibility.tier} • READY TO CLAIM`
-        : eligibility?.reason || "Not eligible for passport yet.";
-      setPassportStatusText(message);
-      dispatchStatusUpdate({
-        message,
-        tone: eligibility?.eligible ? "warning" : "info",
-        durationMs: 4200,
-      });
-    } catch (error) {
-      const message = readActionErrorMessage(
-        error,
-        "Failed to check passport status.",
-      );
-      setPassportStatusText(message);
-      dispatchStatusUpdate({
-        message,
-        tone: "error",
-        durationMs: 4200,
-      });
-    } finally {
-      setPassportBusy(false);
-    }
   }
 
   useEffect(() => {
@@ -544,7 +502,8 @@ export function PlayTopNav() {
   }, []);
 
   async function onClaimPassportClick() {
-    if (passportBusy) return;
+    if (isPassportBusyRef.current) return;
+    isPassportBusyRef.current = true;
     setPassportBusy(true);
     try {
       const bridge = getBridgeApi();
@@ -603,6 +562,7 @@ export function PlayTopNav() {
         durationMs: 4200,
       });
     } finally {
+      isPassportBusyRef.current = false;
       setPassportBusy(false);
     }
   }
