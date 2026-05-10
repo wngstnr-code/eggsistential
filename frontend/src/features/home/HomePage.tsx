@@ -1597,17 +1597,19 @@ export function HomePage() {
                   }}
                 />
               ) : null}
-              <div className="home-guide-fallback" aria-hidden="true">
-                <span className="home-guide-track" />
-                <span className="home-guide-checkpoint" />
-                <span className="home-guide-egg home-guide-egg-one" />
-                <span className="home-guide-egg home-guide-egg-two" />
-                <span className="home-guide-egg home-guide-egg-three" />
-                <span className="home-guide-pass-card home-guide-pass-one" />
-                <span className="home-guide-pass-card home-guide-pass-two" />
-                <span className="home-guide-pass-card home-guide-pass-three" />
-                <span className="home-guide-chicken" />
-              </div>
+              {failedGuideImages[activeGuide.imageSrc] ? (
+                <div className="home-guide-fallback" aria-hidden="true">
+                  <span className="home-guide-track" />
+                  <span className="home-guide-checkpoint" />
+                  <span className="home-guide-egg home-guide-egg-one" />
+                  <span className="home-guide-egg home-guide-egg-two" />
+                  <span className="home-guide-egg home-guide-egg-three" />
+                  <span className="home-guide-pass-card home-guide-pass-one" />
+                  <span className="home-guide-pass-card home-guide-pass-two" />
+                  <span className="home-guide-pass-card home-guide-pass-three" />
+                  <span className="home-guide-chicken" />
+                </div>
+              ) : null}
               {activeGuideSlide > 0 ? (
                 <button
                   className="home-guide-nav-btn home-guide-nav-btn-prev"
