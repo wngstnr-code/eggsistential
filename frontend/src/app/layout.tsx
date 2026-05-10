@@ -22,7 +22,6 @@ const miniAppEmbed = {
   splashImageUrl: APP_ICON,
   splashBackgroundColor: APP_SPLASH_BG,
   buttonTitle: "Play EGGSISTENTIAL",
-  webhookUrl: "",
   button: {
     title: "Play EGGSISTENTIAL",
     action: {
@@ -75,8 +74,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: "cover",
 };
 
@@ -86,8 +85,8 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <body>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>
