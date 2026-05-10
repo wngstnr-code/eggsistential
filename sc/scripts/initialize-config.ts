@@ -1,8 +1,4 @@
-/**
- * Initializes the eggsistential program on devnet without depending on a generated IDL.
- *  1. Creates a new SPL token mint owned by the vault-authority PDA.
- *  2. Calls `initialize_config` via raw instruction encoding.
- */
+
 import {
   Connection,
   Keypair,
@@ -85,7 +81,7 @@ async function main() {
     return;
   }
 
-  // 1. Create mint with vault_authority as mint authority
+  
   const mintKp = Keypair.generate();
   const mintRent = await getMinimumBalanceForRentExemptMint(connection);
   const vaultAta = getAssociatedTokenAddressSync(
@@ -112,7 +108,7 @@ async function main() {
   );
   await sendAndConfirmTransaction(connection, mintTx, [admin, mintKp]);
 
-  // 2. Build initialize_config instruction manually
+  
   const discriminator = anchorDiscriminator("initialize_config");
   const params = encodeInitializeConfigParams(
     backendSigner,

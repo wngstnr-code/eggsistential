@@ -18,7 +18,7 @@ export function useGameSocket(
       return;
     }
 
-    // Prevent multiple initialization
+    
     if (socketInitializedRef.current) {
       return;
     }
@@ -37,8 +37,8 @@ export function useGameSocket(
     initSocket();
 
     return () => {
-      // Cleanup is handled by socket.io's reconnection logic
-      // Don't disconnect on unmount to maintain connection across component unmounts
+      
+      
     };
   }, [enabled, walletAddress, walletProvider]);
 
@@ -60,9 +60,7 @@ export function useGameSocket(
   };
 }
 
-/**
- * Hook to listen to a specific game event
- */
+
 export function useGameEvent<K extends keyof GameEventMap>(
   event: K,
   callback: GameEventMap[K],

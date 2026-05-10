@@ -25,11 +25,7 @@ router.get("/status", requireAuth, (req, res) => {
   });
 });
 
-/**
- * Returns a base64-encoded unsigned transaction the wallet will sign and send.
- * The cooldown is started immediately to discourage repeat requests; if the
- * wallet never signs, the player simply waits out the cooldown.
- */
+
 router.post("/request", requireAuth, async (req, res) => {
   const walletAddress = req.walletAddress!;
   const status = readFaucetStatus(walletAddress);

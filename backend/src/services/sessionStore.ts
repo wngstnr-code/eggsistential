@@ -6,7 +6,7 @@ interface SessionData {
 }
 
 const sessions = new Map<string, SessionData>();
-const nonces = new Map<string, number>(); // nonce → timestamp
+const nonces = new Map<string, number>(); 
 
 export function generateSessionToken(): string {
   return crypto.randomBytes(32).toString("hex");

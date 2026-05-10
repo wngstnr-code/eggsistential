@@ -132,7 +132,7 @@ async function handleEventData(eventData: Buffer, signature: string) {
     const player = readPubkey(body, 0);
     const sessionId = readSessionIdHex(body, 32);
     const outcome = body.readUInt8(64);
-    // stake at 65..73, payout at 73..81, multiplier at 81..89
+    
     const payout = body.readBigUInt64LE(73);
     const finalMultiplierBp = body.readBigUInt64LE(81);
     await ensurePlayer(player);

@@ -585,11 +585,7 @@ router.get("/status", requireAuth, async (req: Request, res: Response) => {
   }
 });
 
-/**
- * Returns a backend-signed `claim_egg_pass` transaction (base64) for the
- * player's wallet to co-sign and submit. The backend signer attests to the
- * eligibility numbers; the player wallet authorizes the on-chain claim.
- */
+
 router.post("/issue-signature", requireAuth, async (req: Request, res: Response) => {
   try {
     const walletAddress = req.walletAddress!;

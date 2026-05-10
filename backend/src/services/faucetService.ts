@@ -86,10 +86,7 @@ function markFaucetRequested(walletAddress: string) {
   lastFaucetAtMsByWallet.set(walletAddress, Date.now());
 }
 
-/**
- * Builds an unsigned `claim_faucet` transaction for the player to sign with
- * their wallet. Marks the cooldown timer immediately to prevent abuse.
- */
+
 export async function requestFaucetForWallet(walletAddress: string) {
   ensureFaucetReady();
 

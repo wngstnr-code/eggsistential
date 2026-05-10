@@ -95,11 +95,7 @@ function normalizeResolution(resolution: SettlementResolutionInput) {
   };
 }
 
-/**
- * Submits a settle_session instruction to the Anchor program.
- * The `signature` param is accepted for API compatibility with the legacy EVM
- * flow but is ignored — the backend signer signs the Solana transaction directly.
- */
+
 export async function submitSettlementOnchain(params: {
   resolution: SettlementResolutionInput;
   signature?: string;

@@ -78,7 +78,7 @@ export function normalizeSessionId(value: string): Buffer {
     const decoded = bs58.decode(trimmed);
     if (decoded.length === 32) return Buffer.from(decoded);
   } catch {
-    // fall through
+    
   }
   throw new Error(`sessionId must be 32 bytes (hex or base58), got "${value}"`);
 }
@@ -210,12 +210,7 @@ export function buildWithdrawIx(
   });
 }
 
-/**
- * Builds an unsigned transaction that the player wallet will sign and submit:
- *   1. Idempotent ATA creation (no-op if already exists)
- *   2. claim_faucet (mints FAUCET_AMOUNT to player ATA)
- * Returns base64-serialized transaction ready to be deserialized by a wallet.
- */
+
 export async function buildClaimFaucetTransaction(player: PublicKey): Promise<string> {
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
   const tx = new Transaction({
@@ -311,7 +306,7 @@ export async function buildStartSessionTransaction(
 
 export { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID };
 
-// ───── EggPass ────────────────────────────────────────────────────────
+
 
 export function eggPassPda(player: PublicKey): PublicKey {
   const [pda] = PublicKey.findProgramAddressSync(
@@ -339,7 +334,7 @@ export interface EggPassClaim {
   reputationScore: number;
   issuedAt: bigint;
   expiry: bigint;
-  nonce: Buffer; // 32 bytes
+  nonce: Buffer; 
 }
 
 export interface EggPassAccount {
@@ -356,16 +351,13 @@ export interface EggPassAccount {
   revoked: boolean;
 }
 
-/**
- * Reads and deserializes a player's EggPass account from chain.
- * Returns null if the account doesn't exist yet.
- */
+
 export async function readEggPass(player: PublicKey): Promise<EggPassAccount | null> {
   const pda = eggPassPda(player);
   const acc = await connection.getAccountInfo(pda);
   if (!acc) return null;
 
-  // Skip 8-byte Anchor discriminator
+  
   const data = acc.data;
   let o = 8;
   const playerKey = new PublicKey(data.subarray(o, o + 32)); o += 32;
@@ -430,7 +422,7 @@ export function buildClaimEggPassIx(
   });
 }
 
-// ───── Read helpers (replaces EVM contract reads) ─────────────────────
+
 
 const ZERO_SESSION_HEX = `0x${"00".repeat(32)}`;
 
@@ -438,7 +430,7 @@ export interface PlayerBalanceState {
   owner: string;
   availableBalance: bigint;
   lockedBalance: bigint;
-  activeSession: string; // 0x-prefixed hex
+  activeSession: string; 
   bump: number;
 }
 
@@ -458,7 +450,7 @@ export async function readPlayerBalance(
 }
 
 export interface SessionState {
-  sessionId: string; // 0x-prefixed hex
+  sessionId: string; 
   player: string;
   stakeAmount: bigint;
   startedAt: number;
@@ -482,11 +474,7 @@ export async function readSession(
   return { sessionId, player, stakeAmount, startedAt, active, settled };
 }
 
-/**
- * Returns the player's active session if one exists and is still active &
- * unsettled, otherwise null. Replaces the EVM `activeSessionOf` + `getSession`
- * round-trip.
- */
+
 export async function readActiveOnchainSession(walletAddress: string): Promise<{
   sessionId: string;
   player: string;
@@ -516,10 +504,7 @@ export async function readActiveOnchainSession(walletAddress: string): Promise<{
   };
 }
 
-/**
- * Returns the on-chain status of a Solana transaction by signature.
- * Throws if signature is invalid.
- */
+
 export async function readTransactionStatus(signature: string): Promise<{
   found: boolean;
   success: boolean | null;
@@ -536,11 +521,7 @@ export function isZeroSessionId(value: string): boolean {
   return /^0x0{64}$/i.test(value);
 }
 
-/**
- * Builds a `claim_egg_pass` transaction signed by the backend authority and
- * serialized for the player's wallet to add their signature and submit.
- * Returns base64-encoded transaction.
- */
+
 export async function buildClaimEggPassTransaction(
   player: PublicKey,
   claim: EggPassClaim,

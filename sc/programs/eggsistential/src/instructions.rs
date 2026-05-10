@@ -719,7 +719,7 @@ fn checked_add_i64(lhs: i64, rhs: i64) -> Result<i64> {
         .ok_or_else(|| error!(EggsError::ArithmeticOverflow))
 }
 
-/// Calculates the payout amount for a cashout settlement using basis points.
+
 pub fn calculate_cashout_payout(stake_amount: u64, final_multiplier_bp: u64) -> Result<u64> {
     let scaled = u128::from(stake_amount)
         .checked_mul(u128::from(final_multiplier_bp))
@@ -746,7 +746,7 @@ pub struct InitializeConfig<'info> {
     pub config: Account<'info, Config>,
     #[account(mut)]
     pub token_mint: Account<'info, Mint>,
-    /// CHECK: This PDA only signs CPIs for the program-owned token vault and faucet minting flow.
+    
     #[account(seeds = [b"vault-authority"], bump)]
     pub vault_authority: UncheckedAccount<'info>,
     #[account(
@@ -785,7 +785,7 @@ pub struct ClaimFaucet<'info> {
     )]
     pub config: Account<'info, Config>,
     pub token_mint: Account<'info, Mint>,
-    /// CHECK: PDA signer for token minting and vault transfers.
+    
     #[account(seeds = [b"vault-authority"], bump = config.vault_authority_bump)]
     pub vault_authority: UncheckedAccount<'info>,
     #[account(mut)]
@@ -855,7 +855,7 @@ pub struct Withdraw<'info> {
     )]
     pub player_balance: Account<'info, PlayerBalance>,
     pub token_mint: Account<'info, Mint>,
-    /// CHECK: PDA signer for token transfers out of the vault.
+    
     #[account(seeds = [b"vault-authority"], bump = config.vault_authority_bump)]
     pub vault_authority: UncheckedAccount<'info>,
     #[account(mut)]
@@ -883,12 +883,12 @@ pub struct TreasuryWithdraw<'info> {
     )]
     pub config: Account<'info, Config>,
     pub token_mint: Account<'info, Mint>,
-    /// CHECK: PDA signer for token transfers out of the vault.
+    
     #[account(seeds = [b"vault-authority"], bump = config.vault_authority_bump)]
     pub vault_authority: UncheckedAccount<'info>,
     #[account(mut)]
     pub vault_token_account: Account<'info, TokenAccount>,
-    /// CHECK: The recipient only needs to match the associated token owner.
+    
     pub recipient: UncheckedAccount<'info>,
     #[account(
         mut,

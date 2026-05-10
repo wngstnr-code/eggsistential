@@ -2,16 +2,7 @@ import { randomBytes } from "node:crypto";
 import { env } from "../config/env.js";
 import { backendSignerKeypair } from "../lib/solana.js";
 
-/**
- * Phase 3 of the Solana migration removed the EIP-712 signature scheme.
- * Settlement now signs the Solana transaction directly inside
- * `submitSettlementOnchain`, and EggPass claims build a partially-signed
- * transaction inside the passport route.
- *
- * The exports below remain for caller compatibility with `routes/game.ts`
- * and `gateway/gameGateway.ts`. The legacy `signSettlement` returns a
- * placeholder signature that downstream code already ignores.
- */
+
 
 export const SETTLEMENT_OUTCOME = {
   CASHED_OUT: 1,
@@ -42,10 +33,7 @@ export function usdcToUint256(amount: number): bigint {
 
 const PLACEHOLDER_SIGNATURE = `0x${"0".repeat(130)}`;
 
-/**
- * Returns a resolution payload + placeholder signature. The Solana
- * settlement executor signs the transaction itself and ignores this field.
- */
+
 export async function signSettlement(params: {
   playerAddress: string;
   onchainSessionId: string;

@@ -1,9 +1,4 @@
-/**
- * Smoke test for the deployed eggsistential program on devnet.
- * Runs: claim_faucet → deposit → start_session → settle_session (cashout) → withdraw
- *
- * Uses the admin wallet as both player AND backend_signer for simplicity.
- */
+
 import {
   Connection,
   Keypair,
@@ -73,7 +68,7 @@ async function main() {
     process.env.ANCHOR_WALLET ?? `${homedir()}/.config/solana/id.json`;
   const conn = new Connection(rpc, "confirmed");
   const player = loadKeypair(wallet);
-  const backendSigner = player; // same wallet for smoke test
+  const backendSigner = player; 
 
   const [configPda] = PublicKey.findProgramAddressSync(
     [Buffer.from("config")],
@@ -94,7 +89,7 @@ async function main() {
   console.log("  playerBalance PDA:", playerBalancePda.toBase58());
   console.log("  playerATA:", playerAta.toBase58());
 
-  // [-1] Cleanup zombie session from previous failed run
+  
   const pbAcc = await conn.getAccountInfo(playerBalancePda);
   if (pbAcc) {
     const activeSession = pbAcc.data.subarray(8 + 32 + 8 + 8, 8 + 32 + 8 + 8 + 32);
@@ -114,7 +109,7 @@ async function main() {
       params.writeBigUInt64LE(lockedBalance, o); o += 8;
       params.writeBigUInt64LE(0n, o); o += 8;
       params.writeBigUInt64LE(0n, o); o += 8;
-      params.writeUInt8(2, o); o += 1; // OUTCOME_CRASHED
+      params.writeUInt8(2, o); o += 1; 
       params.writeBigInt64LE(BigInt(Math.floor(Date.now() / 1000) + 60), o);
       await send(
         conn,
@@ -134,7 +129,7 @@ async function main() {
     }
   }
 
-  // Ensure player ATA exists
+  
   console.log("\n[0] Ensure player ATA");
   await send(
     conn,
@@ -151,7 +146,7 @@ async function main() {
   const before = await tokenBalance(conn, playerAta);
   console.log(`  ATA balance before faucet: ${before}`);
 
-  // [1] claim_faucet
+  
   console.log("\n[1] claim_faucet");
   await send(
     conn,
@@ -174,7 +169,7 @@ async function main() {
   const afterFaucet = await tokenBalance(conn, playerAta);
   console.log(`  ATA balance after faucet:  ${afterFaucet} (+${afterFaucet - before})`);
 
-  // [1.5] fund_treasury so cashout step has runway
+  
   const treasuryFund = afterFaucet / 4n;
   console.log(`\n[1.5] fund_treasury ${treasuryFund}`);
   const fundData = Buffer.concat([
@@ -203,7 +198,7 @@ async function main() {
     "treasury funded",
   );
 
-  // [2] deposit (half of remaining)
+  
   const remaining = await tokenBalance(conn, playerAta);
   const depositAmount = remaining / 2n;
   console.log(`\n[2] deposit ${depositAmount}`);
@@ -233,7 +228,7 @@ async function main() {
     "deposited",
   );
 
-  // [3] start_session (stake half the deposited)
+  
   const sessionId = randomBytes(32);
   const stakeAmount = depositAmount / 2n;
   console.log(`\n[3] start_session stake=${stakeAmount}`);
@@ -263,8 +258,8 @@ async function main() {
     "session started",
   );
 
-  // [4] settle_session (cashout 1.5x)
-  const multiplierBp = 15_000n; // 1.5x
+  
+  const multiplierBp = 15_000n; 
   const payout = (stakeAmount * multiplierBp) / BASIS_POINTS_SCALE;
   const deadline = BigInt(Math.floor(Date.now() / 1000) + 60);
   console.log(`\n[4] settle_session cashout=${payout} (1.5x)`);
@@ -275,7 +270,7 @@ async function main() {
   settleParams.writeBigUInt64LE(stakeAmount, off); off += 8;
   settleParams.writeBigUInt64LE(payout, off); off += 8;
   settleParams.writeBigUInt64LE(multiplierBp, off); off += 8;
-  settleParams.writeUInt8(1, off); off += 1; // OUTCOME_CASHED_OUT
+  settleParams.writeUInt8(1, off); off += 1; 
   settleParams.writeBigInt64LE(deadline, off);
 
   await send(
@@ -294,8 +289,8 @@ async function main() {
     "session settled",
   );
 
-  // [5] withdraw all available
-  const withdrawAmount = payout + (depositAmount - stakeAmount); // payout + leftover available
+  
+  const withdrawAmount = payout + (depositAmount - stakeAmount); 
   console.log(`\n[5] withdraw ${withdrawAmount}`);
   const withdrawData = Buffer.concat([
     disc("withdraw"),

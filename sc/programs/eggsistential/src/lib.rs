@@ -1,7 +1,7 @@
-//! Eggsistential Solana program built with Anchor.
-//!
-//! This program manages faucet claims, vault accounting,
-//! backend-approved settlements, and EggPass credentials.
+
+
+
+
 
 use anchor_lang::prelude::*;
 

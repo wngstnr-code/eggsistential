@@ -120,8 +120,8 @@ router.post("/social", async (req, res) => {
 
     void chainId;
 
-    // Allow trusted social/embedded providers (Reown AppKit)
-    // to pass through this unverified auth flow if enabled.
+    
+    
     const lowerProvider = (walletProvider || "").toLowerCase();
     const isSocialOrEmbedded =
       lowerProvider.includes("reown") ||
@@ -132,9 +132,9 @@ router.post("/social", async (req, res) => {
       lowerProvider === "x";
 
     if (!isSocialOrEmbedded) {
-      // If it's a standard wallet like Phantom, it should ideally use SIWE,
-      // but for now we'll allow it if Social auth is globally enabled and it's from a known source.
-      // res.status(400).json({ error: "Unsupported wallet provider for unverified auth." });
+      
+      
+      
     }
 
     const walletAddress = normalizeSolanaAddress(address);

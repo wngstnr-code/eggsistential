@@ -4,7 +4,7 @@ use crate::constants::ZERO_SESSION_ID;
 
 #[account]
 #[derive(Debug, InitSpace)]
-/// Global configuration and aggregate accounting for the program.
+
 pub struct Config {
     pub admin: Pubkey,
     pub backend_signer: Pubkey,
@@ -22,7 +22,7 @@ pub struct Config {
 
 #[account]
 #[derive(Debug, InitSpace)]
-/// Per-player balance tracking for available and locked funds.
+
 pub struct PlayerBalance {
     pub owner: Pubkey,
     pub available_balance: u64,
@@ -39,7 +39,7 @@ impl PlayerBalance {
 
 #[account]
 #[derive(Debug, InitSpace)]
-/// Session state for a single backend-authoritative game round.
+
 pub struct Session {
     pub session_id: [u8; 32],
     pub player: Pubkey,
@@ -52,7 +52,7 @@ pub struct Session {
 
 #[account]
 #[derive(Debug, InitSpace)]
-/// EggPass credential state stored per player.
+
 pub struct EggPass {
     pub player: Pubkey,
     pub tier: u8,
@@ -70,7 +70,7 @@ pub struct EggPass {
 
 #[account]
 #[derive(Debug, InitSpace)]
-/// Replay-protection marker created once per EggPass nonce.
+
 pub struct UsedNonce {
     pub nonce: [u8; 32],
     pub bump: u8,

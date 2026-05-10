@@ -123,7 +123,7 @@ function calculatePayoutFromUnits(stake: number, multiplierBp: number) {
   };
 }
 
-// Replaced by readActiveOnchainSession from lib/solana.ts
+
 
 async function clearActiveOnchainSession(walletAddress: string) {
   const activeOnchainSession = await readActiveOnchainSession(walletAddress);
