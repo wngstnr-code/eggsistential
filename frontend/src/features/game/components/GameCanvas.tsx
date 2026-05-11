@@ -168,7 +168,7 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
                     $0.00
                   </span>
                 </div>
-                <div className="bet-hud-metric bet-hud-metric-wide">
+                <div className="bet-hud-metric bet-hud-metric-primary">
                   <span className="bet-hud-metric-label">MULTIPLIER</span>
                   <span
                     id="bet-multiplier"
@@ -177,7 +177,7 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
                     0.00x
                   </span>
                 </div>
-                <div className="bet-hud-metric bet-hud-metric-primary">
+                <div className="bet-hud-metric bet-hud-metric-wide">
                   <span className="bet-hud-metric-label">CASH OUT</span>
                   <span
                     id="bet-payout"

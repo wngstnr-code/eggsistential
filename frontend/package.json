@@ -7,7 +7,9 @@
     "dev:turbo": "next dev --turbo",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "remotion:studio": "remotion studio src/remotion/index.ts",
+    "remotion:render:logo": "remotion render src/remotion/index.ts EggsistentialLogoReveal ../docs/eggsistential-logo-reveal.mp4"
   },
   "dependencies": {
     "@reown/appkit": "^1.8.19",
@@ -22,6 +24,7 @@
     "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.386",
     "@tailwindcss/postcss": "^4.1.15",
     "@types/node": "25.6.0",
     "@types/react": "19.2.14",
@@ -30,6 +33,7 @@
     "eslint": "^9.38.0",
     "eslint-config-next": "^16.2.2",
     "postcss": "^8.5.6",
+    "remotion": "^4.0.386",
     "tailwindcss": "^4.1.15",
     "typescript": "6.0.3"
   }
