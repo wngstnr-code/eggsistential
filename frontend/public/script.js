@@ -1541,7 +1541,7 @@ function showResult(data) {
   } else {
     if (shouldPlaySfx) playCrashSfx();
     titleEl.innerText = "GAME OVER";
-    bodyEl.innerHTML = `<p>Hops: <strong>${position.currentRow}</strong></p>`;
+    bodyEl.innerHTML = `<p><span>HOPS:</span><strong>${position.currentRow}</strong></p>`;
   }
   resultDOM.style.visibility = "visible";
 }
@@ -6105,6 +6105,11 @@ function initBettingUI() {
     bet.active = false;
     setBetButtonState();
     initializeGame();
+  });
+
+  document.getElementById("result-close")?.addEventListener("click", () => {
+    playUiClickSfx();
+    hideResult();
   });
 
   showBetPanel(true);

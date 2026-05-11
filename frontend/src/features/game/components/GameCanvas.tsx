@@ -17,42 +17,42 @@ const characters = [
     name: "Chicken",
     role: "Classic runner",
     tone: "Balanced",
-    className: "character-token-chicken",
+    imageSrc: "/images/chick.png",
   },
   {
     id: "duck",
     name: "Duck",
     role: "Waddly charm",
     tone: "Playful",
-    className: "character-token-duck",
+    imageSrc: "/images/duck.png",
   },
   {
     id: "goose",
     name: "Goose",
     role: "Long-neck menace",
     tone: "Bold",
-    className: "character-token-goose",
+    imageSrc: "/images/goose.png",
   },
   {
     id: "turkey",
     name: "Turkey",
     role: "Chunky strutter",
     tone: "Rare",
-    className: "character-token-turkey",
+    imageSrc: "/images/turkey.png",
   },
   {
     id: "quail",
     name: "Quail",
     role: "Tiny scout",
     tone: "Quick",
-    className: "character-token-quail",
+    imageSrc: "/images/quail.png",
   },
   {
     id: "peacock",
     name: "Peacock",
     role: "Flashy flex",
     tone: "Fancy",
-    className: "character-token-peacock",
+    imageSrc: "/images/peacock.png",
   },
 ];
 
@@ -385,7 +385,10 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
 
       <div id="result-container">
         <div id="result">
-          <h1 id="result-title">Game Over</h1>
+          <button className="close-btn" id="result-close" aria-label="Close">
+            X
+          </button>
+          <h1 id="result-title">GAME OVER</h1>
           <div id="result-body" />
           <div className="modal-actions">
             <button id="retry" className="primary">
@@ -477,10 +480,15 @@ export function GameCanvas({ backgroundMode = false }: GameCanvasProps) {
                       selectCharacter(character.id);
                     }}
                   >
-                    <span
-                      className={`character-token ${character.className}`}
-                      aria-hidden="true"
-                    />
+                    <span className="character-token" aria-hidden="true">
+                      <Image
+                        src={character.imageSrc}
+                        alt=""
+                        width={96}
+                        height={96}
+                        className="character-token-image"
+                      />
+                    </span>
                     <span className="character-card-copy">
                       <strong>{character.name}</strong>
                       <small>{character.role}</small>

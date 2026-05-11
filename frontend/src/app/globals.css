@@ -872,106 +872,24 @@ canvas.game {
 
 .character-token {
   position: relative;
-  width: 46px;
-  height: 46px;
-  border: 2px solid #19283d;
-  border-radius: 15px 15px 16px 16px;
-  background: #f7f3dd;
-  box-shadow:
-    inset -6px -7px 0 rgba(0, 0, 0, 0.11),
-    0 2px 0 rgba(255, 255, 255, 0.14),
-    0 4px 8px rgba(0, 0, 0, 0.26);
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   grid-row: 1 / span 2;
   justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.character-token::before,
-.character-token::after {
-  content: "";
-  position: absolute;
-  display: block;
-}
-
-.character-token::before {
-  left: 12px;
-  top: -11px;
-  width: 18px;
-  height: 17px;
-  border: 2px solid #19283d;
-  border-radius: 8px 8px 6px 6px;
-  background: inherit;
-}
-
-.character-token::after {
-  left: 19px;
-  top: 1px;
-  width: 12px;
-  height: 7px;
-  border-radius: 2px;
-  background: #f49a24;
-  box-shadow: 6px 10px 0 -4px #151515;
-}
-
-.character-token-chicken {
-  background: #fff8df;
-}
-
-.character-token-chicken::before {
-  box-shadow: 0 -8px 0 -2px #e54538;
-}
-
-.character-token-duck {
-  background: #ffd45c;
-}
-
-.character-token-duck::after {
-  width: 16px;
-  background: #f07f21;
-}
-
-.character-token-goose {
-  background: #f5f1db;
-}
-
-.character-token-goose::before {
-  top: -16px;
-  height: 22px;
-  background: #f8f4e4;
-}
-
-.character-token-turkey {
-  background: #9a5d36;
-}
-
-.character-token-turkey::before {
-  background: #678aa9;
-  box-shadow:
-    -9px 19px 0 -3px #d74736,
-    9px 19px 0 -3px #f0ad45;
-}
-
-.character-token-quail {
-  background: #b98c59;
-}
-
-.character-token-quail::before {
-  background: #9b7145;
-  box-shadow:
-    -4px -7px 0 -3px #3e2c1d,
-    0 -9px 0 -3px #3e2c1d,
-    4px -7px 0 -3px #3e2c1d;
-}
-
-.character-token-peacock {
-  background: #177f9f;
-}
-
-.character-token-peacock::before {
-  background: #21a6c3;
-  box-shadow:
-    -12px 21px 0 -4px #36a853,
-    0 23px 0 -4px #f0b23f,
-    12px 21px 0 -4px #36a853;
+.character-token-image {
+  width: 62px;
+  height: 62px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.34));
 }
 
 .character-card-copy {
@@ -1759,19 +1677,13 @@ canvas.game {
   }
 
   .character-token {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
   }
 
-  .character-token::before {
-    left: 8px;
-    top: -9px;
-    width: 14px;
-    height: 13px;
-  }
-
-  .character-token::after {
-    left: 14px;
+  .character-token-image {
+    width: 46px;
+    height: 46px;
   }
 
   .modal-box h2 {
@@ -11475,12 +11387,13 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 #result-container #result {
+  position: relative;
   width: min(390px, calc(100vw - 36px));
   min-width: 0;
   max-height: calc(100dvh - 36px);
   overflow-y: auto;
   gap: 14px;
-  padding: 30px 24px 24px;
+  padding: 34px 24px 24px;
   border: 4px solid #31466b !important;
   border-radius: 22px;
   background:
@@ -11492,6 +11405,17 @@ body.checkpoint-arrival #hud-scrim::after {
     inset 0 -10px 0 rgba(0, 0, 0, 0.16),
     0 18px 42px rgba(0, 0, 0, 0.48),
     8px 9px 0 rgba(0, 0, 0, 0.34) !important;
+}
+
+#result-container #result-close {
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-color: #31466b;
+  background: linear-gradient(180deg, #d9efff 0%, #6daee8 100%);
+  color: #10243d;
+  z-index: 1;
 }
 
 #result-container h1 {
@@ -11510,7 +11434,13 @@ body.checkpoint-arrival #hud-scrim::after {
 
 #result-container[data-result="crash"] h1,
 #result-container[data-result="gameover"] h1 {
-  color: #ff948c;
+  color: #ffffff;
+  text-shadow:
+    -2px 0 0 #ff6b6b,
+    2px 0 0 #ff6b6b,
+    0 -2px 0 #ff6b6b,
+    0 2px 0 #ff6b6b,
+    2px 2px 0 rgba(0, 0, 0, 0.42) !important;
 }
 
 #result-container #result-body {
@@ -11527,17 +11457,21 @@ body.checkpoint-arrival #hud-scrim::after {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border: 2px solid #31466b;
+  border: 2px solid rgba(255, 255, 255, 0.88);
   border-radius: 12px;
-  background: linear-gradient(180deg, #24395a 0%, #172741 100%);
-  color: #e8f1ff;
+  background: linear-gradient(180deg, #ffffff 0%, #e8f1ff 100%);
+  color: #223451;
   font-size: 9px;
   line-height: 1.45;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+#result-container p span {
+  color: #223451;
+}
+
 #result-container strong {
-  color: #ffe066;
+  color: #c58c00;
 }
 
 #result-container .profit-positive,
