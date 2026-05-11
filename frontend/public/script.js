@@ -1554,6 +1554,15 @@ function hideResult() {
   }
 }
 
+function startFreePracticeRun() {
+  hideResult();
+  showBetPanel(false);
+  stopBetTicker();
+  bet.active = false;
+  setBetButtonState();
+  initializeGame();
+}
+
 function Camera() {
   const isMobile = window.innerWidth <= 768;
   const size = isMobile ? 240 : 300;
@@ -6084,12 +6093,7 @@ function initBettingUI() {
 
   document.getElementById("free-play-btn")?.addEventListener("click", () => {
     playUiClickSfx();
-    hideResult();
-    showBetPanel(false);
-    stopBetTicker();
-    bet.active = false;
-    setBetButtonState();
-    initializeGame();
+    startFreePracticeRun();
   });
 
   document.getElementById("cash-out-btn")?.addEventListener("click", () => {
@@ -6109,7 +6113,7 @@ function initBettingUI() {
 
   document.getElementById("result-close")?.addEventListener("click", () => {
     playUiClickSfx();
-    hideResult();
+    startFreePracticeRun();
   });
 
   showBetPanel(true);
