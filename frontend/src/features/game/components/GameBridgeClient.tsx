@@ -208,6 +208,7 @@ export function GameBridgeClient({
   } = useWallet();
 
   const pendingUnsubscribersRef = useRef<Array<() => void>>([]);
+  const socketStatusListenersReadyRef = useRef(false);
   const lastSettleSweepAtRef = useRef(0);
   const settleSweepBusyRef = useRef(false);
 
@@ -503,6 +504,19 @@ export function GameBridgeClient({
       await initializeSocket(account, walletProvider?.constructor?.name);
       if (!isSocketConnected()) {
         throw new Error("Socket connection is not ready.");
+      }
+      if (!socketStatusListenersReadyRef.current) {
+        const cleanup = onGameEvent("game:cp_expired", (payload) => {
+          window.dispatchEvent(
+            new CustomEvent("chicken:cp-expired", {
+              detail: {
+                message: payload?.message || "Checkpoint time expired. Keep moving!",
+              },
+            }),
+          );
+        });
+        pendingUnsubscribersRef.current.push(cleanup);
+        socketStatusListenersReadyRef.current = true;
       }
     }
 
@@ -876,6 +890,7 @@ export function GameBridgeClient({
     return () => {
       pendingUnsubscribersRef.current.forEach((dispose) => dispose());
       pendingUnsubscribersRef.current = [];
+      socketStatusListenersReadyRef.current = false;
       delete window.__CHICKEN_GAME_BRIDGE__;
     };
   }, [

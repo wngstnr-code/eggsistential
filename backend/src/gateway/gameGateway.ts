@@ -493,6 +493,7 @@ function handleGameMove(socket: Socket, walletAddress: string, direction: string
       if (isCheckpointRow(state.currentRow)) {
         state.currentCp += 1;
         state.multiplierBp = Math.floor((state.multiplierBp * CP_BONUS_NUM) / CP_BONUS_DEN);
+        state.multiplierBp = getEffectiveMultiplierBp(state.multiplierBp, state.timer.segmentStart, now);
         state.timer = onReachCheckpoint(state.timer);
         state.cashoutWindow = true;
         state.cpRowIndex = state.currentRow;
@@ -627,6 +628,14 @@ async function handleGameCashout(socket: Socket, walletAddress: string): Promise
   }
   if (!state.cashoutWindow) {
     socket.emit("game:error", { message: "Must be at checkpoint to cash out." });
+    return;
+  }
+  if (isCpStayExpired(state.timer)) {
+    state.cashoutWindow = false;
+    state.isAtCheckpoint = false;
+    state.timer = onLeaveCheckpoint(state.timer);
+    socket.emit("game:cp_expired", { message: "Checkpoint time expired. Keep moving!" });
+    socket.emit("game:error", { message: "Checkpoint time expired. Keep moving!" });
     return;
   }
 

@@ -84,6 +84,10 @@ export interface GameErrorPayload {
   message: string;
 }
 
+export interface GameCpExpiredPayload {
+  message: string;
+}
+
 export type GameEventMap = {
   "game:started": (payload: GameStartedPayload) => void;
   "game:state": (payload: GameStatePayload) => void;
@@ -91,6 +95,7 @@ export type GameEventMap = {
   "game:cashout_result": (payload: GameCashoutResultPayload) => void;
   "game:reconnected": (payload: GameReconnectedPayload) => void;
   "game:start_aborted": (payload: GameStartAbortedPayload) => void;
+  "game:cp_expired": (payload: GameCpExpiredPayload) => void;
   "game:error": (payload: GameErrorPayload) => void;
   connect: () => void;
   disconnect: () => void;

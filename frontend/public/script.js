@@ -45,6 +45,7 @@ const bet = {
   active: false,
   stake: 0,
   multiplierBp: 0,
+  decayCarryBp: 0,
   maxRow: 0,
   currentCp: 0,
   cashoutWindow: false,
@@ -887,6 +888,7 @@ function activateBet(stake, availableBalance) {
   bet.active = true;
   bet.stake = stake;
   bet.multiplierBp = 0;
+  bet.decayCarryBp = 0;
   bet.maxRow = 0;
   bet.currentCp = 0;
   bet.cashoutWindow = false;
@@ -942,8 +944,15 @@ function getCurrentDecayPenaltyBp(now = Date.now()) {
 }
 
 function getCurrentEffectiveMultiplierBp(now = Date.now()) {
+  if (bet.cashoutWindow && !bet.segmentActive) {
+    return Math.max(0, bet.multiplierBp);
+  }
+
   const baseMultiplierBp = calculateRowMultiplierBp(position.currentRow);
-  return Math.max(0, baseMultiplierBp - getCurrentDecayPenaltyBp(now));
+  return Math.max(
+    0,
+    baseMultiplierBp - bet.decayCarryBp - getCurrentDecayPenaltyBp(now),
+  );
 }
 
 async function startBet(stake) {
@@ -992,9 +1001,14 @@ function onPlayerAdvance(newRowIndex) {
 function reachCheckpoint(rowIndex) {
   playCheckpointSfx();
   showCheckpointArrivalCue();
+  const lockedMultiplierBp = getCurrentEffectiveMultiplierBp();
   bet.currentCp += 1;
   bet.cpRowIndex = rowIndex;
-  bet.multiplierBp = getCurrentEffectiveMultiplierBp();
+  bet.multiplierBp = lockedMultiplierBp;
+  bet.decayCarryBp = Math.max(
+    0,
+    calculateRowMultiplierBp(rowIndex) - lockedMultiplierBp,
+  );
   bet.cashoutWindow = true;
   bet.cpEnterTime = Date.now();
   bet.segmentActive = false;
@@ -1020,18 +1034,29 @@ function showCheckpointArrivalCue() {
 
 function closeCashoutWindow() {
   bet.cashoutWindow = false;
+  bet.cpStayRemainingMs = 0;
   bet.segmentActive = true;
   bet.segmentStart = Date.now();
   bet.lastDecayTick = Date.now();
 }
 
+function hasCpStayTimeRemaining(now = Date.now()) {
+  if (!bet.cashoutWindow || !bet.cpEnterTime) return false;
+  return Math.max(0, CP_MAX_STAY_MS - (now - bet.cpEnterTime)) > 0;
+}
+
 function canCashOut() {
-  return bet.active && bet.cashoutWindow && !bet.reconnecting;
+  return (
+    bet.active &&
+    bet.cashoutWindow &&
+    hasCpStayTimeRemaining() &&
+    !bet.reconnecting
+  );
 }
 
 async function cashOut(reason) {
   if (!bet.active) return;
-  if (!bet.cashoutWindow) return;
+  if (!canCashOut()) return;
   if (settlementPending) return;
 
   if (hasLiveBridge()) {
@@ -1234,6 +1259,7 @@ function tickBet() {
     renderBetHud();
     if (remaining <= 0) {
       closeCashoutWindow();
+      renderBetHud();
     }
   } else if (bet.segmentActive) {
     const segElapsed = now - bet.segmentStart;
@@ -1452,6 +1478,13 @@ function restoreActiveBetFromSnapshot(snapshot) {
   bet.stake = Math.max(0, Number(snapshot.stake) || 0);
   bet.maxRow = maxRow;
   bet.currentCp = currentCp;
+  const snapshotMultiplierBp = Math.max(0, Number(snapshot.multiplierBp) || 0);
+  bet.decayCarryBp = Math.max(
+    0,
+    calculateRowMultiplierBp(row) -
+      snapshotMultiplierBp -
+      (cashoutWindow ? 0 : decayBp),
+  );
   bet.cashoutWindow = cashoutWindow;
   bet.cpRowIndex = cashoutWindow ? row : currentCp * CP_INTERVAL;
   bet.cpStayRemainingMs = cashoutWindow ? cpStayRemainingMs : 0;
@@ -1465,7 +1498,9 @@ function restoreActiveBetFromSnapshot(snapshot) {
       : now - SEGMENT_TIME_MS - Math.floor((decayBp * 1000) / DECAY_BP_PER_SEC);
   bet.lastDecayTick = now;
   bet.isDecaying = !cashoutWindow && decayBp > 0;
-  bet.multiplierBp = getCurrentEffectiveMultiplierBp(now);
+  bet.multiplierBp = cashoutWindow
+    ? snapshotMultiplierBp
+    : getCurrentEffectiveMultiplierBp(now);
 
   movesQueue.length = 0;
   if (moveClock.running) moveClock.stop();
@@ -1493,6 +1528,7 @@ function resetBetAfterReconnectFailure() {
   bet.cashoutWindow = false;
   bet.segmentActive = false;
   bet.cpStayRemainingMs = 0;
+  bet.decayCarryBp = 0;
   bet.isDecaying = false;
   movesQueue.length = 0;
 
@@ -1559,6 +1595,7 @@ function startFreePracticeRun() {
   showBetPanel(false);
   stopBetTicker();
   bet.active = false;
+  bet.decayCarryBp = 0;
   setBetButtonState();
   initializeGame();
 }
@@ -6146,6 +6183,7 @@ function initBettingUI() {
     bet.cashoutWindow = false;
     bet.segmentActive = false;
     bet.cpStayRemainingMs = 0;
+    bet.decayCarryBp = 0;
     bet.isDecaying = false;
     setBetButtonState();
     renderBetHud();
@@ -6204,8 +6242,7 @@ function initBettingUI() {
   });
 
   window.addEventListener("chicken:cp-expired", (event) => {
-    bet.cashoutWindow = false;
-    bet.cpStayRemainingMs = 0;
+    closeCashoutWindow();
     bet.isDecaying = false;
     renderBetHud();
     const msg =
