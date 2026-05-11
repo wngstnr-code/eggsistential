@@ -1120,21 +1120,35 @@ export function HomePage() {
         className="home-section home-section-system"
       >
         <div className="home-shell home-shell-section">
-          <div className="home-section-head">
+          <motion.div
+            className="home-section-head home-system-head"
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+          >
             <div>
               <p className="home-section-kicker">LIVE RUN LOOP</p>
               <h2 className="home-section-title">VAULT TO PASSPORT</h2>
             </div>
-          </div>
-          <div
+            <p className="home-system-subcopy">
+              Every funded run becomes a readable reputation signal: bankroll,
+              checkpoint discipline, settlement, then trust status.
+            </p>
+          </motion.div>
+          <ol
             className="home-flow-track"
             aria-label="Vault to Passport flow"
           >
-            {FLOW_STEPS.map((step) => (
-              <motion.article
+            {FLOW_STEPS.map((step, index) => (
+              <motion.li
                 key={step.title}
                 className="home-flow-card"
-                whileHover={reduceMotion ? undefined : { y: -6, scale: 1.018 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
+                whileHover={reduceMotion ? undefined : { y: -4 }}
               >
                 <div className="home-flow-card-top">
                   <p>{step.label}</p>
@@ -1142,51 +1156,76 @@ export function HomePage() {
                 </div>
                 <h3>{step.title}</h3>
                 <span>{step.copy}</span>
-              </motion.article>
+              </motion.li>
             ))}
-          </div>
+          </ol>
 
           <motion.div
             className="home-money-band"
-            whileHover={reduceMotion ? undefined : { y: -4, scale: 1.006 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            whileHover={reduceMotion ? undefined : { y: -3 }}
           >
             <div className="home-money-band-copy">
               <p className="home-money-kicker">TRUST PASSPORT</p>
               <h3>Play clean. Build trust.</h3>
               <p>Cashouts, consistency, and fair runs shape your player reputation.</p>
             </div>
-            <div className="home-money-band-pills" aria-label="Passport benefits">
+            <ul className="home-money-band-pills" aria-label="Passport benefits">
               {PASSPORT_BENEFITS.map((benefit) => (
-                <span key={benefit}>{benefit}</span>
+                <li key={benefit}>{benefit}</li>
               ))}
-            </div>
+            </ul>
           </motion.div>
         </div>
       </section>
 
       <section className="home-section home-section-passport">
         <div className="home-shell home-shell-section">
-          <div className="home-section-head">
-            <h2 className="home-section-title">PASSPORT FOR PARTNER APPS</h2>
+          <div className="home-section-head home-passport-head">
+            <div>
+              <p className="home-section-kicker">TRUST INFRASTRUCTURE</p>
+              <h2 className="home-section-title">PASSPORT FOR PARTNER APPS</h2>
+              <p className="home-passport-subcopy">
+                A compact verification layer for apps that need wallet reputation,
+                eligibility, and sybil-resistant access without adding signup friction.
+              </p>
+            </div>
           </div>
-          <div className="home-feature-grid">
-            {PASSPORT_FEATURES.map((item) => (
-              <article key={item.title} className="home-feature-card">
+          <div className="home-feature-grid home-passport-feature-grid">
+            {PASSPORT_FEATURES.map((item, index) => (
+              <motion.article
+                key={item.title}
+                className="home-feature-card home-passport-feature-card"
+                initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.35, delay: index * 0.06, ease: "easeOut" }}
+                whileHover={reduceMotion ? undefined : { y: -4 }}
+              >
                 <p>{item.label}</p>
                 <h3>{item.title}</h3>
                 <span>{item.copy}</span>
-              </article>
+              </motion.article>
             ))}
           </div>
 
-          <div className="home-integration-note">
+          <motion.div
+            className="home-integration-note home-passport-integration"
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+          >
             <h3>HOW OTHER WEBSITES INTEGRATE</h3>
-            <ul>
+            <ol>
               {INTEGRATION_STEPS.map((step) => (
                 <li key={step}>{step}</li>
               ))}
-            </ul>
-          </div>
+            </ol>
+          </motion.div>
         </div>
       </section>
 
