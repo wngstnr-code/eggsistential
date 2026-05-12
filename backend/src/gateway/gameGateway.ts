@@ -301,6 +301,19 @@ async function handleGameStart(
   const onchainSessionId = activeOnchainSession.sessionId;
   const onchainStake = Number(activeOnchainSession.stakeAmountUnits) / 1_000_000;
 
+  const { data: existingOnchain } = await supabase
+    .from("game_sessions")
+    .select("status")
+    .eq("onchain_session_id", onchainSessionId)
+    .maybeSingle();
+
+  if (existingOnchain) {
+    socket.emit("game:error", {
+      message: "Previous game settlement still pending on-chain. Please wait.",
+    });
+    return;
+  }
+
   const { error: dbError } = await supabase.from("game_sessions").insert({
     session_id: sessionId,
     onchain_session_id: onchainSessionId,
