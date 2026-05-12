@@ -6638,7 +6638,7 @@ body.checkpoint-arrival #hud-scrim::after {
 
 @media (max-width: 768px) {
   .play-money-modal.modal-bg {
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     padding: 8px 6px;
   }
@@ -6657,7 +6657,7 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .money-page {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     height: 100dvh;
     max-height: 100dvh;
@@ -9429,10 +9429,15 @@ body.checkpoint-arrival #hud-scrim::after {
   .home-passport-hero {
     left: max(12px, calc(env(safe-area-inset-left) + 12px));
     bottom: max(12px, calc(env(safe-area-inset-bottom) + 12px));
-    width: min(218px, calc(100vw - 86px));
-    min-height: 52px;
-    padding: 9px 10px;
-    gap: 9px;
+    width: 58px;
+    height: 58px;
+    min-height: 0;
+    padding: 0;
+    gap: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
   }
 
   .home-passport-hero-icon {
@@ -9445,13 +9450,8 @@ body.checkpoint-arrival #hud-scrim::after {
     height: 38px;
   }
 
-  .home-passport-hero-copy strong {
-    font-size: 8px;
-  }
-
-  .home-passport-hero-copy small {
-    font-size: 6.5px;
-    line-height: 1.35;
+  .home-passport-hero-copy {
+    display: none;
   }
 
   .home-section-about {
@@ -9683,18 +9683,7 @@ body.checkpoint-arrival #hud-scrim::after {
     font-size: 9px;
   }
 
-  .home-passport-hero {
-    width: min(218px, calc(100vw - 76px));
-    min-height: 52px;
-    justify-content: center;
-    padding: 9px 10px;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 8px;
-  }
 
-  .home-passport-hero-copy {
-    display: flex;
-  }
 
   .home-nav-login {
     max-width: 116px;
