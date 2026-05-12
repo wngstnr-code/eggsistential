@@ -426,7 +426,7 @@ export function ManageMoneyPage() {
         />
       </div>
       <div className="money-overlay" aria-hidden="true" />
-      <ManageMoneyVaultCard />
+      <ManageMoneyVaultCard className="money-card-page" />
     </main>
   );
 }
