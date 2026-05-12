@@ -6559,12 +6559,20 @@ body.checkpoint-arrival #hud-scrim::after {
 @media (max-width: 768px) {
   .play-money-modal.modal-bg {
     align-items: flex-start;
-    padding: 10px 8px;
+    justify-content: center;
+    padding: 8px 6px;
   }
 
   .play-money-modal-shell {
-    width: calc(100vw - 16px);
-    max-height: calc(100dvh - 20px);
+    width: calc(100vw - 12px);
+    max-height: calc(100dvh - 16px);
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+
+  .play-money-modal-shell::-webkit-scrollbar {
+    display: none;
   }
 
   .money-page {
@@ -6578,16 +6586,34 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-card.money-card-play-modal {
-    padding: 22px 10px 12px;
+    gap: 8px;
+    padding: 16px 9px 10px;
+    border-radius: 12px;
+  }
+
+  .money-card-play-modal .money-card-close {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
   }
 
   .money-card-play-modal .money-head-top {
-    padding-right: 40px;
+    gap: 6px;
+    padding-right: 34px;
+  }
+
+  .money-card-play-modal .money-head-top .flow-eyebrow {
+    font-size: 7px;
+    letter-spacing: 1.35px;
+    line-height: 1.35;
   }
 
   .money-card-play-modal .money-head-badge {
-    min-height: 24px;
-    padding: 0 9px;
+    min-height: 22px;
+    padding: 0 8px;
     font-size: 6px;
     letter-spacing: 0.55px;
   }
@@ -6600,33 +6626,41 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-grid {
-    gap: 10px;
+    gap: 8px;
   }
 
   .money-title {
-    font-size: 28px;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: 0.9px;
   }
 
   .money-subtitle {
-    font-size: 8px;
-    line-height: 1.55;
+    font-size: 7.5px;
+    line-height: 1.45;
   }
 
   .flow-status.money-status-panel,
   .money-action-panel {
-    padding: 12px;
-    gap: 10px;
+    padding: 9px;
+    gap: 8px;
   }
 
   .money-status-row {
     align-items: center;
     flex-direction: row;
-    min-height: 46px;
-    padding: 10px;
+    min-height: 38px;
+    padding: 8px;
+  }
+
+  .money-status-row span {
+    font-size: 7px;
+    line-height: 1.35;
   }
 
   .money-status-row strong {
     text-align: right;
+    font-size: 10px;
   }
 
   .money-head-top {
@@ -6640,14 +6674,20 @@ body.checkpoint-arrival #hud-scrim::after {
   .money-action-tabs {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 3px;
-    padding-top: 4px;
+    padding: 3px;
   }
 
   .money-action-tab {
     min-width: 0;
-    min-height: 32px;
-    font-size: 6.6px;
+    min-height: 30px;
+    font-size: 6.4px;
     letter-spacing: 0.45px;
+  }
+
+  .money-action-hint {
+    padding: 6px 8px;
+    font-size: 7.5px;
+    line-height: 1.35;
   }
 
   .money-quick-picks {
@@ -6660,8 +6700,8 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-amount-block .money-input {
-    min-height: 46px;
-    font-size: 18px;
+    min-height: 42px;
+    font-size: 17px;
   }
 
   .money-faucet-fixed {
@@ -6676,8 +6716,12 @@ body.checkpoint-arrival #hud-scrim::after {
   .money-primary-btn,
   .money-footer-actions .money-panel-nav-btn.money-nav-home-btn,
   .money-footer-actions .money-panel-nav-btn.money-nav-play-btn {
-    min-height: 44px;
-    font-size: 9px;
+    min-height: 40px;
+    font-size: 8px;
+  }
+
+  .money-card-play-modal .money-activity {
+    display: none;
   }
 
   .money-activity-item a,

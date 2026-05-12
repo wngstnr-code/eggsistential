@@ -221,7 +221,7 @@ export function ManageMoneyVaultCard({
         <button
           className="close-btn money-card-close"
           type="button"
-          aria-label="Close vault"
+          aria-label="Close manage money"
           onClick={onClose}
         >
           X
@@ -237,7 +237,7 @@ export function ManageMoneyVaultCard({
             <span className="money-head-badge">USDC</span>
           </div>
         </div>
-        <h1 className="flow-title money-title">MY VAULT</h1>
+        <h1 className="flow-title money-title">MANAGE MONEY</h1>
         <p className="money-subtitle">
           Deposit to vault, then withdraw only from your available balance.
         </p>

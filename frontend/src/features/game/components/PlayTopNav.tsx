@@ -1465,7 +1465,7 @@ export function PlayTopNav() {
             className="play-money-modal-shell"
             role="dialog"
             aria-modal="true"
-            aria-label="Manage vault"
+            aria-label="Manage money"
             onClick={(event) => {
               event.stopPropagation();
             }}
