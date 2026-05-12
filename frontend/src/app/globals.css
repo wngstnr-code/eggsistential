@@ -22,6 +22,17 @@ body {
       #ffb08a 100%);
 }
 
+html.page-scroll-unlock,
+body.page-scroll-unlock {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html.page-scroll-unlock::-webkit-scrollbar,
+body.page-scroll-unlock::-webkit-scrollbar {
+  display: none;
+}
+
 canvas.game {
   display: block;
   position: absolute;
@@ -952,7 +963,7 @@ canvas.game {
   width: 68px;
   height: 68px;
   border-radius: 999px;
-  border: 6px solid #304869;
+  border: 4px solid #304869;
   background: linear-gradient(180deg, #f0f5fb 0%, #dde6f1 100%);
   color: #2f4868;
   text-decoration: none;
@@ -1767,7 +1778,7 @@ canvas.game {
   .home-help-stack .home-help-doc-btn {
     width: 52px;
     height: 52px;
-    border-width: 4px;
+    border-width: 3px;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.82),
       0 5px 0 rgba(8, 16, 31, 0.5),
@@ -5978,12 +5989,13 @@ body.checkpoint-arrival #hud-scrim::after {
   position: relative;
   display: block;
   min-height: 100vh;
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100dvh;
+  height: auto;
   padding: 24px;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   overscroll-behavior-y: contain;
   background: none;
   isolation: isolate;
@@ -7551,14 +7563,16 @@ body.checkpoint-arrival #hud-scrim::after {
 .home-page {
   position: relative;
   min-height: 100vh;
-  height: 100vh;
+  min-height: 100dvh;
+  height: auto;
   display: block;
   padding: 0;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: visible;
   -ms-overflow-style: none;
   scrollbar-width: none;
   scroll-behavior: smooth;
+  touch-action: pan-y;
   background: linear-gradient(180deg, #76c9ff 0%, #9adfff 32%, #d0f3ff 100%);
 }
 
@@ -9290,7 +9304,8 @@ body.checkpoint-arrival #hud-scrim::after {
 
 @media (max-width: 760px) {
   .home-page {
-    height: 100vh;
+    min-height: 100dvh;
+    height: auto;
   }
 
   .home-nav-global,

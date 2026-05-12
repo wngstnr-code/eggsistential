@@ -183,7 +183,7 @@ const GAME_GUIDE_SLIDES = [
     tone: "timer",
   },
   {
-    title: "TRUST PASSPORT",
+    title: "EGGPASS",
     copy: "Passport is your on-chain reputation, built from clean runs and disciplined checkpoint cashouts.",
     imageSrc: "/images/e.webp",
     imageAlt: "Chicken beside a floating on-chain reputation passport",
@@ -382,6 +382,37 @@ export function HomePage() {
   function markGuideImageLoaded(imageSrc: string) {
     setLoadingGuideImages((current) => ({ ...current, [imageSrc]: false }));
   }
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlTouchAction = html.style.touchAction;
+    const previousBodyTouchAction = body.style.touchAction;
+    const previousHtmlOverflowX = html.style.overflowX;
+    const previousHtmlOverflowY = html.style.overflowY;
+    const previousBodyOverflowX = body.style.overflowX;
+    const previousBodyOverflowY = body.style.overflowY;
+
+    html.classList.add("page-scroll-unlock");
+    body.classList.add("page-scroll-unlock");
+    html.style.touchAction = "pan-y";
+    body.style.touchAction = "pan-y";
+    html.style.overflowX = "hidden";
+    html.style.overflowY = "auto";
+    body.style.overflowX = "hidden";
+    body.style.overflowY = "auto";
+
+    return () => {
+      html.style.touchAction = previousHtmlTouchAction;
+      body.style.touchAction = previousBodyTouchAction;
+      html.style.overflowX = previousHtmlOverflowX;
+      html.style.overflowY = previousHtmlOverflowY;
+      body.style.overflowX = previousBodyOverflowX;
+      body.style.overflowY = previousBodyOverflowY;
+      html.classList.remove("page-scroll-unlock");
+      body.classList.remove("page-scroll-unlock");
+    };
+  }, []);
 
   useEffect(() => {
     if (!showProfilePopover) return;
@@ -910,7 +941,7 @@ export function HomePage() {
               <BadgeCheck size={18} strokeWidth={2.7} />
             </span>
             <span className="home-passport-hero-copy">
-              <strong>TRUST PASSPORT</strong>
+              <strong>EGGPASS</strong>
               <small>View status and tier</small>
             </span>
           </motion.button>
@@ -1169,7 +1200,7 @@ export function HomePage() {
             whileHover={reduceMotion ? undefined : { y: -3 }}
           >
             <div className="home-money-band-copy">
-              <p className="home-money-kicker">TRUST PASSPORT</p>
+              <p className="home-money-kicker">EGGPASS</p>
               <h3>Play clean. Build trust.</h3>
               <p>Cashouts, consistency, and fair runs shape your player reputation.</p>
             </div>
@@ -1280,7 +1311,7 @@ export function HomePage() {
             </button>
             <div className="play-passport-status-headline">
               <div>
-                <p className="play-passport-kicker">TRUST PASSPORT</p>
+                <p className="play-passport-kicker">EGGPASS</p>
                 <h3
                   id="home-passport-status-title"
                   className="play-passport-title"

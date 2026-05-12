@@ -406,12 +406,28 @@ export function ManageMoneyPage() {
     const body = document.body;
     const previousHtmlTouchAction = html.style.touchAction;
     const previousBodyTouchAction = body.style.touchAction;
+    const previousHtmlOverflowX = html.style.overflowX;
+    const previousHtmlOverflowY = html.style.overflowY;
+    const previousBodyOverflowX = body.style.overflowX;
+    const previousBodyOverflowY = body.style.overflowY;
+    html.classList.add("page-scroll-unlock");
+    body.classList.add("page-scroll-unlock");
     html.style.touchAction = "pan-y";
     body.style.touchAction = "pan-y";
+    html.style.overflowX = "hidden";
+    html.style.overflowY = "auto";
+    body.style.overflowX = "hidden";
+    body.style.overflowY = "auto";
 
     return () => {
       html.style.touchAction = previousHtmlTouchAction;
       body.style.touchAction = previousBodyTouchAction;
+      html.style.overflowX = previousHtmlOverflowX;
+      html.style.overflowY = previousHtmlOverflowY;
+      body.style.overflowX = previousBodyOverflowX;
+      body.style.overflowY = previousBodyOverflowY;
+      html.classList.remove("page-scroll-unlock");
+      body.classList.remove("page-scroll-unlock");
     };
   }, []);
 

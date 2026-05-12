@@ -1508,7 +1508,7 @@ export function PlayTopNav() {
             </button>
             <div className="play-passport-status-headline">
               <div>
-                <p className="play-passport-kicker">TRUST PASSPORT</p>
+                <p className="play-passport-kicker">EGGPASS</p>
                 <h3 id="passport-status-title" className="play-passport-title">
                   EGGPASS
                 </h3>
