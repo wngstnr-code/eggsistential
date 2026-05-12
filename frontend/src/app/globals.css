@@ -7586,10 +7586,10 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .home-passport-hero {
-  position: absolute;
-  left: 24px;
-  bottom: 24px;
-  z-index: 4;
+  position: fixed;
+  left: max(24px, calc(env(safe-area-inset-left) + 24px));
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+  z-index: 90;
   width: min(238px, calc(100vw - 112px));
   min-height: 58px;
   display: grid;
@@ -9217,8 +9217,8 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .home-passport-hero {
-    left: 12px;
-    bottom: 12px;
+    left: max(12px, calc(env(safe-area-inset-left) + 12px));
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 12px));
     width: min(218px, calc(100vw - 86px));
     min-height: 52px;
     padding: 9px 10px;
