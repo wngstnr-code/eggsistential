@@ -9440,6 +9440,13 @@ body.checkpoint-arrival #hud-scrim::after {
     border-radius: 50%;
   }
 
+  .home-help-doc-btn {
+    width: 58px;
+    height: 58px;
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 12px));
+    right: max(12px, calc(env(safe-area-inset-right) + 12px));
+  }
+
   .home-passport-hero-icon {
     width: 30px;
     height: 30px;
