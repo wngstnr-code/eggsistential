@@ -5,7 +5,6 @@
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
-  BadgeCheck,
   ChevronLeft,
   ChevronRight,
   X,
@@ -938,10 +937,10 @@ export function HomePage() {
             whileTap={reduceMotion ? undefined : { y: 1, scale: 0.98 }}
           >
             <span className="home-passport-hero-icon" aria-hidden="true">
-              <BadgeCheck size={18} strokeWidth={2.7} />
+              <img src="/images/pass.png" alt="" />
             </span>
             <span className="home-passport-hero-copy">
-              <strong>EGGPASS</strong>
+              <strong>TRUST PASSPORT</strong>
               <small>View status and tier</small>
             </span>
           </motion.button>

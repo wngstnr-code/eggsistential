@@ -960,17 +960,17 @@ canvas.game {
 }
 
 .home-help-stack .home-help-doc-btn {
-  width: 68px;
-  height: 68px;
+  width: 62px;
+  height: 62px;
   border-radius: 999px;
-  border: 4px solid #304869;
+  border: 2px solid #304869;
   background: linear-gradient(180deg, #f0f5fb 0%, #dde6f1 100%);
   color: #2f4868;
   text-decoration: none;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    0 8px 0 rgba(8, 16, 31, 0.5),
-    0 12px 24px rgba(5, 10, 20, 0.36);
+    0 4px 0 rgba(8, 16, 31, 0.42),
+    0 8px 16px rgba(5, 10, 20, 0.28);
   transition:
     transform 0.08s ease,
     filter 0.12s ease;
@@ -991,8 +991,8 @@ canvas.game {
 }
 
 .home-help-doc-icon {
-  width: 32px;
-  height: 32px;
+  width: 29px;
+  height: 29px;
   display: block;
   transform: none;
 }
@@ -1776,18 +1776,18 @@ canvas.game {
   }
 
   .home-help-stack .home-help-doc-btn {
-    width: 52px;
-    height: 52px;
-    border-width: 3px;
+    width: 48px;
+    height: 48px;
+    border-width: 2px;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.82),
-      0 5px 0 rgba(8, 16, 31, 0.5),
-      0 10px 18px rgba(5, 10, 20, 0.34);
+      0 3px 0 rgba(8, 16, 31, 0.42),
+      0 7px 13px rgba(5, 10, 20, 0.26);
   }
 
   .home-help-doc-icon {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
   }
 
   .home-modal-box,
@@ -5990,10 +5990,10 @@ body.checkpoint-arrival #hud-scrim::after {
   display: block;
   min-height: 100vh;
   min-height: 100dvh;
-  height: auto;
+  height: 100dvh;
   padding: 24px;
   overflow-x: hidden;
-  overflow-y: visible;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
   overscroll-behavior-y: contain;
@@ -6656,33 +6656,41 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-page {
-    padding: 12px 8px calc(18px + env(safe-area-inset-bottom));
+    height: 100dvh;
+    max-height: 100dvh;
+    padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .money-page::-webkit-scrollbar {
+    display: none;
   }
 
   .money-card {
-    gap: 10px;
-    padding: 14px 12px;
-    border-radius: 13px;
+    gap: 8px;
+    padding: 10px 9px;
+    border-radius: 12px;
   }
 
   .money-card.money-card-page {
-    gap: 11px;
-    padding: 16px 12px 14px;
-    border-radius: 14px;
+    gap: 8px;
+    padding: 12px 9px 10px;
+    border-radius: 12px;
   }
 
   .money-card-page .money-header {
-    gap: 7px;
+    gap: 4px;
+    padding-bottom: 0;
   }
 
   .money-card-page .money-title {
-    font-size: 28px;
+    font-size: 22px;
     line-height: 1;
   }
 
   .money-card-page .money-subtitle {
-    font-size: 8.5px;
-    line-height: 1.5;
+    display: none;
   }
 
   .money-card-page .money-status-grid {
@@ -6690,7 +6698,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-card-page .money-status-row {
-    min-height: 64px;
+    min-height: 48px;
     align-items: flex-start;
     flex-direction: column;
     justify-content: center;
@@ -6702,8 +6710,8 @@ body.checkpoint-arrival #hud-scrim::after {
 
   .money-card-page .flow-status.money-status-panel,
   .money-card-page .money-action-panel {
-    padding: 11px;
-    gap: 10px;
+    padding: 8px;
+    gap: 7px;
   }
 
   .money-card-page .money-footer-actions {
@@ -6751,7 +6759,7 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .money-title {
@@ -6810,9 +6818,9 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-action-hint {
-    padding: 6px 8px;
-    font-size: 7.5px;
-    line-height: 1.35;
+    padding: 5px 7px;
+    font-size: 7px;
+    line-height: 1.3;
   }
 
   .money-quick-picks {
@@ -6820,29 +6828,34 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .money-quick-pick {
-    min-height: 34px;
-    font-size: 7px;
+    min-height: 30px;
+    font-size: 6.5px;
   }
 
   .money-amount-block .money-input {
-    min-height: 42px;
-    font-size: 17px;
+    min-height: 36px;
+    font-size: 15px;
+    padding: 8px 10px;
   }
 
   .money-faucet-fixed {
-    min-height: 104px;
-    padding: 14px;
+    min-height: 82px;
+    padding: 10px;
   }
 
   .money-faucet-fixed strong {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .money-primary-btn,
   .money-footer-actions .money-panel-nav-btn.money-nav-home-btn,
   .money-footer-actions .money-panel-nav-btn.money-nav-play-btn {
-    min-height: 40px;
-    font-size: 8px;
+    min-height: 34px;
+    font-size: 7px;
+  }
+
+  .money-card-page .money-activity {
+    display: none;
   }
 
   .money-card-play-modal .money-activity {
@@ -7769,17 +7782,20 @@ body.checkpoint-arrival #hud-scrim::after {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 10px;
-  border: 2px solid rgba(143, 180, 255, 0.82);
+  border: 2px solid rgba(48, 79, 132, 0.98);
   background:
-    linear-gradient(135deg, rgba(255, 231, 147, 0.18) 0%, transparent 34%),
-    linear-gradient(180deg, rgba(15, 30, 79, 0.93) 0%, rgba(9, 18, 51, 0.96) 100%);
+    radial-gradient(circle at 17% 48%, rgba(69, 224, 255, 0.16) 0%, transparent 26%),
+    linear-gradient(135deg, rgba(255, 231, 147, 0.14) 0%, transparent 32%),
+    linear-gradient(180deg, rgba(15, 32, 84, 0.98) 0%, rgba(8, 18, 54, 0.98) 100%);
   color: #f4f8ff;
   font-family: inherit;
   text-decoration: none;
   cursor: pointer;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 10px 24px rgba(3, 9, 26, 0.36);
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(99, 211, 255, 0.18),
+    0 4px 0 rgba(4, 11, 33, 0.64),
+    0 14px 28px rgba(3, 9, 26, 0.42);
   box-sizing: border-box;
   transition:
     transform 0.08s ease,
@@ -7789,7 +7805,7 @@ body.checkpoint-arrival #hud-scrim::after {
 
 .home-passport-hero:hover,
 .home-passport-hero:focus-visible {
-  border-color: rgba(255, 224, 126, 0.92);
+  border-color: rgba(78, 143, 222, 0.98);
   filter: brightness(1.08);
 }
 
@@ -7809,11 +7825,16 @@ body.checkpoint-arrival #hud-scrim::after {
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: linear-gradient(180deg, #fff4a8 0%, #efb836 100%);
-  color: #15316d;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.48),
-    0 4px 0 rgba(3, 9, 26, 0.36);
+  background: transparent;
+  box-shadow: none;
+}
+
+.home-passport-hero-icon img {
+  width: 42px;
+  height: 42px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 4px rgba(3, 9, 26, 0.34));
 }
 
 .home-passport-hero-copy {
@@ -7832,7 +7853,7 @@ body.checkpoint-arrival #hud-scrim::after {
 }
 
 .home-passport-hero-copy small {
-  color: rgba(211, 226, 255, 0.82);
+  color: rgba(223, 234, 255, 0.9);
   font-size: 7px;
   line-height: 1.45;
   letter-spacing: 0.4px;
@@ -9402,6 +9423,11 @@ body.checkpoint-arrival #hud-scrim::after {
     height: 30px;
   }
 
+  .home-passport-hero-icon img {
+    width: 38px;
+    height: 38px;
+  }
+
   .home-passport-hero-copy strong {
     font-size: 8px;
   }
@@ -9641,15 +9667,16 @@ body.checkpoint-arrival #hud-scrim::after {
   }
 
   .home-passport-hero {
-    width: 46px;
-    min-height: 46px;
+    width: min(218px, calc(100vw - 76px));
+    min-height: 52px;
     justify-content: center;
-    padding: 8px;
-    grid-template-columns: 1fr;
+    padding: 9px 10px;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
   }
 
   .home-passport-hero-copy {
-    display: none;
+    display: flex;
   }
 
   .home-nav-login {

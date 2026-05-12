@@ -415,9 +415,9 @@ export function ManageMoneyPage() {
     html.style.touchAction = "pan-y";
     body.style.touchAction = "pan-y";
     html.style.overflowX = "hidden";
-    html.style.overflowY = "auto";
+    html.style.overflowY = "hidden";
     body.style.overflowX = "hidden";
-    body.style.overflowY = "auto";
+    body.style.overflowY = "hidden";
 
     return () => {
       html.style.touchAction = previousHtmlTouchAction;
