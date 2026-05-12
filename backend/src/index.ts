@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 import { setupGameGateway } from "./gateway/gameGateway.js";
 import { startBlockchainListener } from "./services/blockchainListener.js";
+import { startRecoveryWorker } from "./services/recoveryWorker.js";
 import authRoutes from "./routes/auth.js";
 import gameRoutes from "./routes/game.js";
 import leaderboardRoutes from "./routes/leaderboard.js";
@@ -85,6 +86,8 @@ httpServer.listen(env.PORT, "0.0.0.0", () => {
     console.error("⚠️  Blockchain listener failed to start:", err);
     console.log("   Backend continues without blockchain events.");
   });
+
+  startRecoveryWorker();
 
   void readBackendSignerHealth()
     .then((backendSigner) => {
